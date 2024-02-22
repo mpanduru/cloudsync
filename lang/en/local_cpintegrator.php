@@ -26,3 +26,5 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'cpintegrator';
+$string['dropdown_button'] = 'Cloud';
+$string['mainpage'] = 'My Cloud';

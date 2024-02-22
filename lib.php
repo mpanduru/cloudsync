@@ -22,16 +22,20 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- function local_cpintegrator_extend_navigation(global_navigation $navigation){
-    $main_node = $navigation->add(get_string('pluginname', 'local_cpintegrator'));
-    echo "<script>console.log(".json_encode($navigation).")</script>";
-    $main_node->nodetype = 1;
-    $main_node->force_open = true; // Optional: Force the node to always be open in the navigation menu
+function local_cpintegrator_extend_navigation(global_navigation $navigation){
+   $url = new moodle_url('/local/cpintegrator/testpage.php');
 
-    $url = new moodle_url('/local/cpintegrator/testpage.php'); // Adjust the path as needed
+   # Define the dropdown for our available cloud pages
+   $main_node = $navigation->add(get_string('dropdown_button', 'local_cpintegrator'));
+   $main_node->nodetype = 1;
+   $main_node->isexpandable = true;
+   $main_node->forcetitle = true;
+   $main_node->type = 20; 
 
-    // Set the URL for redirection
-    $main_node->action = $url;
-
-
- }
+   # Define the button that routes to the main cloud page
+   $secondary_node = $main_node->add(get_string('mainpage', 'local_cpintegrator'));
+   $secondary_node->nodetype = 0;
+   $secondary_node->isexpandable = false;
+   $secondary_node->force_open = true;
+   $secondary_node->action = $url;
+}

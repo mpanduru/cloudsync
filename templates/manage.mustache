@@ -1,0 +1,47 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_cpintegrator/manage
+
+    Admin search input for page header.
+
+    Example context (json):
+    {
+
+
+    }
+}}
+
+{{! TO DO add onclick="location.href='accessurl?vmid=id'" to link-text }}
+<h1 class="mb-5">{{#str}} mycloudheading, local_cpintegrator {{/str}}</h1>
+{{#machines}}
+    <div class="mt-2 mb-5 card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col h5">
+                    <a class="link-text"><b>{{name}} &nbsp {{id}}</b></a>
+                </div>
+                <div class="col justify-content-end">
+                    <input type="button" class="btn btn-primary float-right ml-2" value="{{#str}} rename, local_cpintegrator {{/str}}">
+                    <input type="button" class="btn btn-danger float-right" value="{{#str}} delete, local_cpintegrator {{/str}}">
+                </div>
+            </div>
+        </div>
+    </div>
+{{/machines}}
+
+<hr>

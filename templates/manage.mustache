@@ -27,7 +27,14 @@
 }}
 
 {{! TO DO add onclick="location.href='accessurl?vmid=id'" to link-text }}
-<h1 class="mb-5">{{#str}} mycloudheading, local_cpintegrator {{/str}}</h1>
+<div class="row mb-5">
+    <div class="col">
+        <h1>{{#str}} mycloudheading, local_cpintegrator {{/str}}</h1>
+    </div>
+    <div class="col">
+        <input type="button" class="btn btn-primary float-right" onclick="location.href='{{accessurl}}'" value="{{#str}} request, local_cpintegrator {{/str}}">
+    </div>
+</div>
 {{#machines}}
     <div class="mt-2 mb-5 card">
         <div class="card-body">

@@ -23,7 +23,8 @@
  */
 
 function local_cpintegrator_extend_navigation(global_navigation $navigation){
-   $url = new moodle_url('/local/cpintegrator/mycloud.php');
+   $mycloud_url = new moodle_url('/local/cpintegrator/mycloud.php');
+   $cloudadministration_url = new moodle_url('/local/cpintegrator/cloudadministration.php');
 
    # Define the dropdown for our available cloud pages
    $main_node = $navigation->add(get_string('dropdown_button', 'local_cpintegrator'));
@@ -33,9 +34,16 @@ function local_cpintegrator_extend_navigation(global_navigation $navigation){
    $main_node->type = 20; 
 
    # Define the button that routes to the main cloud page
-   $secondary_node = $main_node->add(get_string('mycloudtitle', 'local_cpintegrator'));
-   $secondary_node->nodetype = 0;
-   $secondary_node->isexpandable = false;
-   $secondary_node->force_open = true;
-   $secondary_node->action = $url;
+   $mycloud_node = $main_node->add(get_string('mycloudtitle', 'local_cpintegrator'));
+   $mycloud_node->nodetype = 0;
+   $mycloud_node->isexpandable = false;
+   $mycloud_node->force_open = true;
+   $mycloud_node->action = $mycloud_url;
+
+   # Define the button that routes to the cloud administration page
+   $cloudadministration_node = $main_node->add(get_string('cloudadministrationtitle', 'local_cpintegrator'));
+   $cloudadministration_node->nodetype = 0;
+   $cloudadministration_node->isexpandable = false;
+   $cloudadministration_node->force_open = true;
+   $cloudadministration_node->action = $cloudadministration_url;
 }

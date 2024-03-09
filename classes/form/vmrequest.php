@@ -63,13 +63,18 @@ class vmrequest extends moodleform {
         $mform->addElement('select', 'processor', get_string('vmrequest_processor', 'local_cpintegrator'), $this->init_processor_options());
         $mform->setDefault('processor', '0');
 
-        $mform->addElement('select', 'disk_number', get_string('vmrequest_disk_number', 'local_cpintegrator'), $this->init_disk_number_options());
-        $mform->setDefault('disk_number', '0');
+        $mform->addElement('select', 'disk1_storage', get_string('vmrequest_disk1_storage', 'local_cpintegrator'), $this->init_disk_storage_options(true));
+        $mform->setDefault('disk1_storage', '0');
 
-        $mform->addElement('select', 'disk_storage', get_string('vmrequest_disk_storage', 'local_cpintegrator'), $this->init_disk_storage_options());
-        $mform->setDefault('disk_storage', '0');
+        $mform->addElement('select', 'disk2_storage', get_string('vmrequest_disk2_storage', 'local_cpintegrator'), $this->init_disk_storage_options(false));
+        $mform->setDefault('disk2_storage', '0');
+        $mform->addHelpButton('disk2_storage', 'vmrequest_not_primary_storage', 'local_cpintegrator');
 
-        $this->add_action_buttons(true, get_string('vmrequest_send_request', 'local_cpintegrator'));
+        $mform->addElement('select', 'disk3_storage', get_string('vmrequest_disk3_storage', 'local_cpintegrator'), $this->init_disk_storage_options(false));
+        $mform->setDefault('disk3_storage', '0');
+        $mform->addHelpButton('disk3_storage', 'vmrequest_not_primary_storage', 'local_cpintegrator');
+
+        $this->add_action_buttons(true, get_string('vmrequest_done', 'local_cpintegrator'));
     }
 
     // Custom validation should be added here.
@@ -114,12 +119,11 @@ class vmrequest extends moodleform {
         return [2, 4, 6, 8];
     }
 
-    private function init_disk_number_options() {
-        return [1, 2, 3];
-    }
-
-    private function init_disk_storage_options() {
-        return [32, 64, 128, 256, 512];
+    private function init_disk_storage_options($required) {
+        if ($required) {
+            return [32, 64, 128, 256, 512];
+        }
+        return ['None', 32, 64, 128, 256, 512];
     }
 }
  

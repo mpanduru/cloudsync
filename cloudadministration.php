@@ -160,7 +160,7 @@ $templatecontext = (object)[
     'non_cloud_admin_role_users' => array_values($non_cloud_admin_role_users),
     'cloud_subscriptions' => array_values($cloud_subscriptions),
     'cloud_subscriptions_number' => count($cloud_subscriptions),
-    'accessurl' => new moodle_url('/local/cpintegrator/cloudrequest.php'),
+    'new_subscription_url' => new moodle_url('/local/cpintegrator/newsubscription.php'),
 ];
 
 echo $OUTPUT->render_from_template('local_cpintegrator/cloudadmin', $templatecontext);

@@ -17,7 +17,7 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     local_cpintegrator
+ * @package     local_cloudsync
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,7 +29,7 @@ if (!empty($CFG->forceloginforprofiles)) {
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
-        echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cpintegrator'),
+        echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
                               get_login_url(),
                               $CFG->wwwroot);
         echo $OUTPUT->footer();
@@ -43,12 +43,12 @@ if (!empty($CFG->forceloginforprofiles)) {
 $userid = $userid ? $userid : $USER->id;
 
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/cpintegrator/cloudadministration.php'));
+$PAGE->set_url(new moodle_url('/local/cloudsync/cloudadministration.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('cloudadministrationtitle', 'local_cpintegrator'));
-$PAGE->set_heading(get_string('cloudadministrationtitle', 'local_cpintegrator'));
-$PAGE->requires->css('/local/cpintegrator/styles.css');
+$PAGE->set_title(get_string('cloudadministrationtitle', 'local_cloudsync'));
+$PAGE->set_heading(get_string('cloudadministrationtitle', 'local_cloudsync'));
+$PAGE->requires->css('/local/cloudsync/styles.css');
 
 // cloud requests that require a response will have to be queried from db
 $waiting_cloud_requests = [
@@ -160,8 +160,8 @@ $templatecontext = (object)[
     'non_cloud_admin_role_users' => array_values($non_cloud_admin_role_users),
     'cloud_subscriptions' => array_values($cloud_subscriptions),
     'cloud_subscriptions_number' => count($cloud_subscriptions),
-    'new_subscription_url' => new moodle_url('/local/cpintegrator/newsubscription.php'),
+    'new_subscription_url' => new moodle_url('/local/cloudsync/newsubscription.php'),
 ];
 
-echo $OUTPUT->render_from_template('local_cpintegrator/cloudadmin', $templatecontext);
+echo $OUTPUT->render_from_template('local_cloudsync/cloudadmin', $templatecontext);
 echo $OUTPUT->footer();

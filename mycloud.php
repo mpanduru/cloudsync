@@ -17,7 +17,7 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     local_cpintegrator
+ * @package     local_cloudsync
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ if (!empty($CFG->forceloginforprofiles)) {
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
-        echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cpintegrator'),
+        echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
                               get_login_url(),
                               $CFG->wwwroot);
         echo $OUTPUT->footer();
@@ -44,12 +44,12 @@ if (!empty($CFG->forceloginforprofiles)) {
 $userid = $userid ? $userid : $USER->id;
 
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/cpintegrator/mycloud.php'));
+$PAGE->set_url(new moodle_url('/local/cloudsync/mycloud.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('mycloudtitle', 'local_cpintegrator'));
-$PAGE->set_heading(get_string('mycloudtitle', 'local_cpintegrator'));
-$PAGE->requires->css('/local/cpintegrator/styles.css');
+$PAGE->set_title(get_string('mycloudtitle', 'local_cloudsync'));
+$PAGE->set_heading(get_string('mycloudtitle', 'local_cloudsync'));
+$PAGE->requires->css('/local/cloudsync/styles.css');
 
 // Machines will have to be queried from db
 $machines = [
@@ -67,10 +67,10 @@ $machines = [
 echo $OUTPUT->header(); // Display the header
 $templatecontext = (object)[
     'machines' => array_values($machines),
-    'accessurl' => new moodle_url('/local/cpintegrator/cloudrequest.php'),
+    'accessurl' => new moodle_url('/local/cloudsync/cloudrequest.php'),
 ];
 
-echo $OUTPUT->render_from_template('local_cpintegrator/manage', $templatecontext);
+echo $OUTPUT->render_from_template('local_cloudsync/manage', $templatecontext);
 
 echo "<script>console.log(".json_encode($templatecontext).")</script>";
 echo $OUTPUT->footer(); // Display the footer

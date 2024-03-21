@@ -17,7 +17,7 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     local_cpintegrator
+ * @package     local_cloudsync
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,51 +30,51 @@ class vmrequest extends moodleform {
         $mform = $this->_form;
 
         // General
-        $mform->addElement('header', 'general', get_string('vmrequest_general', 'local_cpintegrator'));
+        $mform->addElement('header', 'general', get_string('vmrequest_general', 'local_cloudsync'));
 
-        $mform->addElement('text','vmname', get_string('vmrequest_vmname', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('vmname', 'vmrequest_vmname', 'local_cpintegrator');
-        $mform->addRule('vmname', get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+        $mform->addElement('text','vmname', get_string('vmrequest_vmname', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('vmname', 'vmrequest_vmname', 'local_cloudsync');
+        $mform->addRule('vmname', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
     
         $teachers = $this->get_teachers();
         // Transform the teacher objects in strings so we can display it
         foreach ($teachers as $teacher) {
             $string_teachers[$teacher->id] = $teacher->firstname . ' ' . $teacher->lastname;
         }
-        $mform->addElement('select', 'teachers', get_string('vmrequest_teacher', 'local_cpintegrator'), $string_teachers);
+        $mform->addElement('select', 'teachers', get_string('vmrequest_teacher', 'local_cloudsync'), $string_teachers);
         $mform->setDefault('teachers', '0');
-        $mform->addRule('teachers', get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
-        $mform->addHelpButton('teachers', 'vmrequest_teacher', 'local_cpintegrator');
+        $mform->addRule('teachers', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
+        $mform->addHelpButton('teachers', 'vmrequest_teacher', 'local_cloudsync');
 
-        $mform->addElement('editor','description', get_string('vmrequest_description', 'local_cpintegrator'), null);
-        $mform->addHelpButton('description', 'vmrequest_description', 'local_cpintegrator');
+        $mform->addElement('editor','description', get_string('vmrequest_description', 'local_cloudsync'), null);
+        $mform->addHelpButton('description', 'vmrequest_description', 'local_cloudsync');
         $mform->setType('description', PARAM_RAW);
 
         // Specifications
-        $mform->addElement('header', 'specifications', get_string('vmrequest_specifications', 'local_cpintegrator'));
-        $mform->addHelpButton('specifications', 'vmrequest_specifications', 'local_cpintegrator');
+        $mform->addElement('header', 'specifications', get_string('vmrequest_specifications', 'local_cloudsync'));
+        $mform->addHelpButton('specifications', 'vmrequest_specifications', 'local_cloudsync');
 
-        $mform->addElement('select', 'os', get_string('vmrequest_os', 'local_cpintegrator'), $this->init_OS_options());
+        $mform->addElement('select', 'os', get_string('vmrequest_os', 'local_cloudsync'), $this->init_OS_options());
         $mform->setDefault('os', '0');
         
-        $mform->addElement('select', 'memory', get_string('vmrequest_memory', 'local_cpintegrator'), $this->init_memory_options());
+        $mform->addElement('select', 'memory', get_string('vmrequest_memory', 'local_cloudsync'), $this->init_memory_options());
         $mform->setDefault('memory', '0');
 
-        $mform->addElement('select', 'processor', get_string('vmrequest_processor', 'local_cpintegrator'), $this->init_processor_options());
+        $mform->addElement('select', 'processor', get_string('vmrequest_processor', 'local_cloudsync'), $this->init_processor_options());
         $mform->setDefault('processor', '0');
 
-        $mform->addElement('select', 'disk1_storage', get_string('vmrequest_disk1_storage', 'local_cpintegrator'), $this->init_disk_storage_options(true));
+        $mform->addElement('select', 'disk1_storage', get_string('vmrequest_disk1_storage', 'local_cloudsync'), $this->init_disk_storage_options(true));
         $mform->setDefault('disk1_storage', '0');
 
-        $mform->addElement('select', 'disk2_storage', get_string('vmrequest_disk2_storage', 'local_cpintegrator'), $this->init_disk_storage_options(false));
+        $mform->addElement('select', 'disk2_storage', get_string('vmrequest_disk2_storage', 'local_cloudsync'), $this->init_disk_storage_options(false));
         $mform->setDefault('disk2_storage', '0');
-        $mform->addHelpButton('disk2_storage', 'vmrequest_not_primary_storage', 'local_cpintegrator');
+        $mform->addHelpButton('disk2_storage', 'vmrequest_not_primary_storage', 'local_cloudsync');
 
-        $mform->addElement('select', 'disk3_storage', get_string('vmrequest_disk3_storage', 'local_cpintegrator'), $this->init_disk_storage_options(false));
+        $mform->addElement('select', 'disk3_storage', get_string('vmrequest_disk3_storage', 'local_cloudsync'), $this->init_disk_storage_options(false));
         $mform->setDefault('disk3_storage', '0');
-        $mform->addHelpButton('disk3_storage', 'vmrequest_not_primary_storage', 'local_cpintegrator');
+        $mform->addHelpButton('disk3_storage', 'vmrequest_not_primary_storage', 'local_cloudsync');
 
-        $this->add_action_buttons(true, get_string('vmrequest_done', 'local_cpintegrator'));
+        $this->add_action_buttons(true, get_string('vmrequest_done', 'local_cloudsync'));
     }
 
     // Custom validation should be added here.

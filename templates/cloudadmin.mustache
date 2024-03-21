@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_cpintegrator/manage
+    @template local_cloudsync/manage
 
     Admin search input for page header.
 
@@ -28,18 +28,18 @@
 
 <!-- Users section -->
 <div class="mb-5">
-    <h3 class="mb-4"><b>{{#str}} manageuserroles, local_cpintegrator {{/str}}</b></h3>
+    <h3 class="mb-4"><b>{{#str}} manageuserroles, local_cloudsync {{/str}}</b></h3>
     <div class="row">
         <div class="col">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{#str}} cloudadminusers, local_cpintegrator {{/str}}</h5>
+                    <h5 class="card-title">{{#str}} cloudadminusers, local_cloudsync {{/str}}</h5>
                     <div class="scrollable-list">
                         <ul class="list-group">
                             {{#cloud_admin_role_users}}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     {{name}}
-                                    <button class="btn btn-danger btn-sm">{{#str}} removerole, local_cpintegrator {{/str}}</button>
+                                    <button class="btn btn-danger btn-sm">{{#str}} removerole, local_cloudsync {{/str}}</button>
                                 </li>
                             {{/cloud_admin_role_users}}
                         </ul>
@@ -50,13 +50,13 @@
         <div class="col">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{#str}} noncloudadminusers, local_cpintegrator {{/str}}</h5>
+                    <h5 class="card-title">{{#str}} noncloudadminusers, local_cloudsync {{/str}}</h5>
                     <div class="scrollable-list">
                         <ul class="list-group">
                             {{#non_cloud_admin_role_users}}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     {{name}}
-                                    <button class="btn btn-success btn-sm">{{#str}} addrole, local_cpintegrator {{/str}}</button>
+                                    <button class="btn btn-success btn-sm">{{#str}} addrole, local_cloudsync {{/str}}</button>
                                 </li>
                             {{/non_cloud_admin_role_users}}
                         </ul>
@@ -71,10 +71,10 @@
 <div>
     <div class="row">
         <div class="col">
-            <h3><b>{{#str}} cloudadminactivesubscriptions, local_cpintegrator {{/str}} ({{cloud_subscriptions_number}})</b></h1>
+            <h3><b>{{#str}} cloudadminactivesubscriptions, local_cloudsync {{/str}} ({{cloud_subscriptions_number}})</b></h1>
         </div>
         <div class="col">
-            <input type="button" class="btn btn-primary float-right" onclick="location.href='{{new_subscription_url}}'" value="{{#str}} newsubscription, local_cpintegrator {{/str}}">
+            <input type="button" class="btn btn-primary float-right" onclick="location.href='{{new_subscription_url}}'" value="{{#str}} newsubscription, local_cloudsync {{/str}}">
         </div>
     </div>
     <div class="row mb-5">
@@ -83,8 +83,8 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{name}}</h5>
-                        <p class="card-text">{{#str}} type, local_cpintegrator {{/str}}: {{type}}</p>
-                        <button class="btn btn-danger">{{#str}} deletesubscription, local_cpintegrator {{/str}}</button>
+                        <p class="card-text">{{#str}} type, local_cloudsync {{/str}}: {{type}}</p>
+                        <button class="btn btn-danger">{{#str}} deletesubscription, local_cloudsync {{/str}}</button>
                     </div>
                 </div>
             </div>
@@ -93,7 +93,7 @@
 </div>
 <!-- Cloud requests section -->
 <div>
-    <h3 class="mb-5"><b>{{#str}} cloudadminrequestsheading, local_cpintegrator {{/str}} ({{waiting_cloud_requests_number}})</b></h1>
+    <h3 class="mb-5"><b>{{#str}} cloudadminrequestsheading, local_cloudsync {{/str}} ({{waiting_cloud_requests_number}})</b></h1>
     <div class="col">
         <div class="card">
             <div class="card-body">
@@ -102,7 +102,7 @@
                         {{#waiting_cloud_requests}}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <a class="link-text"><b>Author: {{author}} &nbsp Teacher: {{teacher}} &nbsp Machine name: {{name}} </b></a>
-                                <input type="button" class="btn btn-danger btn-sm" value="{{#str}} reject, local_cpintegrator {{/str}}">
+                                <input type="button" class="btn btn-danger btn-sm" value="{{#str}} reject, local_cloudsync {{/str}}">
                             </li>
                         {{/waiting_cloud_requests}}
                     </ul>

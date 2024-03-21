@@ -17,7 +17,7 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     local_cpintegrator
+ * @package     local_cloudsync
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,11 +30,11 @@ class subscriptionform extends moodleform {
         $mform = $this->_form;
 
         // General
-        $mform->addElement('header', 'general', get_string('vmrequest_general', 'local_cpintegrator'));
+        $mform->addElement('header', 'general', get_string('vmrequest_general', 'local_cloudsync'));
 
-        $mform->addElement('text','subscriptionname', get_string('subscriptionform_subscriptionname', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('subscriptionname', 'subscriptionform_subscriptionname', 'local_cpintegrator');
-        $mform->addRule('subscriptionname', get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+        $mform->addElement('text','subscriptionname', get_string('subscriptionform_subscriptionname', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('subscriptionname', 'subscriptionform_subscriptionname', 'local_cloudsync');
+        $mform->addRule('subscriptionname', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
     
         $cloudproviders = [
             (object)[
@@ -47,13 +47,13 @@ class subscriptionform extends moodleform {
             ],
         ];
         $mform->addElement('select', 'cloudprovider', 'Select cloud provider', $this->init_cloud_provider_options());
-        $mform->addRule('cloudprovider', get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+        $mform->addRule('cloudprovider', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
 
         foreach ($cloudproviders as $cloudprovider){
             $this->init_cloud_provider_fields($mform, 'cloudprovider', $cloudprovider);
         }
 
-        $this->add_action_buttons(true, get_string('subscriptionform_done', 'local_cpintegrator'));
+        $this->add_action_buttons(true, get_string('subscriptionform_done', 'local_cloudsync'));
     }
 
     // Custom validation should be added here.

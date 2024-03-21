@@ -17,21 +17,21 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     local_cpintegrator
+ * @package     local_cloudsync
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
-require_once($CFG->dirroot.'/local/cpintegrator/classes/form/subscriptionform.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/form/subscriptionform.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
-        echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cpintegrator'),
+        echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
                             get_login_url(),
                             $CFG->wwwroot);
         echo $OUTPUT->footer();
@@ -46,18 +46,18 @@ global $DB;
 $userid = $userid ? $userid : $USER->id;
 
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/cpintegrator/newsubscription.php'));
+$PAGE->set_url(new moodle_url('/local/cloudsync/newsubscription.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('newsubscriptiontitle', 'local_cpintegrator'));
-$PAGE->set_heading(get_string('newsubscriptiontitle', 'local_cpintegrator'));
-$PAGE->requires->css('/local/cpintegrator/styles.css');
+$PAGE->set_title(get_string('newsubscriptiontitle', 'local_cloudsync'));
+$PAGE->set_heading(get_string('newsubscriptiontitle', 'local_cloudsync'));
+$PAGE->requires->css('/local/cloudsync/styles.css');
 
 // HERE
 $mform = new subscriptionform();
 
 if ($mform->is_cancelled()) {
-    redirect($CFG->wwwroot . '/local/cpintegrator/cloudrequest.php', 'Pressed cancel');
+    redirect($CFG->wwwroot . '/local/cloudsync/cloudrequest.php', 'Pressed cancel');
     echo "<script>console.log('This is cancelled')</script>";
 } else if ($fromform = $mform->get_data()) {
     echo "<script>console.log('This is saved')</script>";

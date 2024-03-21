@@ -17,7 +17,7 @@
 /**
  * Plugin strings are defined here.
  *
- * @package     local_cpintegrator
+ * @package     local_cloudsync
  * @category    string
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'cpintegrator';
+$string['pluginname'] = 'cloudsync';
 $string['dropdown_button'] = 'Cloud';
 $string['guestcannotaccessresource'] = 'Guests cannot access cloud resources. Please log in with a full user account to continue.';
 $string['mycloudtitle'] = 'My Cloud';

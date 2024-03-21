@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/cpintegrator/db" VERSION="2024021300" COMMENT="XMLDB file for Moodle local/cpintegrator"
+<XMLDB PATH="local/cloudsync/db" VERSION="2024021300" COMMENT="XMLDB file for Moodle local/cloudsync"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="local_cpintegrator_provider" COMMENT="Cloud providers that moodle will use to create instances on">
+    <TABLE NAME="local_cloudsync_provider" COMMENT="Cloud providers that moodle will use to create instances on">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="name" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
@@ -13,7 +13,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="local_cpintegrator_subs" COMMENT="Subscriptions for the cloud providers">
+    <TABLE NAME="local_cloudsync_subs" COMMENT="Subscriptions for the cloud providers">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="cloud_provider_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -21,10 +21,10 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="cloudproviderid" TYPE="foreign" FIELDS="cloud_provider_id" REFTABLE="local_cpintegrator_provider" REFFIELDS="id"/>
+        <KEY NAME="cloudproviderid" TYPE="foreign" FIELDS="cloud_provider_id" REFTABLE="local_cloudsync_provider" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="local_cpintegrator_awskeys" COMMENT="Secrets for the aws subscriptions">
+    <TABLE NAME="local_cloudsync_awskeys" COMMENT="Secrets for the aws subscriptions">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="subscription_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -33,10 +33,10 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscription_id" REFTABLE="local_cpintegrator_subs" REFFIELDS="id"/>
+        <KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscription_id" REFTABLE="local_cloudsync_subs" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="local_cpintegrator_azurekeys" COMMENT="Secrets for the azure subscriptions">
+    <TABLE NAME="local_cloudsync_azurekeys" COMMENT="Secrets for the azure subscriptions">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="subscription_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -46,10 +46,10 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscription_id" REFTABLE="local_cpintegrator_subs" REFFIELDS="id"/>
+        <KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscription_id" REFTABLE="local_cloudsync_subs" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="local_cpintegrator_vmrequest" COMMENT="Requests of virtual machines">
+    <TABLE NAME="local_cloudsync_vmrequest" COMMENT="Requests of virtual machines">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="status" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
@@ -71,7 +71,7 @@
         <KEY NAME="teacherid" TYPE="foreign" FIELDS="teacher_id" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="local_cpintegrator_vm" COMMENT="Virtual machines created for the students">
+    <TABLE NAME="local_cloudsync_vm" COMMENT="Virtual machines created for the students">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="owner_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -90,8 +90,8 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="ownerid" TYPE="foreign" FIELDS="owner_id" REFTABLE="user" REFFIELDS="id"/>
         <KEY NAME="cloudadminid" TYPE="foreign" FIELDS="cloud_admin_id" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="requestid" TYPE="foreign" FIELDS="request_id" REFTABLE="local_cpintegrator_vmreqest" REFFIELDS="id"/>
-        <KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscription_id" REFTABLE="local_cpintegrator_subs" REFFIELDS="id"/>
+        <KEY NAME="requestid" TYPE="foreign" FIELDS="request_id" REFTABLE="local_cloudsync_vmreqest" REFFIELDS="id"/>
+        <KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscription_id" REFTABLE="local_cloudsync_subs" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>

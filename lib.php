@@ -17,31 +17,31 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     local_cpintegrator
+ * @package     local_cloudsync
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-function local_cpintegrator_extend_navigation(global_navigation $navigation){
-   $mycloud_url = new moodle_url('/local/cpintegrator/mycloud.php');
-   $cloudadministration_url = new moodle_url('/local/cpintegrator/cloudadministration.php');
+function local_cloudsync_extend_navigation(global_navigation $navigation){
+   $mycloud_url = new moodle_url('/local/cloudsync/mycloud.php');
+   $cloudadministration_url = new moodle_url('/local/cloudsync/cloudadministration.php');
 
    # Define the dropdown for our available cloud pages
-   $main_node = $navigation->add(get_string('dropdown_button', 'local_cpintegrator'));
+   $main_node = $navigation->add(get_string('dropdown_button', 'local_cloudsync'));
    $main_node->nodetype = 1;
    $main_node->isexpandable = true;
    $main_node->forcetitle = true;
    $main_node->type = 20; 
 
    # Define the button that routes to the main cloud page
-   $mycloud_node = $main_node->add(get_string('mycloudtitle', 'local_cpintegrator'));
+   $mycloud_node = $main_node->add(get_string('mycloudtitle', 'local_cloudsync'));
    $mycloud_node->nodetype = 0;
    $mycloud_node->isexpandable = false;
    $mycloud_node->force_open = true;
    $mycloud_node->action = $mycloud_url;
 
    # Define the button that routes to the cloud administration page
-   $cloudadministration_node = $main_node->add(get_string('cloudadministrationtitle', 'local_cpintegrator'));
+   $cloudadministration_node = $main_node->add(get_string('cloudadministrationtitle', 'local_cloudsync'));
    $cloudadministration_node->nodetype = 0;
    $cloudadministration_node->isexpandable = false;
    $cloudadministration_node->force_open = true;

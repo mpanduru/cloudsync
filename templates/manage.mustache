@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_cpintegrator/manage
+    @template local_cloudsync/manage
 
     Admin search input for page header.
 
@@ -28,10 +28,10 @@
 
 <div class="row mb-5">
     <div class="col">
-        <h1>{{#str}} mycloudheading, local_cpintegrator {{/str}}</h1>
+        <h1>{{#str}} mycloudheading, local_cloudsync {{/str}}</h1>
     </div>
     <div class="col">
-        <input type="button" class="btn btn-primary float-right" onclick="location.href='{{accessurl}}'" value="{{#str}} request, local_cpintegrator {{/str}}">
+        <input type="button" class="btn btn-primary float-right" onclick="location.href='{{accessurl}}'" value="{{#str}} request, local_cloudsync {{/str}}">
     </div>
 </div>
 {{#machines}}
@@ -42,8 +42,8 @@
                     <a class="link-text"><b>{{name}} &nbsp {{id}}</b></a>
                 </div>
                 <div class="col justify-content-end">
-                    <input type="button" class="btn btn-primary float-right ml-2" value="{{#str}} rename, local_cpintegrator {{/str}}">
-                    <input type="button" class="btn btn-danger float-right" value="{{#str}} delete, local_cpintegrator {{/str}}">
+                    <input type="button" class="btn btn-primary float-right ml-2" value="{{#str}} rename, local_cloudsync {{/str}}">
+                    <input type="button" class="btn btn-danger float-right" value="{{#str}} delete, local_cloudsync {{/str}}">
                 </div>
             </div>
         </div>

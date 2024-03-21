@@ -17,7 +17,7 @@
 /**
  * Plugin version and other meta-data are defined here.
  *
- * @package     local_cpintegrator
+ * @package     local_cloudsync
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -34,49 +34,49 @@ class vmcreate extends moodleform{
         $mform->setType('id', PARAM_INT);
         
         // Request
-        $mform->addElement('header', 'request', get_string('vmcreate_request', 'local_cpintegrator'));
+        $mform->addElement('header', 'request', get_string('vmcreate_request', 'local_cloudsync'));
 
-        $mform->addElement('text','user', get_string('vmcreate_user', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('user', 'vmcreate_user', 'local_cpintegrator');
+        $mform->addElement('text','user', get_string('vmcreate_user', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('user', 'vmcreate_user', 'local_cloudsync');
         $mform->freeze('user');
 
-        $mform->addElement('text','teacher', get_string('vmcreate_teacher', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('teacher', 'vmcreate_teacher', 'local_cpintegrator');
+        $mform->addElement('text','teacher', get_string('vmcreate_teacher', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('teacher', 'vmcreate_teacher', 'local_cloudsync');
         $mform->freeze('teacher');
 
-        $mform->addElement('text','vmname', get_string('vmrequest_vmname', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('vmname', 'vmrequest_vmname', 'local_cpintegrator');
+        $mform->addElement('text','vmname', get_string('vmrequest_vmname', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('vmname', 'vmrequest_vmname', 'local_cloudsync');
         $mform->freeze('vmname');
 
-        $mform->addElement('editor','description', get_string('vmcreate_description', 'local_cpintegrator'), null);
-        $mform->addHelpButton('description', 'vmcreate_description', 'local_cpintegrator');
+        $mform->addElement('editor','description', get_string('vmcreate_description', 'local_cloudsync'), null);
+        $mform->addHelpButton('description', 'vmcreate_description', 'local_cloudsync');
         $mform->freeze('description');
 
-        $mform->addElement('text','os', get_string('vmcreate_os', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('os', 'vmcreate_os', 'local_cpintegrator');
+        $mform->addElement('text','os', get_string('vmcreate_os', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('os', 'vmcreate_os', 'local_cloudsync');
         $mform->freeze('os');
 
-        $mform->addElement('text','request_memory', get_string('vmcreate_memory', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('request_memory', 'vmcreate_memory', 'local_cpintegrator');
+        $mform->addElement('text','request_memory', get_string('vmcreate_memory', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('request_memory', 'vmcreate_memory', 'local_cloudsync');
         $mform->freeze('request_memory');
 
-        $mform->addElement('text','request_processor', get_string('vmcreate_processor', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('request_processor', 'vmcreate_processor', 'local_cpintegrator');
+        $mform->addElement('text','request_processor', get_string('vmcreate_processor', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('request_processor', 'vmcreate_processor', 'local_cloudsync');
         $mform->freeze('request_processor');
 
-        $mform->addElement('text','request_disk1_storage', get_string('vmcreate_disk1_storage', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('request_disk1_storage', 'vmcreate_disk1_storage', 'local_cpintegrator');
+        $mform->addElement('text','request_disk1_storage', get_string('vmcreate_disk1_storage', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('request_disk1_storage', 'vmcreate_disk1_storage', 'local_cloudsync');
         $mform->freeze('request_disk1_storage');
 
-        $mform->addElement('text','request_disk2_storage', get_string('vmcreate_disk2_storage', 'local_cpintegrator'),'maxlength="254" size="50"');
-        $mform->addHelpButton('request_disk2_storage', 'vmcreate_disk2_storage', 'local_cpintegrator');
+        $mform->addElement('text','request_disk2_storage', get_string('vmcreate_disk2_storage', 'local_cloudsync'),'maxlength="254" size="50"');
+        $mform->addHelpButton('request_disk2_storage', 'vmcreate_disk2_storage', 'local_cloudsync');
         $mform->freeze('request_disk2_storage');
 
         // Cloud provider select
         $mform->addElement('header', 'cloudproviderselector', 'Cloud Provider');
         
         $mform->addElement('select', 'cloudtype', 'Select cloud provider', $this->init_cloud_provider_options());
-        $mform->addRule('cloudtype', get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+        $mform->addRule('cloudtype', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
 
         $cloudproviders = [
             (object)[
@@ -90,42 +90,42 @@ class vmcreate extends moodleform{
         ];
         
         // Machine
-        $mform->addElement('header', 'virtualmachine', get_string('vmcreate_virtualmachine', 'local_cpintegrator'));
+        $mform->addElement('header', 'virtualmachine', get_string('vmcreate_virtualmachine', 'local_cloudsync'));
 
         foreach ($cloudproviders as $cloudprovider){
-            $mform->addElement('select', 'subscription' . $cloudprovider->name, get_string('vmcreate_subscription', 'local_cpintegrator'), $this->init_subscription_options($cloudprovider->id));
+            $mform->addElement('select', 'subscription' . $cloudprovider->name, get_string('vmcreate_subscription', 'local_cloudsync'), $this->init_subscription_options($cloudprovider->id));
             $mform->setDefault('subscription' . $cloudprovider->name, '0');
-            $mform->addRule('subscription' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+            $mform->addRule('subscription' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('subscription' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('subscription' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
-            $mform->addElement('select', 'region' . $cloudprovider->name, get_string('vmcreate_region', 'local_cpintegrator'), $this->init_region_options($cloudprovider->id));
+            $mform->addElement('select', 'region' . $cloudprovider->name, get_string('vmcreate_region', 'local_cloudsync'), $this->init_region_options($cloudprovider->id));
             $mform->setDefault('region' . $cloudprovider->name, '0');
-            $mform->addRule('region' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+            $mform->addRule('region' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('region' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('region' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
-            $mform->addElement('select', 'architecture' . $cloudprovider->name, get_string('vmcreate_architecture', 'local_cpintegrator'), $this->init_architecture_options($cloudprovider->id));
+            $mform->addElement('select', 'architecture' . $cloudprovider->name, get_string('vmcreate_architecture', 'local_cloudsync'), $this->init_architecture_options($cloudprovider->id));
             $mform->setDefault('architecture' . $cloudprovider->name, '0');
-            $mform->addRule('architecture' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+            $mform->addRule('architecture' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('architecture' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('architecture' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
-            $mform->addElement('select', 'type' . $cloudprovider->name, get_string('vmcreate_type', 'local_cpintegrator'), $this->init_type_options($cloudprovider->id));
+            $mform->addElement('select', 'type' . $cloudprovider->name, get_string('vmcreate_type', 'local_cloudsync'), $this->init_type_options($cloudprovider->id));
             $mform->setDefault('type' . $cloudprovider->name, '0');
-            $mform->addRule('type' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+            $mform->addRule('type' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('type' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('type' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
-            $mform->addElement('select', 'disk1' . $cloudprovider->name, get_string('vmcreate_disk1', 'local_cpintegrator'), $this->init_disk_options(true));
+            $mform->addElement('select', 'disk1' . $cloudprovider->name, get_string('vmcreate_disk1', 'local_cloudsync'), $this->init_disk_options(true));
             $mform->setDefault('disk1' . $cloudprovider->name, '0');
-            $mform->addRule('disk1' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+            $mform->addRule('disk1' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('disk1' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('disk1' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
-            $mform->addElement('select', 'disk2' . $cloudprovider->name, get_string('vmcreate_disk2', 'local_cpintegrator'), $this->init_disk_options(false));
+            $mform->addElement('select', 'disk2' . $cloudprovider->name, get_string('vmcreate_disk2', 'local_cloudsync'), $this->init_disk_options(false));
             $mform->setDefault('disk2' . $cloudprovider->name, '0');
-            $mform->addRule('disk2' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cpintegrator'), 'required', null, 'client');
+            $mform->addRule('disk2' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('disk2' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('disk2' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
         }

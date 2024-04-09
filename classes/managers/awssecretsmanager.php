@@ -23,7 +23,7 @@
  */
 
 require_once('../../config.php'); // Include Moodle configuration
-require_once("./secretsmanager.php");
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/secretsmanager.php');
 
 class awssecretsmanager extends secretsmanager{
 

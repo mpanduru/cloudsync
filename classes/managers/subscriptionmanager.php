@@ -22,25 +22,34 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+global $CFG;
 require_once('../../config.php'); // Include Moodle configuration
-require_once("./awssecretsmanager.php");
-require_once("./azuresecretsmanager.php");
-
+require_once($CFG->dirroot . '/local/cloudsync/constants.php'); // Include Moodle configuration
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/awssecretsmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/azuresecretsmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
 class subscriptionmanager {
     const PLUGINNAME = 'local_cloudsync';
     const DB_TABLE = self::PLUGINNAME . '_subs';
 
-    private secretsmanager $secretsManager;
-
-    public function __construct($provider) {
-        $this->secretsManager = self::createSecretsManager($provider);
-    }
-
-    public static function createSecretsManager($provider) {
-        switch ($provider) {
-            case 'AWS':
+    /**
+     * Create a secretmanager object of specific type.
+     *
+     * @param int $provider_id the id of the provider that will be used to instantiate the secretmanager
+     * object
+     * @return secretsmanager a secretmanager object that will be used to interact with secrets db
+     */
+    public function createSecretsManager($provider_id) {
+        $providermanager = new cloudprovidermanager();
+        echo "<script>console.log('MERGE')</script>";
+        $provider = $providermanager->get_provider_by_id($provider_id);
+        echo "<script>console.log(".json_encode($provider).")</script>";
+        
+        return new azuresecretsmanager();
+        switch ($provider->name) {
+            case AWS_PROVIDER:
                 return new awssecretsmanager();
-            case 'AZURE':
+            case AZURE_PROVIDER:
                 return new azuresecretsmanager();
             default:
                 throw new Exception("Unknown provider: $provider");
@@ -51,14 +60,19 @@ class subscriptionmanager {
      * Create a subscription
      *
      * @param object $subscription a data object with values for one or more fields in the record
+     * @param object $secrets a data object that holds the secrets
      * @return bool|int true or new subscription id
      */
     public function create_subscription($subscription, $secrets) {
         global $DB;
 
+        $secretsManager = $this->createSecretsManager($subscription->cloud_provider_id);
         $subscription_id = $DB->insert_record(self::DB_TABLE, $subscription, true);
-        self::$secretsManager->create_secrets($secrets);
-        return $subscription_id;
+        $secrets->{'subscription_id'} = $subscription_id;
+        $secrets_id = $secretsManager->create_secrets($secrets);
+        if ($secrets_id);
+            return $subscription_id;
+        return false;
     }
 
     /**
@@ -87,13 +101,30 @@ class subscriptionmanager {
     }
 
     /**
+     * Get the value of specific fields of a subscription by its id
+     *
+     * @param int $id the id of the subscription searched
+     * @param string $fields a comma separated list of fields to be searched for
+     * @return bool|mixed a fieldset object containing the first matching record, false or exception if error not found depending on mode
+     */
+    public function get_subscription_fields_by_id($id, $fields) {
+        global $DB;
+
+        $subscription = $DB->get_record(self::DB_TABLE, ['id' => $id], $fields);
+        return $subscription;
+    }
+
+    /**
      * Get a subscription secrets by subscription id
      *
      * @param int $id the id of the subscription searched
      * @return bool|stdClass the secrets of the subscription that has the id=$id
      */
     public function get_secrets_by_subscription_id($id) {
-        $secrets = self::$secretsManager->get_secrets_by_subscription_id($id);
+        $provider_id_object = $this->get_subscription_fields_by_id($id, 'cloud_provider_id'); 
+
+        $secretsManager = $this->createSecretsManager($provider_id_object->cloud_provider_id);
+        $secrets = $secretsManager->get_secrets_by_subscription_id($id);
         return $secrets;
     }
 
@@ -119,10 +150,13 @@ class subscriptionmanager {
      * @return bool true
      */
     public function update_subscription_secrets($id, $secrets) {
+        $provider_id_object = $this->get_subscription_fields_by_id($id, 'cloud_provider_id'); 
+        $secretsManager = $this->createSecretsManager($provider_id_object->cloud_provider_id);
+
         $dbSecrets = self::get_secrets_by_subscription_id($id);
         $secrets->id = $dbSecrets->id;
 
-        $result = self::$secretsManager->update_secrets($secrets);
+        $result = $secretsManager->update_secrets($secrets);
         return $result;
     }
 
@@ -135,8 +169,10 @@ class subscriptionmanager {
     public function delete_subscription($id) {
         global $DB;
 
+        $provider_id_object = $this->get_subscription_fields_by_id($id, 'cloud_provider_id');
+        $secretsManager = $this->createSecretsManager($provider_id_object->cloud_provider_id);
         $subscription_secrets = self::get_secrets_by_subscription_id($id);
-        $result_secrets = self::$secretsManager->delete_secrets($subscription_secrets->id);
+        $result_secrets = $secretsManager->delete_secrets($subscription_secrets->id);
         if ($result_secrets){
             $result = $DB->delete_records(self::DB_TABLE, ['id' => $id]);
             return $result;

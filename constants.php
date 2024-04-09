@@ -22,12 +22,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
-require_once($CFG->dirroot . '/local/cloudsync/classes/managers/secretsmanager.php');
 
-class azuresecretsmanager extends secretsmanager{
-    
-    public function __construct() {
-        $this->dbTable = parent::PLUGINNAME . '_azurekeys';
-    }
-}
+define('AWS_PROVIDER', 'AWS');
+define('AZURE_PROVIDER', 'AZURE');

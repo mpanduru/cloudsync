@@ -22,12 +22,31 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
-require_once($CFG->dirroot . '/local/cloudsync/classes/managers/secretsmanager.php');
+defined('MOODLE_INTERNAL') || die();
+global $CFG;
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
 
-class azuresecretsmanager extends secretsmanager{
-    
-    public function __construct() {
-        $this->dbTable = parent::PLUGINNAME . '_azurekeys';
+class cloudprovidermanager_test extends advanced_testcase{
+
+    public function test_create_provider() {
+        $this->resetAfterTest();
+        $manager = new cloudprovidermanager();
+        $providers = $manager->get_all_providers();
+        $this->assertEmpty($providers);
+
+        $cloud_provider_1 = (object)[
+            'name' => 'AWS'
+        ];
+        $result_1 = $manager->create_provider($cloud_provider_1);
+        $this->assertTrue($result_1);
+
+        $cloud_provider_2 = (object)[
+            'name' => 'Azure'
+        ];
+        $result_2 = $manager->create_provider($cloud_provider_2);
+        $this->assertTrue($result_2);
+
+        $providers = $manager->get_all_providers();
+        $this->assertNotEmpty($providers);
     }
 }

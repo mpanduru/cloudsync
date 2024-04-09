@@ -23,11 +23,24 @@
  */
 
 require_once('../../config.php'); // Include Moodle configuration
-require_once($CFG->dirroot . '/local/cloudsync/classes/managers/secretsmanager.php');
 
-class azuresecretsmanager extends secretsmanager{
-    
-    public function __construct() {
-        $this->dbTable = parent::PLUGINNAME . '_azurekeys';
+class subscription {
+
+    public function __construct($cloud_provider_id, $name) {
+        $this->{'id'} = 'None';
+        $this->{'cloud_provider_id'} = $cloud_provider_id;
+        $this->{'name'} = $name;
+    }
+
+    public function setId($id) {
+        $this->{'id'} = $id;
+    }
+
+    public function setCloudProvider($cloud_provider_id) {
+        $this->{'cloud_provider_id'} = $cloud_provider_id;
+    }
+
+    public function setName($name) {
+        $this->{'name'} = $name;
     }
 }

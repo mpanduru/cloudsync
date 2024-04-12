@@ -24,7 +24,13 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
+require_once($CFG->dirroot.'/local/cloudsync/constants.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/form/subscriptionform.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/models/subscription.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/models/aws_secrets.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/models/azure_secrets.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/managers/cloudprovidermanager.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -60,7 +66,23 @@ if ($mform->is_cancelled()) {
     redirect($CFG->wwwroot . '/local/cloudsync/cloudrequest.php', 'Pressed cancel');
     echo "<script>console.log('This is cancelled')</script>";
 } else if ($fromform = $mform->get_data()) {
-    echo "<script>console.log('This is saved')</script>";
+    $providermanager = new cloudprovidermanager();
+    $subscriptionmanager = new subscriptionmanager();
+    $subscription = new subscription($fromform->cloudprovider, $fromform->subscriptionname);
+    $provider_type = $providermanager->get_provider_type_by_id($fromform->cloudprovider);
+    switch ($provider_type) {
+        case AWS_PROVIDER:
+            $secrets = new aws_secrets($subscription->id, $fromform->aws_access_key_id, $fromform->aws_secret_access_key);
+            break;
+        case AZURE_PROVIDER:
+            $secrets = new azure_secrets($subscription->id, $fromform->tenant_id, $fromform->app_id, $fromform->password);
+            break;
+        default:
+            throw new Exception("Unknown provider type: $provider_type");
+    }
+    $id = $subscriptionmanager->create_subscription($subscription, $secrets);
+    $subscription->setId($id);
+    redirect($CFG->wwwroot . '/local/cloudsync/cloudadministration.php', 'Subscription added!');
 } else {
 }
 

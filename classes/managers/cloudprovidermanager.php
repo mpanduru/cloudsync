@@ -67,6 +67,19 @@ class cloudprovidermanager {
     }
 
     /**
+     * Get a cloud provider type from its id
+     *
+     * @param int $id the id of the cloud provider searched
+     * @return string the provider type that has the id=$id
+     */
+    public function get_provider_type_by_id($id) {
+        global $DB;
+
+        $provider = $DB->get_record(self::DB_TABLE, ['id' => $id], 'name');
+        return $provider->name;
+    }
+
+    /**
      * Update a cloud provider
      *
      * @param object $provider An object with contents equal to fieldname=>fieldvalue. Must have an entry for 'id' to map to the table specified.

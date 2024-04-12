@@ -22,7 +22,9 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once("$CFG->libdir/formslib.php");
+ require_once("$CFG->libdir/formslib.php");
+ require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
+ require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 
 class subscriptionform extends moodleform {
     public function definition() {
@@ -36,17 +38,8 @@ class subscriptionform extends moodleform {
         $mform->addHelpButton('subscriptionname', 'subscriptionform_subscriptionname', 'local_cloudsync');
         $mform->addRule('subscriptionname', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
     
-        $cloudproviders = [
-            (object)[
-                'id'=> 0,
-                'name' => 'AWS',
-            ],
-            (object)[
-                'id'=> 1,
-                'name' => 'Azure',
-            ],
-        ];
-        $mform->addElement('select', 'cloudprovider', 'Select cloud provider', $this->init_cloud_provider_options());
+        $cloudproviders = $this->init_cloud_provider_options();
+        $mform->addElement('select', 'cloudprovider', 'Select cloud provider', $this->providers_to_string($cloudproviders));
         $mform->addRule('cloudprovider', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
 
         foreach ($cloudproviders as $cloudprovider){
@@ -62,33 +55,30 @@ class subscriptionform extends moodleform {
     }
 
     private function init_cloud_provider_options() {
-        $cloudproviders = [
-            (object)[
-                'id'=> 0,
-                'name' => 'AWS',
-            ],
-            (object)[
-                'id'=> 1,
-                'name' => 'Azure',
-            ],
-        ];
+        $cloudprovidermanager = new cloudprovidermanager();
+        $cloudproviders = $cloudprovidermanager->get_all_providers();
 
+        return $cloudproviders;
+    }
+
+    private function providers_to_string($cloudproviders) {
         foreach ($cloudproviders as $cloudprovider) {
             $string_cloudproviders[$cloudprovider->id] = $cloudprovider->name;
         }
+
         return $string_cloudproviders;
     }
 
     private function init_cloud_provider_fields($form, $dependenton, $cloudprovider){
         switch ($cloudprovider->name) {
-            case 'AWS':
+            case AWS_PROVIDER:
                 $this->init_aws_fields($form, $dependenton, $cloudprovider->id);
                 break;
-            case 'Azure':
+            case AZURE_PROVIDER:
                 $this->init_azure_fields($form, $dependenton, $cloudprovider->id);
                 break;
             default:
-                echo "<script>console.log('This is new')</script>";
+                throw new Exception("Unknown provider: $cloudprovider->name");
         }
     }
 

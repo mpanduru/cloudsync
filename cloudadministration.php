@@ -23,6 +23,7 @@
  */
 
 require_once('../../config.php'); // Include Moodle configuration
+require_once($CFG->dirroot.'/local/cloudsync/classes/managers/subscriptionmanager.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -128,28 +129,9 @@ $non_cloud_admin_role_users = [
     ],
 ];
 
-$cloud_subscriptions = [
-    (object)[
-        'id'=> 0,
-        'type' => 'Azure',
-        'name' => 'Subscription Azure 1',
-    ],
-    (object)[
-        'id'=> 1,
-        'type' => 'AWS',
-        'name' => 'Subscription AWS 1',
-    ],
-    (object)[
-        'id'=> 2,
-        'type' => 'Azure',
-        'name' => 'Subscription Azure 2',
-    ],
-    (object)[
-        'id'=> 3,
-        'type' => 'AWS',
-        'name' => 'Subscription AWS 2',
-    ],
-];
+
+$subscriptionmanager = new subscriptionmanager();
+$cloud_subscriptions = $subscriptionmanager->get_all_subscriptions();
 
 // Output starts here
 echo $OUTPUT->header(); // Display the header

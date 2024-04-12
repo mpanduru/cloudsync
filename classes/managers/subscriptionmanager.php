@@ -41,11 +41,8 @@ class subscriptionmanager {
      */
     public function createSecretsManager($provider_id) {
         $providermanager = new cloudprovidermanager();
-        echo "<script>console.log('MERGE')</script>";
         $provider = $providermanager->get_provider_by_id($provider_id);
-        echo "<script>console.log(".json_encode($provider).")</script>";
         
-        return new azuresecretsmanager();
         switch ($provider->name) {
             case AWS_PROVIDER:
                 return new awssecretsmanager();
@@ -126,6 +123,19 @@ class subscriptionmanager {
         $secretsManager = $this->createSecretsManager($provider_id_object->cloud_provider_id);
         $secrets = $secretsManager->get_secrets_by_subscription_id($id);
         return $secrets;
+    }
+
+    /**
+     * Get all subscriptions of the same cloud provider
+     *
+     * @param int $id the id of the cloud provider
+     * @return array the subscription that has the id=$id
+     */
+    public function get_subscriptions_by_provider_id($id) {
+        global $DB;
+
+        $subscriptions = $DB->get_records(self::DB_TABLE, ['cloud_provider_id' => $id]);
+        return $subscriptions;
     }
 
     /**

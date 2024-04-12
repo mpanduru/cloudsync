@@ -24,6 +24,9 @@
 
 global $CFG;
 require_once("$CFG->libdir/formslib.php");
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 
 class vmcreate extends moodleform{
     public function definition() {
@@ -75,25 +78,17 @@ class vmcreate extends moodleform{
         // Cloud provider select
         $mform->addElement('header', 'cloudproviderselector', 'Cloud Provider');
         
-        $mform->addElement('select', 'cloudtype', 'Select cloud provider', $this->init_cloud_provider_options());
-        $mform->addRule('cloudtype', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
+        $cloudproviders = $this->init_cloud_provider_options();
 
-        $cloudproviders = [
-            (object)[
-                'id'=> 0,
-                'name' => 'AWS',
-            ],
-            (object)[
-                'id'=> 1,
-                'name' => 'Azure',
-            ],
-        ];
+        $mform->addElement('select', 'cloudtype', 'Select cloud provider', $this->providers_to_string($cloudproviders));
+        $mform->addRule('cloudtype', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
         
         // Machine
         $mform->addElement('header', 'virtualmachine', get_string('vmcreate_virtualmachine', 'local_cloudsync'));
 
         foreach ($cloudproviders as $cloudprovider){
-            $mform->addElement('select', 'subscription' . $cloudprovider->name, get_string('vmcreate_subscription', 'local_cloudsync'), $this->init_subscription_options($cloudprovider->id));
+            $subscriptions = $this->init_subscription_options($cloudprovider->id);
+            $mform->addElement('select', 'subscription' . $cloudprovider->name, get_string('vmcreate_subscription', 'local_cloudsync'), $this->subscriptions_to_string($subscriptions));
             $mform->setDefault('subscription' . $cloudprovider->name, '0');
             $mform->addRule('subscription' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('subscription' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
@@ -140,29 +135,17 @@ class vmcreate extends moodleform{
 
     // Function that gets the all subscriptions from the database
     private function init_subscription_options($cloudproviderid) {
-        $subscriptions = [
-            (object)[
-                'id'=> 0,
-                'type' => 0,
-                'name' => 'Subscription AWS 1',
-            ],
-            (object)[
-                'id'=> 1,
-                'type' => 0,
-                'name' => 'Subscription AWS 2',
-            ],
-            (object)[
-                'id'=> 2,
-                'type' => 1,
-                'name' => 'Subscription Azure 1',
-            ],
-        ];
+        $subscriptionmanager = new subscriptionmanager();
+        $subscriptions = $subscriptionmanager->get_subscriptions_by_provider_id($cloudproviderid);
 
-        $i = 0;
+        return $subscriptions;
+    }
+
+    private function subscriptions_to_string($subscriptions) {
         foreach ($subscriptions as $subscription) {
-            if($subscription->type === $cloudproviderid)
-                $string_subscriptions[$i++] = $subscription->name;
+            $string_subscriptions[$subscription->id] = $subscription->name;
         }
+
         return $string_subscriptions;
     }
 
@@ -350,20 +333,17 @@ class vmcreate extends moodleform{
     }
 
     private function init_cloud_provider_options() {
-        $cloudproviders = [
-            (object)[
-                'id'=> 0,
-                'name' => 'AWS',
-            ],
-            (object)[
-                'id'=> 1,
-                'name' => 'Azure',
-            ],
-        ];
+        $cloudprovidermanager = new cloudprovidermanager();
+        $cloudproviders = $cloudprovidermanager->get_all_providers();
 
+        return $cloudproviders;
+    }
+
+    private function providers_to_string($cloudproviders) {
         foreach ($cloudproviders as $cloudprovider) {
             $string_cloudproviders[$cloudprovider->id] = $cloudprovider->name;
         }
+
         return $string_cloudproviders;
     }
 }

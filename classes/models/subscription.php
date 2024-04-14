@@ -27,7 +27,6 @@ require_once('../../config.php'); // Include Moodle configuration
 class subscription {
 
     public function __construct($cloud_provider_id, $name) {
-        $this->{'id'} = 'None';
         $this->{'cloud_provider_id'} = $cloud_provider_id;
         $this->{'name'} = $name;
     }

@@ -23,7 +23,9 @@
  */
 
 require_once('../../config.php'); // Include Moodle configuration
+require_once($CFG->dirroot.'/local/cloudsync/helpers.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/managers/vmrequestmanager.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -52,6 +54,15 @@ $PAGE->set_heading(get_string('cloudadministrationtitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
 // cloud requests that require a response will have to be queried from db
+$requestmanager = new vmrequestmanager();
+$requests = $requestmanager->get_requests_by_status('WAITING');
+echo "<script>console.log(".json_encode($requests).")</script>";
+
+foreach ($requests as $request) {
+    $request->owner = get_user_name($request->owner_id);
+    $request->teacher = get_user_name($request->teacher_id);
+}
+
 $waiting_cloud_requests = [
     (object)[
         'id' => 0,
@@ -136,13 +147,14 @@ $cloud_subscriptions = $subscriptionmanager->get_all_subscriptions();
 // Output starts here
 echo $OUTPUT->header(); // Display the header
 $templatecontext = (object)[
-    'waiting_cloud_requests' => array_values($waiting_cloud_requests),
-    'waiting_cloud_requests_number' => count($waiting_cloud_requests),
+    'waiting_cloud_requests' => array_values($requests),
+    'waiting_cloud_requests_number' => count($requests),
     'cloud_admin_role_users'=> array_values($cloud_admin_role_users),
     'non_cloud_admin_role_users' => array_values($non_cloud_admin_role_users),
     'cloud_subscriptions' => array_values($cloud_subscriptions),
     'cloud_subscriptions_number' => count($cloud_subscriptions),
     'new_subscription_url' => new moodle_url('/local/cloudsync/newsubscription.php'),
+    'manage_request_url' => new moodle_url('/local/cloudsync/cloudadminrequest.php')
 ];
 
 echo $OUTPUT->render_from_template('local_cloudsync/cloudadmin', $templatecontext);

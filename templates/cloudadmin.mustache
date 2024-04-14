@@ -101,7 +101,7 @@
                     <ul class="list-group">
                         {{#waiting_cloud_requests}}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a class="link-text"><b>Author: {{author}} &nbsp Teacher: {{teacher}} &nbsp Machine name: {{name}} </b></a>
+                                <a class="link-text" onclick="location.href='{{manage_request_url}}?id={{id}}'"><b>Owner: {{owner}} &nbsp Teacher: {{teacher}} &nbsp Machine name: {{vm_name}} </b></a>
                                 <input type="button" class="btn btn-danger btn-sm" value="{{#str}} reject, local_cloudsync {{/str}}">
                             </li>
                         {{/waiting_cloud_requests}}

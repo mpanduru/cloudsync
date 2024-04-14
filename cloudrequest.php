@@ -22,9 +22,13 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
-require_once($CFG->dirroot.'/local/cloudsync/classes/form/vmrequest.php');
+global $USER;
+require_once('../../config.php'); // Include Moodle configuration
+require_once($CFG->dirroot.'/local/cloudsync/constants.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/form/vmrequestform.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/models/vmrequest.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/managers/vmrequestmanager.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -52,13 +56,18 @@ $PAGE->set_title(get_string('cloudrequest', 'local_cloudsync'));
 $PAGE->set_heading(get_string('cloudrequest', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
-$mform = new vmrequest();
+$mform = new vmrequestform();
 
 if ($mform->is_cancelled()) {
     redirect($CFG->wwwroot . '/local/cloudsync/cloudrequest.php', 'Pressed cancel');
     echo "<script>console.log('This is cancelled')</script>";
 } else if ($fromform = $mform->get_data()) {
-    echo "<script>console.log('This is saved')</script>";
+    $vmrequestmanager = new vmrequestmanager();
+    $request = new vmrequest($userid, $fromform->teacher, $fromform->description, $fromform->vmname, SUPPORTED_OS_VALUES[$fromform->os],
+    SUPPORTED_MEMORY_VALUES[$fromform->memory], SUPPORTED_VCPUS_VALUES[$fromform->processor], 
+    SUPPORTED_ROOTDISK_VALUES[$fromform->rootdisk_storage], SUPPORTED_SECONDDISK_VALUES[$fromform->disk2_storage]);
+    $id = $vmrequestmanager->create_request($request);
+    $request->setId($id);
 } else {
 }
 

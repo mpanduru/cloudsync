@@ -27,7 +27,6 @@ require_once('../../config.php'); // Include Moodle configuration
 class azure_secrets {
 
     public function __construct($subscription_id, $tenant_id, $app_id, $secret) {
-        $this->{'id'} = 'None';
         $this->{'subscription_id'} = $subscription_id;
         $this->{'tenant_id'} = $tenant_id;
         $this->{'app_id'} = $app_id;

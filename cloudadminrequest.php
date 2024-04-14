@@ -24,7 +24,9 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
+require_once($CFG->dirroot.'/local/cloudsync/helpers.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/form/vmcreate.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/managers/vmrequestmanager.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -58,18 +60,10 @@ $PAGE->requires->css('/local/cloudsync/styles.css');
 $user = $DB->get_record('user', array('id' => '2'));
 
 // Get the request from db by id
-$request = (object)[
-    'id'=> $requestID,
-    'user'=> $user->firstname." ".$user->lastname,
-    'vmname' => 'Test VM 1',
-    'teacher' => 'Teacher 1',
-    'description' => array('text' => 'No reason at all, it is just a test environment.', 'format' => FORMAT_HTML),
-    'os' => 'ubuntu 22.04',
-    'request_memory' => 1024,
-    'request_processor' => 4,
-    'request_disk1_storage' => 32,
-    'request_disk2_storage' => 64,
-];
+$vmrequestmanager = new vmrequestmanager();
+$request = $vmrequestmanager->get_request_by_id($requestID);
+$request->user = get_user_name($request->owner_id);
+$request->teacher = get_user_name($request->teacher_id);
 
 $mform = new vmcreate(null, array('id' => $requestID));
 $mform->set_data($request);

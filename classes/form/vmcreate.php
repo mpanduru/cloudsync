@@ -91,40 +91,34 @@ class vmcreate extends moodleform{
             $subscriptions = $this->init_subscription_options($cloudprovider->id);
             $mform->addElement('select', 'subscription' . $cloudprovider->name, get_string('vmcreate_subscription', 'local_cloudsync'), $this->subscriptions_to_string($subscriptions));
             $mform->setDefault('subscription' . $cloudprovider->name, '0');
-            $mform->addRule('subscription' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('subscription' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('subscription' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
             $mform->addElement('select', 'region' . $cloudprovider->name, get_string('vmcreate_region', 'local_cloudsync'), 
                                     return_var_by_provider_id($cloudprovider->id, SUPPORTED_AWS_REGIONS, SUPPORTED_AZURE_REGIONS));
             $mform->setDefault('region' . $cloudprovider->name, '0');
-            $mform->addRule('region' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('region' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('region' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
             $mform->addElement('select', 'architecture' . $cloudprovider->name, get_string('vmcreate_architecture', 'local_cloudsync'), 
                                     return_var_by_provider_id($cloudprovider->id, SUPPORTED_AWS_ARCHITECTURES, SUPPORTED_AZURE_ARCHITECTURES));
             $mform->setDefault('architecture' . $cloudprovider->name, '0');
-            $mform->addRule('architecture' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('architecture' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('architecture' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
             $mform->addElement('select', 'type' . $cloudprovider->name, get_string('vmcreate_type', 'local_cloudsync'), 
                                     $this->init_type_options($cloudprovider->id));
             $mform->setDefault('type' . $cloudprovider->name, '0');
-            $mform->addRule('type' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('type' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('type' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
             $mform->addElement('select', 'disk1' . $cloudprovider->name, get_string('vmcreate_disk1', 'local_cloudsync'), SUPPORTED_ROOTDISK_VALUES);
             $mform->setDefault('disk1' . $cloudprovider->name, '0');
-            $mform->addRule('disk1' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('disk1' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('disk1' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
             $mform->addElement('select', 'disk2' . $cloudprovider->name, get_string('vmcreate_disk2', 'local_cloudsync'), SUPPORTED_SECONDDISK_VALUES);
             $mform->setDefault('disk2' . $cloudprovider->name, '0');
-            $mform->addRule('disk2' . $cloudprovider->name, get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
             $mform->disabledIf('disk2' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('disk2' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
         }
@@ -138,7 +132,7 @@ class vmcreate extends moodleform{
     }
 
     // Function that gets the all subscriptions from the database
-    private function init_subscription_options($cloudproviderid) {
+    function init_subscription_options($cloudproviderid) {
         $subscriptionmanager = new subscriptionmanager();
         $subscriptions = $subscriptionmanager->get_subscriptions_by_provider_id($cloudproviderid);
 

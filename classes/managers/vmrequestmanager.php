@@ -22,8 +22,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
-
 class vmrequestmanager {
     
     const PLUGINNAME = 'local_cloudsync';
@@ -85,7 +83,7 @@ class vmrequestmanager {
      * @param object $request An object with contents equal to fieldname=>fieldvalue. Must have an entry for 'id' to map to the table specified.
      * @return bool true
      */
-    public function update_provider($request) {
+    public function update_request($request) {
         global $DB;
 
         $result = $DB->update_record(self::DB_TABLE, $request);
@@ -98,7 +96,7 @@ class vmrequestmanager {
      * @param int $id the id of the request to delete
      * @return bool true
      */
-    public function delete_provider($id) {
+    public function delete_request($id) {
         global $DB;
 
         $result = $DB->delete_records(self::DB_TABLE, ['id' => $id]);

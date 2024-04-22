@@ -22,21 +22,18 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
+class vm {
 
-class vmrequest {
-
-    public function __construct($owner_id, $teacher_id, $description, $vm_name, $vm_os, $vm_memory, $vm_vcpus, $rootdisk_storage, $seconddisk_storage) {
-        $this->{'status'} = 'WAITING';
+    public function __construct($owner_id, $cloud_admin_id, $request_id, $subscription_id, $region, $architecture, $type, $rootdisk_storage, $seconddisk_storage) {
         $this->{'owner_id'} = $owner_id;
-        $this->{'teacher_id'} = $teacher_id;
+        $this->{'cloud_admin_id'} = $cloud_admin_id;
+        $this->{'request_id'} = $request_id;
         $now = new DateTime("now", core_date::get_server_timezone_object());
         $this->{'created_at'} = $now->getTimestamp();
-        $this->{'description'} = $description;
-        $this->{'vm_name'} = $vm_name;
-        $this->{'vm_os'} = $vm_os;
-        $this->{'vm_memory'} = $vm_memory;
-        $this->{'vm_vcpus'} = $vm_vcpus;
+        $this->{'subscription_id'} = $subscription_id;
+        $this->{'region'} = $region;
+        $this->{'architecture'} = $architecture;
+        $this->{'type'} = $type;
         $this->{'rootdisk_storage'} = $rootdisk_storage;
         if($seconddisk_storage != 'None')
             $this->{'seconddisk_storage'} = $seconddisk_storage;
@@ -48,41 +45,37 @@ class vmrequest {
         $this->{'id'} = $id;
     }
 
-    public function setStatus($status) {
-        $this->{'status'} = $status;
-    }
-
     public function setOwner($owner_id) {
         $this->{'owner_id'} = $owner_id;
     }
 
-    public function setTeacher($teacher_id) {
-        $this->{'teacher_id'} = $teacher_id;
+    public function setAdmin($cloud_admin_id) {
+        $this->{'cloud_admin_id'} = $cloud_admin_id;
     }
 
-    public function close() {
+    public function setRequest($request_id) {
+        $this->{'request_id'} = $request_id;
+    }
+
+    public function setSubscription($subscription_id) {
+        $this->{'subscription_id'} = $subscription_id;
+    }
+
+    public function setDeleted() {
         $now = new DateTime("now", core_date::get_server_timezone_object());
-        $this->{'closed_at'} = $now->getTimestamp();
+        $this->{'deleted_at'} = $now->getTimestamp();
     }
 
-    public function setDescription($description) {
-        $this->{'description'} = $description;
+    public function setRegion($region) {
+        $this->{'region'} = $region;
     }
 
-    public function setVmName($name) {
-        $this->{'vm_name'} = $name;
+    public function setArchitecture($architecture) {
+        $this->{'architecture'} = $architecture;
     }
 
-    public function setVmOS($os) {
-        $this->{'vm_os'} = $os;
-    }
-
-    public function setVmMemory($vm_memory) {
-        $this->{'vm_memory'} = $vm_memory;
-    }
-
-    public function setVmVCPUs($vm_vcpus) {
-        $this->{'vm_vcpus'} = $vm_vcpus;
+    public function setType($type) {
+        $this->{'type'} = $type;
     }
 
     public function setVmRootDisk($storage) {

@@ -69,3 +69,14 @@ define('SUPPORTED_AZURE_TYPES_SPECS', [
     'vCPUs 2, 4 GiB RAM, 4 Data disks, 1280 Max IOPS, 8 Gib Local storage (SCSI)',
     'vCPUs 2, 8 GiB RAM, 4 Data disks, 1920 Max IOPS, 16 Gib Local storage (SCSI)',
 ]);
+
+define('AWS_FIELDS', array(
+    "region" => SUPPORTED_AWS_REGIONS,
+    "architecture" => SUPPORTED_AWS_ARCHITECTURES,
+    "type" => SUPPORTED_AWS_TYPES
+));
+define('AZURE_FIELDS', array(
+    "region" => SUPPORTED_AZURE_REGIONS,
+    "architecture" => SUPPORTED_AZURE_ARCHITECTURES,
+    "type" => SUPPORTED_AZURE_TYPES
+));

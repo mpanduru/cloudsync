@@ -24,9 +24,14 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
+global $USER;
+require_once($CFG->dirroot.'/local/cloudsync/constants.php');
 require_once($CFG->dirroot.'/local/cloudsync/helpers.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/form/vmcreate.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/managers/vmrequestmanager.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/models/vm.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/managers/virtualmachinemanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -75,9 +80,20 @@ if ($mform->is_cancelled()) {
     $output = json_encode($output);
     echo "<script>console.log(".$output.")</script>";
 } else if ($fromform = $mform->get_data()) {
-    echo "<script>console.log('This is saved')</script>";
-    redirect($CFG->wwwroot . '/local/cloudsync/cloudrequest.php', 'Pressed cancel');
-} else {
+    echo "<script>console.log(".json_encode($fromform).")</script>";
+    $fields = return_var_by_provider_id($fromform->cloudtype, AWS_FIELDS, AZURE_FIELDS);
+    $cloudprovidermanager = new cloudprovidermanager();
+    $provider = $cloudprovidermanager->get_provider_type_by_id($fromform->cloudtype);
+    $vm = new vm($request->owner_id, $userid, $requestID, $fromform->{'subscription' . $provider}, $fields["region"][$fromform->{'region' . $provider}], 
+        $fields["architecture"][$fromform->{'architecture' . $provider}], 
+        $fields["type"][$fromform->{'type' . $provider}], 
+        SUPPORTED_ROOTDISK_VALUES[$fromform->{'disk1' . $provider}], 
+        SUPPORTED_SECONDDISK_VALUES[$fromform->{'disk2' . $provider}]);
+    echo "<script>console.log(".json_encode($vm).")</script>";
+    $vmmanager = new virtualmachinemanager();
+    $id = $vmmanager->create_vm($vm);
+    $vm->setId($id);
+    echo "<script>console.log(".json_encode($vm).")</script>";
 }
 
 // Output starts here

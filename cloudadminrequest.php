@@ -84,7 +84,7 @@ if ($mform->is_cancelled()) {
     $fields = return_var_by_provider_id($fromform->cloudtype, AWS_FIELDS, AZURE_FIELDS);
     $cloudprovidermanager = new cloudprovidermanager();
     $provider = $cloudprovidermanager->get_provider_type_by_id($fromform->cloudtype);
-    $vm = new vm($request->owner_id, $userid, $requestID, $fromform->{'subscription' . $provider}, $fields["region"][$fromform->{'region' . $provider}], 
+    $vm = new vm($request->owner_id, $userid, $requestID, $fromform->vm_name, $fromform->{'subscription' . $provider}, $fields["region"][$fromform->{'region' . $provider}], 
         $fields["architecture"][$fromform->{'architecture' . $provider}], 
         $fields["type"][$fromform->{'type' . $provider}], 
         SUPPORTED_ROOTDISK_VALUES[$fromform->{'disk1' . $provider}], 

@@ -24,6 +24,9 @@
 
 
 require_once('../../config.php'); // Include Moodle configuration
+global $CFG;
+global $USER;
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -51,17 +54,8 @@ $PAGE->set_title(get_string('mycloudtitle', 'local_cloudsync'));
 $PAGE->set_heading(get_string('mycloudtitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
-// Machines will have to be queried from db
-$machines = [
-    (object)[
-        'name'=> 'TestVM1',
-        'id' => 1,
-    ],
-    (object)[
-        'name'=> 'TestVM2',
-        'id' => 2,
-    ],
-];
+$vmmanager = new virtualmachinemanager();
+$machines = $vmmanager->get_vms_by_user($userid);
 
 // Output starts here
 echo $OUTPUT->header(); // Display the header

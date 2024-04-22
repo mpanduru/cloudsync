@@ -24,10 +24,11 @@
 
 class vm {
 
-    public function __construct($owner_id, $cloud_admin_id, $request_id, $subscription_id, $region, $architecture, $type, $rootdisk_storage, $seconddisk_storage) {
+    public function __construct($owner_id, $cloud_admin_id, $request_id, $name, $subscription_id, $region, $architecture, $type, $rootdisk_storage, $seconddisk_storage) {
         $this->{'owner_id'} = $owner_id;
         $this->{'cloud_admin_id'} = $cloud_admin_id;
         $this->{'request_id'} = $request_id;
+        $this->{'name'} = $name;
         $now = new DateTime("now", core_date::get_server_timezone_object());
         $this->{'created_at'} = $now->getTimestamp();
         $this->{'subscription_id'} = $subscription_id;
@@ -55,6 +56,10 @@ class vm {
 
     public function setRequest($request_id) {
         $this->{'request_id'} = $request_id;
+    }
+
+    public function setName($name) {
+        $this->{'name'} = $name;
     }
 
     public function setSubscription($subscription_id) {

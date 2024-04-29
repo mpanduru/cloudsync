@@ -77,6 +77,8 @@ abstract class secretsmanager {
         global $DB;
 
         $secrets = $DB->get_record($this->dbTable, ['subscription_id' => $id]);
+        $secrets->access_key_id = str_replace('\\', '', $secrets->access_key_id);
+        $secrets->access_key_secret = str_replace('\\', '', $secrets->access_key_secret);
         return $secrets;
     }
 

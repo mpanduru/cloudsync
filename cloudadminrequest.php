@@ -29,9 +29,11 @@ require_once($CFG->dirroot.'/local/cloudsync/constants.php');
 require_once($CFG->dirroot.'/local/cloudsync/helpers.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/form/vmcreate.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/managers/vmrequestmanager.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/managers/subscriptionmanager.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/models/vm.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/providers/aws_helper.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -89,6 +91,17 @@ if ($mform->is_cancelled()) {
         $fields["type"][$fromform->{'type' . $provider}], 
         SUPPORTED_ROOTDISK_VALUES[$fromform->{'disk1' . $provider}], 
         SUPPORTED_SECONDDISK_VALUES[$fromform->{'disk2' . $provider}]);
+    $subscription_manager = new subscriptionmanager();
+    $secrets = $subscription_manager->get_secrets_by_subscription_id($fromform->{'subscription' . $provider});
+    echo "<script>console.log(".json_encode($secrets).")</script>";
+    $aws_helper = new aws_helper();
+    $client = $aws_helper->create_connection($fields["region"][$fromform->{'region' . $provider}], $secrets->access_key_id, $secrets->access_key_secret);
+    $key = $aws_helper->create_key($client, 'mpanduru_key', 'mpanduru');
+    $instance_id = $aws_helper->create_instance($client, 'mpanduru', $fromform->vm_name, 'ami-04e5276ebb8451442', $fields["type"][$fromform->{'type' . $provider}], 
+        SUPPORTED_ROOTDISK_VALUES[$fromform->{'disk1' . $provider}], 
+        SUPPORTED_SECONDDISK_VALUES[$fromform->{'disk2' . $provider}],
+        $key->key_name);
+    echo "<script>console.log('".$instance_id."')</script>";
     echo "<script>console.log(".json_encode($vm).")</script>";
     $vmmanager = new virtualmachinemanager();
     $id = $vmmanager->create_vm($vm);

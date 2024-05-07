@@ -59,8 +59,7 @@ $PAGE->requires->css('/local/cloudsync/styles.css');
 $mform = new vmrequestform();
 
 if ($mform->is_cancelled()) {
-    redirect($CFG->wwwroot . '/local/cloudsync/cloudrequest.php', 'Pressed cancel');
-    echo "<script>console.log('This is cancelled')</script>";
+    redirect($CFG->wwwroot . '/local/cloudsync/mycloud.php', 'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
 } else if ($fromform = $mform->get_data()) {
     $vmrequestmanager = new vmrequestmanager();
     $request = new vmrequest($userid, $fromform->teacher, $fromform->description, $fromform->vmname, SUPPORTED_OS_VALUES[$fromform->os],
@@ -68,6 +67,7 @@ if ($mform->is_cancelled()) {
     SUPPORTED_ROOTDISK_VALUES[$fromform->rootdisk_storage], SUPPORTED_SECONDDISK_VALUES[$fromform->disk2_storage]);
     $id = $vmrequestmanager->create_request($request);
     $request->setId($id);
+    redirect($CFG->wwwroot . '/local/cloudsync/mycloud.php', 'Request Sent Succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);
 } else {
 }
 

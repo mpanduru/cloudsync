@@ -24,7 +24,7 @@
 
 function local_cloudsync_extend_navigation(global_navigation $navigation){
    $mycloud_url = new moodle_url('/local/cloudsync/mycloud.php');
-   $cloudadministration_url = new moodle_url('/local/cloudsync/cloudadministration.php');
+   $cloudoverview_url = new moodle_url('/local/cloudsync/cloudadministration.php');
 
    # Define the dropdown for our available cloud pages
    $main_node = $navigation->add(get_string('dropdown_button', 'local_cloudsync'));
@@ -33,17 +33,24 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $main_node->forcetitle = true;
    $main_node->type = 20; 
 
-   # Define the button that routes to the main cloud page
-   $mycloud_node = $main_node->add(get_string('mycloudtitle', 'local_cloudsync'));
-   $mycloud_node->nodetype = 0;
-   $mycloud_node->isexpandable = false;
-   $mycloud_node->force_open = true;
-   $mycloud_node->action = $mycloud_url;
-
-   # Define the button that routes to the cloud administration page
+   # Define the button that expands into cloud administration pages
    $cloudadministration_node = $main_node->add(get_string('cloudadministrationtitle', 'local_cloudsync'));
-   $cloudadministration_node->nodetype = 0;
-   $cloudadministration_node->isexpandable = false;
-   $cloudadministration_node->force_open = true;
-   $cloudadministration_node->action = $cloudadministration_url;
+   $cloudadministration_node->nodetype = 1;
+   $cloudadministration_node->isexpandable = true;
+   $cloudadministration_node->forcetitle = true;
+   $cloudadministration_node->type = 20; 
+
+   # Define the button that routes to the cloud overview page
+   $overview_node = $cloudadministration_node->add(get_string('cloudoverviewtitle', 'local_cloudsync'));
+   $overview_node->nodetype = 0;
+   $overview_node->isexpandable = false;
+   $overview_node->force_open = true;
+   $overview_node->action = $cloudoverview_url;
+   
+   # Define the button that routes to the main cloud page
+   $vms_node = $main_node->add(get_string('virtualmachinestitle', 'local_cloudsync'));
+   $vms_node->nodetype = 0;
+   $vms_node->isexpandable = false;
+   $vms_node->force_open = true;
+   $vms_node->action = $mycloud_url;
 }

@@ -25,6 +25,7 @@
 require_once('../../config.php'); // Include Moodle configuration
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/secretsmanager.php');
 
+// Class that will be used to interact with azure subscription db
 class azuresecretsmanager extends secretsmanager{
     
     public function __construct() {

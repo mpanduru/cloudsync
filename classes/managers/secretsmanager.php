@@ -24,6 +24,7 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 
+// Class that will be used to interact with keys secrets (aws or azure)
 abstract class secretsmanager {
     const PLUGINNAME = 'local_cloudsync';
     protected $dbTable;

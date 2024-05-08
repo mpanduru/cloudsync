@@ -22,8 +22,24 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Class that will be used to create virtual machines models
+// before adding those to the database
 class vm {
 
+     /**
+     * Constructor.
+     *
+     * @param int $owner_id the id of the user the vm is created for
+     * @param int $cloud_admin_id the id of the user that approved the vm request
+     * @param int $request_id the id of the request for the created vm
+     * @param string $name The name of the virtual machine
+     * @param int $subscription_id The id of the subscription the vm is created on (from moodle db)
+     * @param string $region The region the vm is created on
+     * @param string $architecture The cpu architecture of the virtual machine
+     * @param string $type The type of the virtual machine (specifications)
+     * @param int $rootdisk_storage The storage of the root disk for the virtual machine
+     * @param int|string $seconddisk_storage The storage of the second disk for the virtual machine
+     */
     public function __construct($owner_id, $cloud_admin_id, $request_id, $name, $subscription_id, $region, $architecture, $type, $rootdisk_storage, $seconddisk_storage) {
         $this->{'owner_id'} = $owner_id;
         $this->{'cloud_admin_id'} = $cloud_admin_id;
@@ -42,52 +58,115 @@ class vm {
             $this->{'seconddisk_storage'} = 0;
     }
 
+     /**
+     * Set the id of the virtual machine
+     * 
+     * Use it after adding the vm to the db with the id returned from the add function.
+     *
+     * @param int $id the id of the vm from db
+     */
     public function setId($id) {
         $this->{'id'} = $id;
     }
 
+     /**
+     * Set the owner user of the vm
+     *
+     * @param int $owner_id the id of the user that will use the vm
+     */
     public function setOwner($owner_id) {
         $this->{'owner_id'} = $owner_id;
     }
 
+     /**
+     * Set the admin user of the vm (the user that approves the vm request)
+     *
+     * @param int $cloud_admin_id the id of the user that will create the vm
+     */
     public function setAdmin($cloud_admin_id) {
         $this->{'cloud_admin_id'} = $cloud_admin_id;
     }
 
+     /**
+     * Set the request for the created vm
+     *
+     * @param int $request_id the id of the request for the created vm
+     */
     public function setRequest($request_id) {
         $this->{'request_id'} = $request_id;
     }
 
+     /**
+     * Set the name of the vm
+     *
+     * @param string $name the name of the vm
+     */
     public function setName($name) {
         $this->{'name'} = $name;
     }
 
+     /**
+     * Set the subscription for the created vm
+     *
+     * @param int $subscription_id the id of the subscription for the created vm
+     */
     public function setSubscription($subscription_id) {
         $this->{'subscription_id'} = $subscription_id;
     }
 
-    public function setDeleted() {
-        $now = new DateTime("now", core_date::get_server_timezone_object());
-        $this->{'deleted_at'} = $now->getTimestamp();
-    }
-
+     /**
+     * Set the region of the vm
+     *
+     * @param string $region the region of the vm
+     */
     public function setRegion($region) {
         $this->{'region'} = $region;
     }
 
+     /**
+     * Set the architecture of the vm
+     *
+     * @param string $architecture the architecture of the vm
+     */
     public function setArchitecture($architecture) {
         $this->{'architecture'} = $architecture;
     }
 
+     /**
+     * Set the type of the vm
+     *
+     * @param string $type the type of the vm
+     */
     public function setType($type) {
         $this->{'type'} = $type;
     }
 
+     /**
+     * Set the storage for the root disk of the vm
+     *
+     * @param int $storage the storage for the root disk of the vm
+     */
     public function setVmRootDisk($storage) {
         $this->{'rootdisk_storage'} = $storage;
     }
 
+     /**
+     * Set the storage for the second disk of the vm
+     *
+     * @param int|string $storage the storage for the second disk of the vm
+     */
     public function setVmSecondDisk($storage) {
-        $this->{'seconddisk_storage'} = $storage;
+        if($storage != 'None')
+            $this->{'seconddisk_storage'} = $storage;
+        else
+            $this->{'seconddisk_storage'} = 0;
+    }
+
+     /**
+     * Mark the vm as deleted
+     */
+    public function markDeleted() {
+        $now = new DateTime("now", core_date::get_server_timezone_object());
+        $this->{'deleted_at'} = $now->getTimestamp();
     }
 }

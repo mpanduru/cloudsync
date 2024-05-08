@@ -25,6 +25,7 @@
 require_once('../../config.php'); // Include Moodle configuration
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/secretsmanager.php');
 
+// Class that will be used to interact with aws subscription db
 class awssecretsmanager extends secretsmanager{
 
     public function __construct() {

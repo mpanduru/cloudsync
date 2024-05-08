@@ -24,6 +24,7 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 
+// Class that will be used to interact with cloud provider db
 class cloudprovidermanager {
     const PLUGINNAME = 'local_cloudsync';
     const DB_TABLE = self::PLUGINNAME . '_provider';

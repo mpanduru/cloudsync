@@ -35,7 +35,7 @@ function xmldb_local_cloudsync_install() {
     }
 
 
-    // Create site course
+    // Create the supported cloud providers
     if ($DB->record_exists('local_cloudsync_provider', array())) {
         throw new moodle_exception('generalexceptionmessage', 'error', '', 'Can not create providers, they already exist.');
     }

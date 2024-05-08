@@ -25,7 +25,18 @@
 global $CFG;
 require($CFG->dirroot . '/local/cloudsync/vendor/autoload.php');
 
+// Class that will be used to administrate the resources that live
+// on AWS subscriptions
 class aws_helper {
+
+     /**
+     * Create a connection to the AWS cloud
+     *
+     * @param string $region the region of the connection
+     * @param string $access_key the access_key of the aws subscription
+     * @param string $access_key_secret the access_key_secret of the aws subscription
+     * @return Aws\Ec2\Ec2Client the client that will be used to interact with AWS
+     */
     public function create_connection($region, $access_key, $access_key_secret) {
         $ec2Client = new Aws\Ec2\Ec2Client([
             'region' => $region,
@@ -39,6 +50,11 @@ class aws_helper {
         return $ec2Client;
     }
 
+     /**
+     * Describe all the instances that live on an AWS subscription
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     */
     public function describe_instances(Aws\Ec2\Ec2Client $ec2Client) {
         $result = $ec2Client->describeInstances();
 
@@ -49,6 +65,12 @@ class aws_helper {
         }
     }
 
+     /**
+     * Get info about a specified instance
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $instance_id the id of the searched instance (from the aws cloud)
+     */
     public function describe_instance(Aws\Ec2\Ec2Client $ec2Client, $instance_id) {
         $result = $ec2Client->describeInstances([
             'InstanceIds' => [$instance_id,]
@@ -57,6 +79,19 @@ class aws_helper {
         var_dump($result);
     }
 
+     /**
+     * Create an instance on the AWS cloud
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $owner the name of the owner of the virtual machine
+     * @param string $name the name of the virtual machine
+     * @param string $image_id the id of the os image used for the virtual machine
+     * @param string $instance_type the type of the virtual machine
+     * @param int $rootdisk the storage for the root disk of the virtual machine
+     * @param int|string $seconddisk the storage for the secondary disk of the virtual machine
+     * @param string $key_name the name of the ssh key used to connect to the virtual machine
+     * @return string id of the created instance in AWS
+     */
     public function create_instance(Aws\Ec2\Ec2Client $ec2Client, $owner, $name, $image_id, $instance_type, $rootdisk, $seconddisk, $key_name) {
         $blockDeviceMappings = [
             [
@@ -107,6 +142,14 @@ class aws_helper {
         return $Instance[0]['InstanceId'];
     }
 
+     /**
+     * Create an ssh key on the AWS cloud
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $key_name the name of the key
+     * @param string $owner the name of the owner of the key
+     * @return object an object that holds the created key name and its value
+     */
     public function create_key(Aws\Ec2\Ec2Client $ec2Client, $key_name, $owner) {
         $result = $ec2Client->createKeyPair([
             'KeyFormat' => 'pem',
@@ -133,6 +176,14 @@ class aws_helper {
         return $key;
     }
 
+     /**
+     * 
+     * Wait for an instance to start
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $instance_id the id of the instance
+     * @return bool whether or not the instance is running
+     */
     public function wait_instance(Aws\Ec2\Ec2Client $ec2Client, $instance_id) {
         $waiterName = 'InstanceRunning';
         $waiterOptions = ['InstanceIds' => [

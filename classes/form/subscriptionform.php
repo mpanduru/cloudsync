@@ -31,7 +31,7 @@ class subscriptionform extends moodleform {
         global $CFG;
         $mform = $this->_form;
 
-        // General
+        // General header
         $mform->addElement('header', 'general', get_string('vmrequest_general', 'local_cloudsync'));
 
         $mform->addElement('text','subscriptionname', get_string('subscriptionform_subscriptionname', 'local_cloudsync'),'maxlength="254" size="50"');
@@ -54,6 +54,7 @@ class subscriptionform extends moodleform {
         return [];
     }
 
+    // Returns all the supported cloud providers from db
     private function init_cloud_provider_options() {
         $cloudprovidermanager = new cloudprovidermanager();
         $cloudproviders = $cloudprovidermanager->get_all_providers();
@@ -61,6 +62,7 @@ class subscriptionform extends moodleform {
         return $cloudproviders;
     }
 
+    // Converts an array of cloud providers to an array of their name
     private function providers_to_string($cloudproviders) {
         foreach ($cloudproviders as $cloudprovider) {
             $string_cloudproviders[$cloudprovider->id] = $cloudprovider->name;
@@ -69,6 +71,7 @@ class subscriptionform extends moodleform {
         return $string_cloudproviders;
     }
 
+    // Initialize fields of a cloud provider based on its type
     private function init_cloud_provider_fields($form, $dependenton, $cloudprovider){
         switch ($cloudprovider->name) {
             case AWS_PROVIDER:
@@ -82,6 +85,7 @@ class subscriptionform extends moodleform {
         }
     }
 
+    // Initialize fields of AWS provider subscription
     private function init_aws_fields($form, $dependenton, $id){
         $form->addElement('text', 'aws_access_key_id', 'AWS Access Key ID');
         $form->disabledIf('aws_access_key_id', $dependenton, 'ne', $id);
@@ -91,6 +95,7 @@ class subscriptionform extends moodleform {
         $form->hideIf('aws_secret_access_key', $dependenton, 'ne', $id);
     }
 
+    // Initialize fields of Azure provider subscription
     private function init_azure_fields($form, $dependenton, $id){
         $form->addElement('text', 'tenant_id', 'Azure Tenant ID');
         $form->disabledIf('tenant_id', $dependenton, 'ne', $id);

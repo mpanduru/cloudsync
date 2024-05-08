@@ -21,6 +21,8 @@
  * @copyright   2024 Constantin-Marius Panduru <constantin.panduru@student.upt.ro>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+// Class that will be used to interact with virtual machines db
 class virtualmachinemanager {
     
     const PLUGINNAME = 'local_cloudsync';

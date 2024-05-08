@@ -27,6 +27,7 @@ require_once($CFG->dirroot.'/local/cloudsync/helpers.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/managers/subscriptionmanager.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/managers/vmrequestmanager.php');
 
+// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
@@ -42,9 +43,6 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
-// // Set the user id variable
-$userid = $userid ? $userid : $USER->id;
-
 // Set up the page
 $PAGE->set_url(new moodle_url('/local/cloudsync/cloudadministration.php'));
 $PAGE->set_context(context_system::instance());
@@ -53,10 +51,9 @@ $PAGE->set_title(get_string('cloudadministrationtitle', 'local_cloudsync'));
 $PAGE->set_heading(get_string('cloudadministrationtitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
-// cloud requests that require a response will have to be queried from db
+// vm requests that require a response will have to be queried from db
 $requestmanager = new vmrequestmanager();
 $requests = $requestmanager->get_requests_by_status('WAITING');
-echo "<script>console.log(".json_encode($requests).")</script>";
 
 foreach ($requests as $request) {
     $request->owner = get_user_name($request->owner_id);

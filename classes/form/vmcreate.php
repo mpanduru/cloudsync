@@ -87,6 +87,7 @@ class vmcreate extends moodleform{
         // Machine
         $mform->addElement('header', 'virtualmachine', get_string('vmcreate_virtualmachine', 'local_cloudsync'));
 
+        // Add different fields based on the cloud provider
         foreach ($cloudproviders as $cloudprovider){
             $subscriptions = $this->init_subscription_options($cloudprovider->id);
             $mform->addElement('select', 'subscription' . $cloudprovider->name, get_string('vmcreate_subscription', 'local_cloudsync'), $this->subscriptions_to_string($subscriptions));
@@ -139,6 +140,7 @@ class vmcreate extends moodleform{
         return $subscriptions;
     }
 
+    // Converts an array of subscriptions to an array of their name
     private function subscriptions_to_string($subscriptions) {
         foreach ($subscriptions as $subscription) {
             $string_subscriptions[$subscription->id] = $subscription->name;
@@ -147,6 +149,7 @@ class vmcreate extends moodleform{
         return $string_subscriptions;
     }
 
+    // Returns all the supported cloud providers from db
     private function init_cloud_provider_options() {
         $cloudprovidermanager = new cloudprovidermanager();
         $cloudproviders = $cloudprovidermanager->get_all_providers();
@@ -154,6 +157,7 @@ class vmcreate extends moodleform{
         return $cloudproviders;
     }
 
+    // Converts an array of cloud providers to an array of their name
     private function providers_to_string($cloudproviders) {
         foreach ($cloudproviders as $cloudprovider) {
             $string_cloudproviders[$cloudprovider->id] = $cloudprovider->name;
@@ -162,6 +166,7 @@ class vmcreate extends moodleform{
         return $string_cloudproviders;
     }
 
+    // Returns all the supported types based on the cloud provider
     private function init_type_options($provider_id) {
         $types = return_var_by_provider_id($provider_id, SUPPORTED_AWS_TYPES, SUPPORTED_AZURE_TYPES);
         $specs = return_var_by_provider_id($provider_id, SUPPORTED_AWS_TYPES_SPECS, SUPPORTED_AZURE_TYPES_SPECS);

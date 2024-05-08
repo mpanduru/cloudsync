@@ -25,10 +25,10 @@
 global $CFG;
 global $USER;
 require_once('../../config.php'); // Include Moodle configuration
-require_once($CFG->dirroot.'/local/cloudsync/constants.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/form/vmrequestform.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/models/vmrequest.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/managers/vmrequestmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/constants.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/form/vmrequestform.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/lib.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -45,9 +45,6 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
-// // Set the user id variable
-$userid = $userid ? $userid : $USER->id;
-
 // Set up the page
 $PAGE->set_url(new moodle_url('/local/cloudsync/cloudrequest.php'));
 $PAGE->set_context(context_system::instance());
@@ -56,17 +53,18 @@ $PAGE->set_title(get_string('cloudrequest', 'local_cloudsync'));
 $PAGE->set_heading(get_string('cloudrequest', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
+// // Set the user id variable
+$userid = $userid ? $userid : $USER->id;
+
 $mform = new vmrequestform();
 
 if ($mform->is_cancelled()) {
     redirect($CFG->wwwroot . '/local/cloudsync/mycloud.php', 'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
 } else if ($fromform = $mform->get_data()) {
     $vmrequestmanager = new vmrequestmanager();
-    $request = new vmrequest($userid, $fromform->teacher, $fromform->description, $fromform->vmname, SUPPORTED_OS_VALUES[$fromform->os],
-    SUPPORTED_MEMORY_VALUES[$fromform->memory], SUPPORTED_VCPUS_VALUES[$fromform->processor], 
-    SUPPORTED_ROOTDISK_VALUES[$fromform->rootdisk_storage], SUPPORTED_SECONDDISK_VALUES[$fromform->disk2_storage]);
-    $id = $vmrequestmanager->create_request($request);
-    $request->setId($id);
+    cloudsync_submit_vm_request($fromform, $vmrequestmanager, $userid);
+
+    // redirect back to the vms page
     redirect($CFG->wwwroot . '/local/cloudsync/mycloud.php', 'Request Sent Succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);
 } else {
 }

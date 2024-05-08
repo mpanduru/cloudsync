@@ -24,15 +24,35 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 
+// Class that will be used to create cloud providers models
+// before adding those to the database
 class cloudprovider {
 
+     /**
+     * Constructor.
+     *
+     * @param string $name The name of the cloud provider
+     */
     public function __construct($name) {
         $this->{'name'} = $name;
     }
 
+     /**
+     * Set the id of the cloud provider
+     * 
+     * Use it after adding the provider to the db with the id returned from the add function.
+     *
+     * @param int $id the id of the cloud provider from db
+     */
     public function setId($id) {
         $this->{'id'} = $id;
     }
+
+     /**
+     * Set the name of the cloud provider
+     *
+     * @param string $name the name of the cloud provider
+     */
 
     public function setName($name) {
         $this->{'name'} = $name;

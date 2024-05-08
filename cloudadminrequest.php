@@ -25,16 +25,18 @@
 require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
 global $USER;
-require_once($CFG->dirroot.'/local/cloudsync/constants.php');
-require_once($CFG->dirroot.'/local/cloudsync/helpers.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/form/vmcreate.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/managers/vmrequestmanager.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/managers/subscriptionmanager.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/models/vm.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/managers/virtualmachinemanager.php');
+global $DB;
+require_once($CFG->dirroot . '/local/cloudsync/constants.php');
+require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/form/vmcreate.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/providers/aws_helper.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
+require_once($CFG->dirroot . '/local/cloudsync/lib.php');
 
+// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
@@ -50,12 +52,6 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
-$requestID = required_param('id', PARAM_INT);
-
-// // Set the user id variable
-global $DB;
-$userid = $userid ? $userid : $USER->id;
-
 // Set up the page
 $PAGE->set_url(new moodle_url('/local/cloudsync/cloudadminrequest.php'));
 $PAGE->set_context(context_system::instance());
@@ -64,49 +60,40 @@ $PAGE->set_title(get_string('cloudadminrequesttitle', 'local_cloudsync'));
 $PAGE->set_heading(get_string('cloudadminrequesttitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
-$user = $DB->get_record('user', array('id' => '2'));
+$requestID = required_param('id', PARAM_INT);
 
-// Get the request from db by id
+// Set the user id variable
+$userid = $userid ? $userid : $USER->id;
+
+// Search for the request and show names of the owner and teacher instead of id
 $vmrequestmanager = new vmrequestmanager();
 $request = $vmrequestmanager->get_request_by_id($requestID);
 $request->user = get_user_name($request->owner_id);
 $request->teacher = get_user_name($request->teacher_id);
 
+// Init the form
 $mform = new vmcreate(null, array('id' => $requestID));
 $mform->set_data($request);
 
 if ($mform->is_cancelled()) {
+    // If the user presses cancel: TO BE CHANGED
     echo "<script>console.log('This is saved')</script>";
     putenv('PATH=/usr/local/bin');
     $output = shell_exec('cat /home/ubuntu/test');
     $output = json_encode($output);
     echo "<script>console.log(".$output.")</script>";
 } else if ($fromform = $mform->get_data()) {
-    echo "<script>console.log(".json_encode($fromform).")</script>";
+    // get the possible fields values based on the cloud provider selected
     $fields = return_var_by_provider_id($fromform->cloudtype, AWS_FIELDS, AZURE_FIELDS);
+
+    // create the necessary providers in order to create the vm
     $cloudprovidermanager = new cloudprovidermanager();
-    $provider = $cloudprovidermanager->get_provider_type_by_id($fromform->cloudtype);
-    $vm = new vm($request->owner_id, $userid, $requestID, $fromform->vm_name, $fromform->{'subscription' . $provider}, $fields["region"][$fromform->{'region' . $provider}], 
-        $fields["architecture"][$fromform->{'architecture' . $provider}], 
-        $fields["type"][$fromform->{'type' . $provider}], 
-        SUPPORTED_ROOTDISK_VALUES[$fromform->{'disk1' . $provider}], 
-        SUPPORTED_SECONDDISK_VALUES[$fromform->{'disk2' . $provider}]);
     $subscription_manager = new subscriptionmanager();
-    $secrets = $subscription_manager->get_secrets_by_subscription_id($fromform->{'subscription' . $provider});
-    echo "<script>console.log(".json_encode($secrets).")</script>";
     $aws_helper = new aws_helper();
-    $client = $aws_helper->create_connection($fields["region"][$fromform->{'region' . $provider}], $secrets->access_key_id, $secrets->access_key_secret);
-    $key = $aws_helper->create_key($client, 'mpanduru_key', 'mpanduru');
-    $instance_id = $aws_helper->create_instance($client, 'mpanduru', $fromform->vm_name, 'ami-04e5276ebb8451442', $fields["type"][$fromform->{'type' . $provider}], 
-        SUPPORTED_ROOTDISK_VALUES[$fromform->{'disk1' . $provider}], 
-        SUPPORTED_SECONDDISK_VALUES[$fromform->{'disk2' . $provider}],
-        $key->key_name);
-    echo "<script>console.log('".$instance_id."')</script>";
-    echo "<script>console.log(".json_encode($vm).")</script>";
-    $vmmanager = new virtualmachinemanager();
-    $id = $vmmanager->create_vm($vm);
-    $vm->setId($id);
-    echo "<script>console.log(".json_encode($vm).")</script>";
+    $vm_manager = new virtualmachinemanager();
+
+    cloudsync_submit_vm_creation($fields, $fromform, $cloudprovidermanager, $request->owner_id, $userid, $requestID, 
+                                 $subscription_manager, $aws_helper, $vm_manager);
 }
 
 // Output starts here

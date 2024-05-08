@@ -24,26 +24,57 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 
+// Class that will be used to create secrets for aws subscription
+// before adding those to the database
 class aws_secrets {
 
+     /**
+     * Constructor.
+     *
+     * @param int $subscription_id The id of the subscription which holds these secrets
+     * @param string $access_key_id The access key id from aws
+     * @param string $access_key_secret The secret of the specified access key
+     */
     public function __construct($subscription_id, $access_key_id, $access_key_secret) {
         $this->{'subscription_id'} = $subscription_id;
         $this->{'access_key_id'} = $access_key_id;
         $this->{'access_key_secret'} = $access_key_secret;
     }
 
+     /**
+     * Set the id of the aws secrets
+     * 
+     * Use it after adding the secrets to the db with the id returned from the add function.
+     *
+     * @param int $id the id of the aws secrets from db
+     */
     public function setId($id) {
         $this->{'id'} = $id;
     }
 
+     /**
+     * Set a parent subscription for the secrets
+     *
+     * @param int $subscription_id the id of the subscription from db
+     */
     public function setSubscription($subscription_id) {
         $this->{'subscription_id'} = $subscription_id;
     }
 
+     /**
+     * Set the id of the access key
+     *
+     * @param string $access_key_id the id of the access key from aws
+     */
     public function setAccessKeyId($access_key_id) {
         $this->{'access_key_id'} = $access_key_id;
     }
 
+     /**
+     * Set the secret of the access key
+     *
+     * @param string $access_key_secret the secret of the access key from aws
+     */
     public function setAccessKeySecret($access_key_secret) {
         $this->{'access_key_secret'} = $access_key_secret;
     }

@@ -25,6 +25,7 @@
 global $CFG;
 require('../../../config.php');
 
+// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
@@ -57,9 +58,15 @@ if ($confirm) {
     redirect(new moodle_url('/local/cloudsync/mycloud.php'));
 }
 
-echo $OUTPUT->header();
 $yesurl = new moodle_url($PAGE->url, array('confirm'=>1, 'vm'=>$id));
 $nourl = new moodle_url('/local/cloudsync/mycloud.php');
 $message = get_string('deletevmquestion', 'local_cloudsync') . $id . '?';
+
+// Output starts here
+echo $OUTPUT->header();
+
+// A confirm message will be displayed, if the user accepts it 
+// he will be redirected to $yesurl otherwise he will be 
+// redirected to $nourl
 echo $OUTPUT->confirm($message, $yesurl, $nourl);
 echo $OUTPUT->footer();

@@ -22,6 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Class that will be used to interact with vm requests db
 class vmrequestmanager {
     
     const PLUGINNAME = 'local_cloudsync';

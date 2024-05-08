@@ -28,6 +28,8 @@ require_once($CFG->dirroot . '/local/cloudsync/constants.php'); // Include Moodl
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/awssecretsmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/azuresecretsmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
+
+// Class that will be used to interact with subscription db
 class subscriptionmanager {
     const PLUGINNAME = 'local_cloudsync';
     const DB_TABLE = self::PLUGINNAME . '_subs';

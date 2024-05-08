@@ -24,8 +24,18 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 
+// Class that will be used to create secrets for azure subscription
+// before adding those to the database
 class azure_secrets {
 
+     /**
+     * Constructor.
+     *
+     * @param int $subscription_id The id of the subscription which holds these secrets
+     * @param string $tenant_id The id of the tenant from azure
+     * @param string $app_id The id of the app from azure
+     * @param string $secret The secret of the specified app
+     */
     public function __construct($subscription_id, $tenant_id, $app_id, $secret) {
         $this->{'subscription_id'} = $subscription_id;
         $this->{'tenant_id'} = $tenant_id;
@@ -33,22 +43,49 @@ class azure_secrets {
         $this->{'secret'} = $secret;
     }
 
+     /**
+     * Set the id of the azure secrets
+     * 
+     * Use it after adding the secrets to the db with the id returned from the add function.
+     *
+     * @param int $id the id of the azure secrets from db
+     */
     public function setId($id) {
         $this->{'id'} = $id;
     }
 
+    /**
+     * Set a parent subscription for the secrets
+     *
+     * @param int $subscription_id the id of the subscription from db
+     */
     public function setSubscription($subscription_id) {
         $this->{'subscription_id'} = $subscription_id;
     }
 
+     /**
+     * Set the id of the tenant
+     *
+     * @param string $tenant_id the id of the tenant from azure
+     */
     public function setTenantId($tenant_id) {
         $this->{'tenant_id'} = $tenant_id;
     }
 
+     /**
+     * Set the id of the app
+     *
+     * @param string $app_id the id of the app from azure
+     */
     public function setAppId($app_id) {
         $this->{'app_id'} = $app_id;
     }
 
+     /**
+     * Set the app secret
+     *
+     * @param string $secret the secret of the app from azure
+     */
     public function setSecret($secret) {
         $this->{'secret'} = $secret;
     }

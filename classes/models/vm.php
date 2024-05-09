@@ -32,6 +32,7 @@ class vm {
      * @param int $owner_id the id of the user the vm is created for
      * @param int $cloud_admin_id the id of the user that approved the vm request
      * @param int $request_id the id of the request for the created vm
+     * @param int $vm_key_id the id of the keypair for the created vm
      * @param string $name The name of the virtual machine
      * @param int $subscription_id The id of the subscription the vm is created on (from moodle db)
      * @param string $region The region the vm is created on
@@ -40,10 +41,11 @@ class vm {
      * @param int $rootdisk_storage The storage of the root disk for the virtual machine
      * @param int|string $seconddisk_storage The storage of the second disk for the virtual machine
      */
-    public function __construct($owner_id, $cloud_admin_id, $request_id, $name, $subscription_id, $region, $architecture, $type, $rootdisk_storage, $seconddisk_storage) {
+    public function __construct($owner_id, $cloud_admin_id, $request_id, $vm_key_id, $name, $subscription_id, $region, $architecture, $type, $rootdisk_storage, $seconddisk_storage) {
         $this->{'owner_id'} = $owner_id;
         $this->{'cloud_admin_id'} = $cloud_admin_id;
         $this->{'request_id'} = $request_id;
+        $this->{'vm_key_id'} = $vm_key_id;
         $this->{'name'} = $name;
         $now = new DateTime("now", core_date::get_server_timezone_object());
         $this->{'created_at'} = $now->getTimestamp();
@@ -56,6 +58,7 @@ class vm {
             $this->{'seconddisk_storage'} = $seconddisk_storage;
         else
             $this->{'seconddisk_storage'} = 0;
+        $this->{'status'} = 'Pending';
     }
 
      /**
@@ -94,6 +97,15 @@ class vm {
      */
     public function setRequest($request_id) {
         $this->{'request_id'} = $request_id;
+    }
+
+     /**
+     * Set the keypair for the created vm
+     *
+     * @param int $keypair_id the id of the keypair for the created vm
+     */
+    public function setKeypair($keypair_id) {
+        $this->{'vm_key_id'} = $keypair_id;
     }
 
      /**
@@ -160,6 +172,24 @@ class vm {
             $this->{'seconddisk_storage'} = $storage;
         else
             $this->{'seconddisk_storage'} = 0;
+    }
+
+     /**
+     * Set the status of the vm
+     *
+     * @param string $status the status of the vm
+     */
+    public function setVmStatus($status) {
+        $this->{'status'} = $status;
+    }
+
+     /**
+     * Set the instance id of the vm (inside the cloud provider)
+     *
+     * @param string $instance_id the instance id of the virtual machine inside the cloud provider
+     */
+    public function setVmInstanceId($instance_id) {
+        $this->{'instance_id'} = $instance_id;
     }
 
      /**

@@ -29,10 +29,12 @@ global $DB;
 require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/form/vmcreate.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/models/vmrequest.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
 require_once($CFG->dirroot . '/local/cloudsync/lib.php');
 
@@ -89,11 +91,25 @@ if ($mform->is_cancelled()) {
     // create the necessary providers in order to create the vm
     $cloudprovidermanager = new cloudprovidermanager();
     $subscription_manager = new subscriptionmanager();
+    $keypair_manager = new keypairmanager();
     $aws_helper = new aws_helper();
     $vm_manager = new virtualmachinemanager();
 
     cloudsync_submit_vm_creation($fields, $fromform, $cloudprovidermanager, $request->owner_id, $userid, $requestID, 
-                                 $subscription_manager, $aws_helper, $vm_manager);
+                                 $subscription_manager, $aws_helper, $vm_manager, $keypair_manager);
+
+    // close the request
+    $vmrequest = unserialize(sprintf(
+        'O:%d:"%s"%s',
+        strlen('vmrequest'),
+        'vmrequest',
+        strstr(strstr(serialize($request), '"'), ':')
+    ));
+    $vmrequest->close();
+    $vmrequestmanager->update_request($vmrequest);
+    
+    // redirect back to the overview page
+    redirect($CFG->wwwroot . '/local/cloudsync/cloudadministration.php', 'Vm created succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
 // Output starts here

@@ -56,8 +56,8 @@ class virtualmachinemanager {
      /**
      * Get all vms that belong to a specific user
      *
-     * @param int the id of the user
-     * @return array An array of requests vms by first column.
+     * @param int $user_id the id of the user
+     * @return array An array of vms indexed by first column.
      */
     public function get_vms_by_user($user_id) {
         global $DB;

@@ -169,5 +169,6 @@ class vmrequest {
     public function close() {
         $now = new DateTime("now", core_date::get_server_timezone_object());
         $this->{'closed_at'} = $now->getTimestamp();
+        $this->{'status'} = 'CLOSED';
     }
 }

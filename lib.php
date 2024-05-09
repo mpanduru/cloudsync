@@ -55,35 +55,67 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $vms_node->action = $mycloud_url;
 }
 
-function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovider_manager, $request_owner, 
-                                      $admin_id, $request_id, $subscription_manager, $helper, $vm_manager) {
+function cloudsync_use_or_create_keypair($owner_id, $subscription_id, $name, $region, $helper, $keypair_manager, $client) {
    global $CFG;
+   require_once($CFG->dirroot . '/local/cloudsync/classes/models/keypair.php');
+
+   if($helper->exists_key($client, $name)){
+      if($keypair_manager->check_key_exists_by_name($name)) {
+         return $keypair_manager->get_key_by_name($name);
+      } else {
+         throw new Exception("Key exists in cloud but not in db");
+      }
+   } else {
+      if($keypair_manager->check_key_exists_by_name($name)) {
+         throw new Exception("Key exists in db but not in cloud");
+      } else {
+         $keypair = new keypair($owner_id, $subscription_id, $name, $region);
+         $key = $helper->create_key($client, $name, 'mpanduru');
+         $keypair->setKeypairValue($key->private_key_value);
+         $keypair->setKeypairId($key->key_name);
+         $id = $keypair_manager->create_key($keypair);
+         $keypair->setId($id);
+         return $keypair;
+      }
+   }
+}
+
+function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovider_manager, $request_owner, 
+                                      $admin_id, $request_id, $subscription_manager, $helper, $vm_manager, $keypair_manager) {
+   global $CFG;
+   require_once($CFG->dirroot . '/local/cloudsync/classes/models/keypair.php');
    require_once($CFG->dirroot . '/local/cloudsync/classes/models/vm.php');
    require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 
    $provider = $cloudprovider_manager->get_provider_type_by_id($formdata->cloudtype);
-   $vm = new vm($request_owner, $admin_id, $request_id, $formdata->vm_name, 
-      $formdata->{'subscription' . $provider}, 
-      $provider_fields["region"][$formdata->{'region' . $provider}], 
-      $provider_fields["architecture"][$formdata->{'architecture' . $provider}], 
-      $provider_fields["type"][$formdata->{'type' . $provider}], 
-      SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
-      SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}]);
       
    $secrets = $subscription_manager->get_secrets_by_subscription_id($formdata->{'subscription' . $provider});
 
    $client = $helper->create_connection($provider_fields["region"][$formdata->{'region' . $provider}], 
                                           $secrets->access_key_id, $secrets->access_key_secret);
 
-   $key = $helper->create_key($client, 'mpanduru_key', 'mpanduru');
+   $keypair = cloudsync_use_or_create_keypair($request_owner, $formdata->{'subscription' . $provider}, 'mpanduru_key',
+                                              $provider_fields["region"][$formdata->{'region' . $provider}], $helper,
+                                              $keypair_manager, $client);
+
    $instance_id = $helper->create_instance($client, 'mpanduru', $formdata->vm_name, 'ami-04e5276ebb8451442', 
                                              $provider_fields["type"][$formdata->{'type' . $provider}], 
                                              SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
                                              SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}],
-                                             $key->key_name);
-                                             
-   $id = $vm_manager->create_vm($vm);
-   $vm->setId($id);
+                                             $keypair->keypair_id);
+   
+   
+   $vm = new vm($request_owner, $admin_id, $request_id, $keypair->id, $formdata->vm_name, 
+               $formdata->{'subscription' . $provider}, 
+               $provider_fields["region"][$formdata->{'region' . $provider}], 
+               $provider_fields["architecture"][$formdata->{'architecture' . $provider}], 
+               $provider_fields["type"][$formdata->{'type' . $provider}], 
+               SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
+               SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}]);
+
+   $vm->setVmInstanceId($instance_id);
+   $vm_id = $vm_manager->create_vm($vm);
+   $vm->setId($vm_id);
 }
 
 function cloudsync_submit_vm_request($formdata, $vmrequestmanager, $userid) {

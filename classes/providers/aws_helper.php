@@ -177,6 +177,31 @@ class aws_helper {
     }
 
      /**
+     * Verify an existing key on the AWS Cloud
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $key_name the name of the key
+     * @return boolean whether or not the key exists on the cloud
+     */
+    public function exists_key(Aws\Ec2\Ec2Client $ec2Client, $key_name) {
+        $waiterName = 'KeyPairExists';
+        $waiterOptions = [
+            'KeyNames' => [$key_name,],
+            '@waiter' => [
+                'delay' => 3,
+                'maxAttempts' => 1
+            ]
+        ];
+
+        try {
+            $ec2Client->waitUntil($waiterName, $waiterOptions);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+     /**
      * 
      * Wait for an instance to start
      *
@@ -186,9 +211,8 @@ class aws_helper {
      */
     public function wait_instance(Aws\Ec2\Ec2Client $ec2Client, $instance_id) {
         $waiterName = 'InstanceRunning';
-        $waiterOptions = ['InstanceIds' => [
-            $instance_id,
-            ]
+        $waiterOptions = [
+            'InstanceIds' => [$instance_id,]
         ];
 
         try {

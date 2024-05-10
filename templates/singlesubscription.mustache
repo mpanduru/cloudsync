@@ -1,0 +1,46 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_cloudsync/singlesubscription
+
+    Admin search input for page header.
+
+    Example context (json):
+    {
+
+
+    }
+}}
+
+<div>
+    <h2 class="mb-6">{{#str}} subscriptionvmsheader, local_cloudsync {{/str}}<b>{{subscription_name}}</b></h2>
+    <div class="justify-content-center mt-5">
+    {{#vms}}
+        <li class="list-group-item d-flex justify-content-between align-items-center border-primary text-center">
+            <span><b>{{#str}} subscriptionvmsvmname, local_cloudsync {{/str}}</b><br>{{name}}</span>
+            <span><b>{{#str}} subscriptionvmsvmuser, local_cloudsync {{/str}}</b><br>{{owner_name}}</span>
+            <span><b>{{#str}} subscriptionvmscreatedat, local_cloudsync {{/str}}</b><br>{{hr_created_at}}</span>
+            <span><b>{{#str}} subscriptionvmscloudid, local_cloudsync {{/str}}</b><br>{{instance_id}}</span>
+            <span><b>{{#str}} subscriptionvmsvmregion, local_cloudsync {{/str}}</b><br>{{region}}</span>
+            <span><b>{{#str}} subscriptionvmsvmtype, local_cloudsync {{/str}}</b><br>{{type}}</span>
+            <span><b>{{#str}} subscriptionvmsvmstatus, local_cloudsync {{/str}}</b><br>{{status}}</span>
+            <span><b>{{#str}} subscriptionvmslastused, local_cloudsync {{/str}}</b><br>{{hr_accessed_at}}</span>
+            <span class="badge badge-primary link-text" onclick="location.href='{{vm_url}}'">{{#str}} subscriptionvmsgoto, local_cloudsync {{/str}}</span>
+        </li>
+    {{/vms}}
+    </div>
+</div>

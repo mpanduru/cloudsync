@@ -66,6 +66,19 @@ class virtualmachinemanager {
         return $vms;
     }
 
+     /**
+     * Get all vms that live on a specific subscription
+     *
+     * @param int $subscription_id the id of the user
+     * @return array An array of vms indexed by first column.
+     */
+    public function get_vms_by_subscription($subscription_id) {
+        global $DB;
+
+        $vms = $DB->get_records(self::DB_TABLE, ['subscription_id' => $subscription_id]);
+        return $vms;
+    }
+
     /**
      * Get a vm by id
      *

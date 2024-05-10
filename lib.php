@@ -25,6 +25,7 @@
 function local_cloudsync_extend_navigation(global_navigation $navigation){
    $mycloud_url = new moodle_url('/local/cloudsync/mycloud.php');
    $cloudoverview_url = new moodle_url('/local/cloudsync/cloudadministration.php');
+   $subscriptionspage_url = new moodle_url('/local/cloudsync/subscriptions.php');
 
    # Define the dropdown for our available cloud pages
    $main_node = $navigation->add(get_string('dropdown_button', 'local_cloudsync'));
@@ -46,6 +47,13 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $overview_node->isexpandable = false;
    $overview_node->force_open = true;
    $overview_node->action = $cloudoverview_url;
+
+   # Define the button that routes to the subscriptions page
+   $overview_node = $cloudadministration_node->add(get_string('subscriptionspagetitle', 'local_cloudsync'));
+   $overview_node->nodetype = 0;
+   $overview_node->isexpandable = false;
+   $overview_node->force_open = true;
+   $overview_node->action = $subscriptionspage_url;
    
    # Define the button that routes to the main cloud page
    $vms_node = $main_node->add(get_string('virtualmachinestitle', 'local_cloudsync'));

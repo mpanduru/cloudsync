@@ -158,3 +158,42 @@ function cloudsync_submit_subscription_creation($formdata, $providermanager, $su
    $id = $subscriptionmanager->create_subscription($subscription, $secrets);
    $subscription->setId($id);
 }
+
+function get_vm_connection_details($vm) {
+   global $CFG;
+   require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
+   require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+   require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
+
+   $subscription_manager = new subscriptionmanager();
+   $secrets = $subscription_manager->get_secrets_by_subscription_id($vm->subscription_id);
+
+   $helper = new aws_helper();  // DE INLOCUIT CU AMBELE
+   $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+
+   $connection = $helper->describe_instance($client, $vm->instance_id);
+   return $connection;
+}
+
+function vm_keypair_prompt($vm, $virtualmachine_manager) {
+   global $CFG;
+   require_once($CFG->dirroot . '/local/cloudsync/classes/models/vm.php');
+   require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
+
+   $returnvalue = false;
+   if(empty($vm->accessed_at)) {
+      $keymanager = new keypairmanager();
+      $key = $keymanager->get_key_by_id($vm->vm_key_id);
+      $returnvalue = nl2br($key->value);
+   }
+   $vm = unserialize(sprintf(
+      'O:%d:"%s"%s',
+      strlen('vm'),
+      'vm',
+      strstr(strstr(serialize($vm), '"'), ':')
+  ));
+  $vm->markAccessed();
+  $virtualmachine_manager->update_vm($vm);
+
+  return $returnvalue;
+}

@@ -193,6 +193,14 @@ class vm {
     }
 
      /**
+     * Mark the vm as accessed at a specific time
+     */
+    public function markAccessed() {
+        $now = new DateTime("now", core_date::get_server_timezone_object());
+        $this->{'accessed_at'} = $now->getTimestamp();
+    }
+
+     /**
      * Mark the vm as deleted
      */
     public function markDeleted() {

@@ -92,6 +92,7 @@ class keypairmanager {
         global $DB;
 
         $key = $DB->get_record(self::DB_TABLE, ['id' => $id]);
+        $key->value = str_replace('\\', '', $key->value);
         return $key;
     }
 

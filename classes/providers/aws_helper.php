@@ -76,7 +76,8 @@ class aws_helper {
             'InstanceIds' => [$instance_id,]
         ]);
 
-        var_dump($result);
+        $result_final = $result['Reservations'][0]['Instances'][0]['PublicDnsName'];
+        return $result_final;
     }
 
      /**

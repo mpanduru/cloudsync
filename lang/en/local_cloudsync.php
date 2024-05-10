@@ -36,6 +36,7 @@ $string['cloudadminrequestsheading'] = 'Active requests';
 $string['cloudadminactivesubscriptions'] = 'Active subscriptions';
 $string['cloudadminrequesttitle'] = 'Manage requests';
 $string['newsubscriptiontitle'] = 'Add Existing Subscription';
+$string['virtualmachinetitle'] = 'Virtual Machine';
 $string['manageuserroles'] = 'Manage Users';
 $string['cloudadminusers'] = 'Cloud Admin Users';
 $string['noncloudadminusers'] = 'Non-Cloud Admin Users';
@@ -100,3 +101,15 @@ $string['subscriptionform_subscriptionname_help'] = 'The name that will be displ
 $string['subscriptionform_done'] = 'Save';
 $string['deletevmtitle'] = 'Delete Virtual Machine';
 $string['deletevmquestion'] = 'Are you sure you want to delete vm ';
+$string['firstaccessattention'] = 'ATTENTION! DO NOT REFRESH THIS PAGE YET!';
+$string['firstaccessmessage'] = 'This is your first time accessing this virtual machine. Click the button below to get your SSH private key 
+for connecting to your virtual machine. Save the key on your device, then refresh the page to see the connection details. 
+Remember, once you refresh the page, the SSH key will not be visible anymore, so make sure to follow these steps carefully.';
+$string['vmaccesscardtitle'] = 'SSH Connection Instructions';
+$string['vmaccessexplanation'] = 'You need to use an SSH client to connect to this virtual machine. Follow these steps:';
+$string['vmaccessstep1'] = 'Open your preferred SSH client.';
+$string['vmaccessstep2'] = 'Find your private key file. You should have saved this key when you first accessed this virtual machine.';
+$string['vmaccessstep3'] = 'If needed, run this command (you will get an error if your key is publicly visible):';
+$string['vmaccessstep3command'] = 'chmod 400 "your_key.pem"';
+$string['vmaccessstep4'] = 'Connect to your instance using this command:';
+$string['vmaccessstep4command'] = 'ssh -i "your_key.pem" ';

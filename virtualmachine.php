@@ -22,20 +22,21 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 require_once('../../config.php'); // Include Moodle configuration
-global $CFG;
 global $USER;
+global $CFG;
+require_once($CFG->dirroot . '/local/cloudsync/lib.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 
+// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
         echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
-                              get_login_url(),
-                              $CFG->wwwroot);
+                            get_login_url(),
+                            $CFG->wwwroot);
         echo $OUTPUT->footer();
         die;
     }
@@ -43,30 +44,40 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
+// Set up the page
+$PAGE->set_url(new moodle_url('/local/cloudsync/virtualmachine.php'));
+$PAGE->set_context(context_system::instance());
+$PAGE->set_pagelayout('standard');
+$PAGE->set_title(get_string('virtualmachinetitle', 'local_cloudsync'));
+$PAGE->set_heading(get_string('virtualmachinetitle', 'local_cloudsync'));
+$PAGE->requires->css('/local/cloudsync/styles.css');
+
+$vmId = required_param('id', PARAM_INT);
+
 // Set the user id variable
 $userid = $userid ? $userid : $USER->id;
 
-// Set up the page
-$PAGE->set_url(new moodle_url('/local/cloudsync/mycloud.php'));
-$PAGE->set_context(context_system::instance());
-$PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('virtualmachinestitle', 'local_cloudsync'));
-$PAGE->set_heading(get_string('virtualmachinestitle', 'local_cloudsync'));
-$PAGE->requires->css('/local/cloudsync/styles.css');
-
 $vmmanager = new virtualmachinemanager();
-$machines = $vmmanager->get_vms_by_user($userid);
+$vm = $vmmanager->get_vm_by_id($vmId);
 
+if($vm->owner_id != $userid){
+   throw new Exception('You are not allowed to access this resource!');
+}
+$vm_keypair = vm_keypair_prompt($vm, $vmmanager);
 // Output starts here
 echo $OUTPUT->header(); // Display the header
-$templatecontext = (object)[
-    'machines' => array_values($machines),
-    'accessurl' => new moodle_url('/local/cloudsync/cloudrequest.php'),
-    'deleteurl' => new moodle_url('/local/cloudsync/dialogs/delete_vm.php'),
-    'vmurl' => new moodle_url('/local/cloudsync/virtualmachine.php')
-];
-
-echo $OUTPUT->render_from_template('local_cloudsync/manage', $templatecontext);
-
-echo "<script>console.log(".json_encode($templatecontext).")</script>";
-echo $OUTPUT->footer(); // Display the footer
+if($vm_keypair) {
+    $templatecontext = (object)[
+        'ssh_key' => $vm_keypair,
+    ];
+    echo $OUTPUT->render_from_template('local_cloudsync/firstaccessvm', $templatecontext);
+} else {
+    $public_dns = get_vm_connection_details($vm);
+    
+    $templatecontext = (object)[
+        'user' => 'student',
+        'public_dns' => $public_dns,
+    ];
+    echo $OUTPUT->render_from_template('local_cloudsync/virtualmachine', $templatecontext);
+}
+echo $OUTPUT->footer();

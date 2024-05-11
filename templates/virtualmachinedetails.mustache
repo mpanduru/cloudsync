@@ -1,0 +1,113 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_cloudsync/virtualmachinedetails
+
+    Admin search input for page header.
+
+    Example context (json):
+    {
+
+
+    }
+}}
+
+<div class="mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    {{#str}} vmdetailstitle, local_cloudsync {{/str}}
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>{{#str}} cloudprovidersubscription, local_cloudsync {{/str}}</strong>{{provider_name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} subscriptionvmsheader, local_cloudsync {{/str}}</strong>{{subscription_name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsowner, local_cloudsync {{/str}}</strong>{{vm.owner_name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailscloudadmin, local_cloudsync {{/str}}</strong>{{vm.cloud_admin}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsvmname, local_cloudsync {{/str}}</strong>{{vm.name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} subscriptionvmscreatedat, local_cloudsync {{/str}}</strong>{{#userdate}} {{vm.created_at}}{{/userdate}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsdeletedat, local_cloudsync {{/str}}</strong> 
+                            {{#vm.deleted_at}} 
+                                {{#userdate}} {{vm.deleted_at}} {{/userdate}}
+                            {{/vm.deleted_at}}
+                            {{^vm.deleted_at}}
+                                {{#str}} vmdetailsvmnotdeleted, local_cloudsync {{/str}}
+                            {{/vm.deleted_at}}
+                        </li>
+                        <li class="list-group-item"><strong>{{#str}} subscriptionvmsvmregion, local_cloudsync {{/str}}</strong>{{vm.region}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsvmarch, local_cloudsync {{/str}}</strong>{{vm.architecture}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailstype, local_cloudsync {{/str}}</strong>{{vm.type}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsstorage, local_cloudsync {{/str}}</strong>
+                        Disk 1: {{vm.rootdisk_storage}} GB
+                        {{#vm.seconddisk_storage}} 
+                            , Disk 2: {{vm.seconddisk_storage}} GB
+                        {{/vm.seconddisk_storage}}
+                        </li>
+                        <li class="list-group-item"><strong>{{#str}} subscriptionvmsvmstatus, local_cloudsync {{/str}}</strong>{{vm.status}}</li>
+                        <li class="list-group-item"><strong>{{#str}} subscriptionvmscloudid, local_cloudsync {{/str}}</strong>{{vm.instance_id}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailssshkey, local_cloudsync {{/str}}</strong>{{key_name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} subscriptionvmslastused, local_cloudsync {{/str}}</strong>{{#userdate}} {{vm.accessed_at}} {{/userdate}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    {{#str}} vmdetailsrequestinfo, local_cloudsync {{/str}}
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsrequestedat, local_cloudsync {{/str}}</strong>{{#userdate}} {{request.created_at}} {{/userdate}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsapprovedat, local_cloudsync {{/str}}</strong>{{#userdate}} {{request.closed_at}} {{/userdate}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsteacher, local_cloudsync {{/str}}</strong>{{request.teacher_name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsdescription, local_cloudsync {{/str}}</strong>
+                                {{#request.description}} 
+                                    {{request.description}}
+                                {{/request.description}}
+                        </li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsreqos, local_cloudsync {{/str}}</strong>{{request.vm_os}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsreqmem, local_cloudsync {{/str}}</strong>{{request.vm_memory}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsreqvcpu, local_cloudsync {{/str}}</strong>{{request.vm_vcpus}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsreqdisk1, local_cloudsync {{/str}}</strong>{{request.rootdisk_storage}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsreqdisk2, local_cloudsync {{/str}}</strong>
+                            {{#request.seconddisk_storage}} 
+                                {{request.seconddisk_storage}}
+                            {{/request.seconddisk_storage}}
+                            {{^request.seconddisk_storage}}
+                                {{#str}} vmdetailsreqno2nddisk, local_cloudsync {{/str}}
+                            {{/request.seconddisk_storage}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header bg-primary text-white">
+                    {{#str}} vmdetailsnetinfo, local_cloudsync {{/str}}
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsprivateip, local_cloudsync {{/str}}</strong>{{private_ip}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailspublicip, local_cloudsync {{/str}}</strong>{{public_ip}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailspublicdns, local_cloudsync {{/str}}</strong>{{public_dns}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

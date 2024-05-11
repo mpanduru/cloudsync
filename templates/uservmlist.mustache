@@ -1,0 +1,55 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_cloudsync/uservmlist
+
+    Admin search input for page header.
+
+    Example context (json):
+    {
+
+
+    }
+}}
+
+<div class="row mt-1">
+    <div class="col ">
+        <h2 >{{#str}} mycloudheading, local_cloudsync {{/str}}</h2>
+    </div>
+    <div class="col">
+        <input type="button" class="btn btn-primary float-right" onclick="location.href='{{accessurl}}'" value="{{#str}} request, local_cloudsync {{/str}}">
+    </div>
+</div>
+<div class="list-group mt-5">
+    {{#machines}}
+        <a class="link-text list-group-item list-group-item-action" onclick="location.href='{{vmurl}}?id={{id}}'">
+        <div class="d-flex w-100 justify-content-between align-items-center mb-4">
+            <h4>{{name}}</h4>
+            <button type="button" class="btn btn-danger btn-sm float-right" onclick="location.href='{{deleteurl}}?vm={{id}}'">{{#str}} delete, local_cloudsync {{/str}}</button>
+        </div>
+            <p class="mb-1">{{#str}} subscriptionvmslastused, local_cloudsync {{/str}}
+            {{#accessed_at}} 
+                {{#userdate}} {{accessed_at}} {{/userdate}}
+            {{/accessed_at}}
+            {{^accessed_at}}
+                {{#str}} uservmlistnotaccessed, local_cloudsync {{/str}}
+            {{/accessed_at}}
+                <small class="mr-1 float-right">{{#str}} uservmlistviewdetails, local_cloudsync {{/str}}</small>
+            </p>
+        </a>
+    {{/machines}}
+</div>

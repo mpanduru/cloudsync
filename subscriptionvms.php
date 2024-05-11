@@ -61,8 +61,6 @@ $vmmanager = new virtualmachinemanager();
 $vms = $vmmanager->get_vms_by_subscription($subscriptionId);
 foreach ($vms as $vm) {
     $vm->owner_name = get_user_name($vm->owner_id);
-    $vm->hr_created_at = date('Y-m-d H:i:s', $vm->created_at);
-    $vm->hr_accessed_at = $vm->accessed_at ? date('Y-m-d H:i:s', $vm->accessed_at) : 'Never';
 }
 
 // Output starts here
@@ -70,7 +68,7 @@ echo $OUTPUT->header(); // Display the header
 $templatecontext = (object)[
     'subscription_name' => $subscription_name->name,
     'vms' => array_values($vms),
-    'vm_url' => new moodle_url('/local/cloudsync/newsubscription.php'),
+    'vm_url' => new moodle_url('/local/cloudsync/virtualmachinedetails.php'),
 ];
 
 echo $OUTPUT->render_from_template('local_cloudsync/singlesubscription', $templatecontext);

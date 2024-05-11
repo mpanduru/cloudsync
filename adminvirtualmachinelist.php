@@ -22,20 +22,20 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
 require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
-global $USER;
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
 
+// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
         echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
-                              get_login_url(),
-                              $CFG->wwwroot);
+                            get_login_url(),
+                            $CFG->wwwroot);
         echo $OUTPUT->footer();
         die;
     }
@@ -43,11 +43,8 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
-// Set the user id variable
-$userid = $userid ? $userid : $USER->id;
-
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/cloudsync/mycloud.php'));
+$PAGE->set_url(new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('virtualmachinestitle', 'local_cloudsync'));
@@ -55,16 +52,18 @@ $PAGE->set_heading(get_string('virtualmachinestitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
 $vmmanager = new virtualmachinemanager();
-$machines = $vmmanager->get_vms_by_user($userid);
+$subscriptionmanager = new subscriptionmanager();
+$vms = $vmmanager->get_all_vms();
+foreach ($vms as $vm) {
+    $vm->subscription_name = $subscriptionmanager->get_subscription_by_id($vm->subscription_id)->name;
+}
 
 // Output starts here
 echo $OUTPUT->header(); // Display the header
-$templatecontext = (object)[
-    'machines' => array_values($machines),
-    'accessurl' => new moodle_url('/local/cloudsync/cloudrequest.php'),
-    'deleteurl' => new moodle_url('/local/cloudsync/dialogs/delete_vm.php'),
-    'vmurl' => new moodle_url('/local/cloudsync/virtualmachine.php')
-];
 
-echo $OUTPUT->render_from_template('local_cloudsync/uservmlist', $templatecontext);
-echo $OUTPUT->footer(); // Display the footer
+$templatecontext = (object)[
+    'vms' => array_values($vms),
+    'vm_url' => new moodle_url('/local/cloudsync/virtualmachinedetails.php'),
+];
+echo $OUTPUT->render_from_template('local_cloudsync/adminvmlist', $templatecontext);
+echo $OUTPUT->footer();

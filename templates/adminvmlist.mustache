@@ -1,0 +1,50 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_cloudsync/adminvmlist
+
+    Admin search input for page header.
+
+    Example context (json):
+    {
+
+
+    }
+}}
+
+<h2 class="mt-1 ml-2">{{#str}} virtualmachinestitle, local_cloudsync {{/str}}</h2>
+<div class="list-group mt-6">
+    {{#vms}}
+    <a class="link-text list-group-item list-group-item-action" onclick="location.href='{{vm_url}}?id={{id}}'">
+        <div class="d-flex w-100 justify-content-between align-items-center">
+            <h4 class="mb-3">{{name}}</h4>
+            <small class="mr-1 float-right">{{#str}} adminvmlistviewdetails, local_cloudsync {{/str}}</small>
+        </div>
+        <p class="mb-1 ml-1">{{#str}} subscriptionvmsvmstatus, local_cloudsync {{/str}}{{status}}</p>
+        <p class="mb-1 ml-1">{{#str}} subscriptionvmsheader, local_cloudsync {{/str}}{{subscription_name}}</p>
+        <p class="mb-1 ml-1">{{#str}} subscriptionvmscreatedat, local_cloudsync {{/str}}{{#userdate}} {{created_at}} {{/userdate}}</p>
+        <p class="mb-1 ml-1">{{#str}} subscriptionvmslastused, local_cloudsync {{/str}}
+        {{#accessed_at}} 
+            {{#userdate}} {{accessed_at}} {{/userdate}}
+        {{/accessed_at}}
+        {{^accessed_at}}
+            {{#str}} adminvmlistnotaccessed, local_cloudsync {{/str}}
+        {{/accessed_at}}
+        </p>
+    </a>
+    {{/vms}}
+</div>

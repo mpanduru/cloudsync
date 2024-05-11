@@ -33,13 +33,13 @@
         <li class="list-group-item d-flex justify-content-between align-items-center border-primary text-center">
             <span><b>{{#str}} subscriptionvmsvmname, local_cloudsync {{/str}}</b><br>{{name}}</span>
             <span><b>{{#str}} subscriptionvmsvmuser, local_cloudsync {{/str}}</b><br>{{owner_name}}</span>
-            <span><b>{{#str}} subscriptionvmscreatedat, local_cloudsync {{/str}}</b><br>{{hr_created_at}}</span>
+            <span><b>{{#str}} subscriptionvmscreatedat, local_cloudsync {{/str}}</b><br>{{#userdate}}{{created_at}}{{/userdate}}</span>
             <span><b>{{#str}} subscriptionvmscloudid, local_cloudsync {{/str}}</b><br>{{instance_id}}</span>
             <span><b>{{#str}} subscriptionvmsvmregion, local_cloudsync {{/str}}</b><br>{{region}}</span>
             <span><b>{{#str}} subscriptionvmsvmtype, local_cloudsync {{/str}}</b><br>{{type}}</span>
             <span><b>{{#str}} subscriptionvmsvmstatus, local_cloudsync {{/str}}</b><br>{{status}}</span>
-            <span><b>{{#str}} subscriptionvmslastused, local_cloudsync {{/str}}</b><br>{{hr_accessed_at}}</span>
-            <span class="badge badge-primary link-text" onclick="location.href='{{vm_url}}'">{{#str}} subscriptionvmsgoto, local_cloudsync {{/str}}</span>
+            <span><b>{{#str}} subscriptionvmslastused, local_cloudsync {{/str}}</b><br>{{#userdate}}{{accessed_at}}{{/userdate}}</span>
+            <span class="badge badge-primary link-text" onclick="location.href='{{vm_url}}?id={{id}}'">{{#str}} subscriptionvmsgoto, local_cloudsync {{/str}}</span>
         </li>
     {{/vms}}
     </div>

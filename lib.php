@@ -26,6 +26,7 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $mycloud_url = new moodle_url('/local/cloudsync/mycloud.php');
    $cloudoverview_url = new moodle_url('/local/cloudsync/cloudadministration.php');
    $subscriptionspage_url = new moodle_url('/local/cloudsync/subscriptions.php');
+   $adminvmlistpage_url = new moodle_url('/local/cloudsync/adminvirtualmachinelist.php');
 
    # Define the dropdown for our available cloud pages
    $main_node = $navigation->add(get_string('dropdown_button', 'local_cloudsync'));
@@ -54,6 +55,13 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $overview_node->isexpandable = false;
    $overview_node->force_open = true;
    $overview_node->action = $subscriptionspage_url;
+
+   # Define the button that routes to the admin vm list page
+   $overview_node = $cloudadministration_node->add(get_string('virtualmachinestitle', 'local_cloudsync'));
+   $overview_node->nodetype = 0;
+   $overview_node->isexpandable = false;
+   $overview_node->force_open = true;
+   $overview_node->action = $adminvmlistpage_url;
    
    # Define the button that routes to the main cloud page
    $vms_node = $main_node->add(get_string('virtualmachinestitle', 'local_cloudsync'));
@@ -179,8 +187,8 @@ function get_vm_connection_details($vm) {
    $helper = new aws_helper();  // DE INLOCUIT CU AMBELE
    $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
 
-   $connection = $helper->describe_instance($client, $vm->instance_id);
-   return $connection;
+   $instance_details = $helper->describe_instance($client, $vm->instance_id);
+   return $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName'];
 }
 
 function vm_keypair_prompt($vm, $virtualmachine_manager) {

@@ -93,6 +93,19 @@ class virtualmachinemanager {
     }
 
     /**
+     * Get a vm by its request id
+     *
+     * @param int $id the id of the request for the searched vm
+     * @return bool|stdClass the vm that has the request_id=$id
+     */
+    public function get_vm_by_requestId($id) {
+        global $DB;
+
+        $vm = $DB->get_record(self::DB_TABLE, ['request_id' => $id]);
+        return $vm;
+    }
+
+    /**
      * Update a vm
      *
      * @param object $vm An object with contents equal to fieldname=>fieldvalue. Must have an entry for 'id' to map to the table specified.

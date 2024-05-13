@@ -27,6 +27,8 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $cloudoverview_url = new moodle_url('/local/cloudsync/cloudadministration.php');
    $subscriptionspage_url = new moodle_url('/local/cloudsync/subscriptions.php');
    $adminvmlistpage_url = new moodle_url('/local/cloudsync/adminvirtualmachinelist.php');
+   $userrequestlist_url = new moodle_url('/local/cloudsync/uservmrequests.php');
+   $adminactiverequestlist_url = new moodle_url('/local/cloudsync/adminvmrequests.php?active=1');
 
    # Define the dropdown for our available cloud pages
    $main_node = $navigation->add(get_string('dropdown_button', 'local_cloudsync'));
@@ -62,6 +64,13 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $overview_node->isexpandable = false;
    $overview_node->force_open = true;
    $overview_node->action = $adminvmlistpage_url;
+
+   # Define the button that routes to the admin active request list page
+   $overview_node = $cloudadministration_node->add(get_string('activerequests', 'local_cloudsync'));
+   $overview_node->nodetype = 0;
+   $overview_node->isexpandable = false;
+   $overview_node->force_open = true;
+   $overview_node->action = $adminactiverequestlist_url;
    
    # Define the button that routes to the main cloud page
    $vms_node = $main_node->add(get_string('virtualmachinestitle', 'local_cloudsync'));
@@ -69,6 +78,13 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $vms_node->isexpandable = false;
    $vms_node->force_open = true;
    $vms_node->action = $mycloud_url;
+
+   # Define the button that routes to the main cloud page
+   $vms_node = $main_node->add(get_string('uservmrequeststitle', 'local_cloudsync'));
+   $vms_node->nodetype = 0;
+   $vms_node->isexpandable = false;
+   $vms_node->force_open = true;
+   $vms_node->action = $userrequestlist_url;
 }
 
 function cloudsync_use_or_create_keypair($owner_id, $subscription_id, $name, $region, $helper, $keypair_manager, $client) {

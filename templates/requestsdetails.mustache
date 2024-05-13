@@ -1,0 +1,160 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_cloudsync/userrequestsdetails
+
+    Admin search input for page header.
+
+    Example context (json):
+    {
+
+
+    }
+}}
+
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_cloudsync/requestsdetails
+
+    Admin search input for page header.
+
+    Example context (json):
+    {
+
+
+    }
+}}
+
+<div class="mt-2">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    {{#str}} userreqdetailsheader, local_cloudsync {{/str}}
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsreqby, local_cloudsync {{/str}}</strong>{{request.owner_name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsreqat, local_cloudsync {{/str}}</strong>{{#userdate}} {{request.created_at}} {{/userdate}}</li>
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsteacher, local_cloudsync {{/str}}</strong>{{request.teacher_name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsdescription, local_cloudsync {{/str}}</strong>{{request.description}}</li>
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsreqname, local_cloudsync {{/str}}</strong>{{request.vm_name}}</li>
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsreqos, local_cloudsync {{/str}}</strong>{{request.vm_os}}</li>
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsreqmem, local_cloudsync {{/str}}</strong>{{request.vm_memory}}</li>
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsreqcpu, local_cloudsync {{/str}}</strong>{{request.vm_vcpus}}</li>
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsreqstorage, local_cloudsync {{/str}}</strong>
+                        Disk 1: {{request.rootdisk_storage}} GB
+                        {{#request.seconddisk_storage}} 
+                            , Disk 2: {{request.seconddisk_storage}} GB
+                        {{/request.seconddisk_storage}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {{#admin}} 
+                {{#request.approved}}
+                    {{#vm}}
+                        <div class="card mt-3">
+                            <div class="card-header bg-primary text-white">
+                                {{#str}} reqdetailscloudinfo, local_cloudsync {{/str}}
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item"><strong>Cloud Provider: </strong>{{vm.provider}}</li>
+                                    <li class="list-group-item"><strong>Subscription: </strong>{{vm.subscription}}</li>
+                                    <li class="list-group-item"><strong>Region: </strong>{{vm.region}}</li>
+                                    <li class="list-group-item"><strong>ID (Cloud): </strong>{{vm.instance_id}}</li>
+                                    <li class="list-group-item"><strong>Type: </strong>{{vm.type}}</li>
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    {{/vm}}
+                {{/request.approved}}
+            {{/admin}}
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    {{#str}} userreqdetailsresponsedetails, local_cloudsync {{/str}}
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>{{#str}} userreqdetailsstatus, local_cloudsync {{/str}}</strong>{{request.status}}</li>
+                        {{#request.waiting}} 
+                            <li class="list-group-item">{{#str}} userreqdetailspending, local_cloudsync {{/str}}</li>
+                        {{/request.waiting}}
+                        {{^request.waiting}}
+                            {{#request.approved}}
+                                <li class="list-group-item"><strong>{{#str}} userreqdetailsappat, local_cloudsync {{/str}}</strong>{{#userdate}} {{request.closed_at}} {{/userdate}}</li>
+                                <li class="list-group-item"><strong>{{#str}} userreqdetailsappmessage, local_cloudsync {{/str}}</strong>Nu e treaba ta</li>
+                                <li class="list-group-item"><strong>{{#str}} userreqdetailsappby, local_cloudsync {{/str}}</strong>Cineva</li>
+                            {{/request.approved}}
+                            {{^request.approved}}
+                                <li class="list-group-item"><strong>{{#str}} userreqdetailsrejat, local_cloudsync {{/str}}</strong>{{#userdate}} {{request.closed_at}} {{/userdate}}</li>
+                                <li class="list-group-item"><strong>{{#str}} userreqdetailsrejmessage, local_cloudsync {{/str}}</strong>Nu e treaba ta</li>
+                                <li class="list-group-item"><strong></strong>Cineva</li>
+                            {{/request.approved}}
+                        {{/request.waiting}}
+                    </ul>
+                </div>
+            </div>
+            {{^request.waiting}} 
+                {{#request.approved}}
+                    {{#vm}}
+                        <div class="card mt-3">
+                            <div class="card-header bg-primary text-white">
+                                {{#str}} userreqdetailsvmdetails, local_cloudsync {{/str}}
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item "><strong>{{#str}} userreqdetailsvmname, local_cloudsync {{/str}}</strong><a href="{{vm_url}}?id={{id}}">{{vm.name}}</a></li>
+                                    <li class="list-group-item"><strong>{{#str}} userreqdetailsvmstatus, local_cloudsync {{/str}}</strong>{{vm.status}}</li>
+                                    <li class="list-group-item"><strong>{{#str}} userreqdetailsvmkey, local_cloudsync {{/str}}</strong>{{vm.key_name}}</li>
+                                    <li class="list-group-item"><strong>{{#str}} userreqdetailsvmos, local_cloudsync {{/str}}</strong>Ubuntu 22.04</li>
+                                    <li class="list-group-item"><strong>{{#str}} userreqdetailsvmmemory, local_cloudsync {{/str}}</strong>{{vm.memory}} MB</li>
+                                    <li class="list-group-item"><strong>{{#str}} userreqdetailsvmcpus, local_cloudsync {{/str}}</strong>{{vm.vcpus}}</li>
+                                    <li class="list-group-item"><strong>{{#str}} userreqdetailsvmstorage, local_cloudsync {{/str}}</strong>
+                                    Disk 1: {{vm.rootdisk_storage}} GB
+                                    {{#vm.seconddisk_storage}} 
+                                        , Disk 2: {{vm.seconddisk_storage}} GB
+                                    {{/vm.seconddisk_storage}}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    {{/vm}}
+                {{/request.approved}} 
+            {{/request.waiting}}
+        </div>
+    </div>
+</div>

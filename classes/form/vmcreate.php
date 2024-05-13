@@ -169,14 +169,14 @@ class vmcreate extends moodleform{
     // Returns all the supported types based on the cloud provider
     private function init_type_options($provider_id) {
         $types = return_var_by_provider_id($provider_id, SUPPORTED_AWS_TYPES, SUPPORTED_AZURE_TYPES);
-        $specs = return_var_by_provider_id($provider_id, SUPPORTED_AWS_TYPES_SPECS, SUPPORTED_AZURE_TYPES_SPECS);
+        $specs = return_var_by_provider_id($provider_id, SUPPORTED_AWS_TYPES_SPEC_DESCRIPTION, SUPPORTED_AZURE_TYPES_SPEC_DESCRIPTION);
 
         $length_types = count($types);
         $length_specs = count($specs);
         if ($length_types != $length_specs)
             throw new Exception("Not all defined vm types have defined specifications for provider". $provider_id);
         for ($i = 0; $i < $length_types; $i++) {
-            $array[$i] = $types[$i] . ' (' . $specs[$i] . ')';
+            $array[$i] = $types[$i] . ' (' . $specs[$types[$i]] . ')';
         }
 
         return $array;

@@ -65,6 +65,19 @@ class vmrequestmanager {
         return $requests;
     }
 
+     /**
+     * Get all vm requests that belong to a specific user
+     *
+     * @param int $user_id the id of the user
+     * @return array An array of vm requests indexed by first column.
+     */
+    public function get_requests_by_user($user_id) {
+        global $DB;
+
+        $reqs = $DB->get_records(self::DB_TABLE, ['owner_id' => $user_id]);
+        return $reqs;
+    }
+
     /**
      * Get a request by id
      *

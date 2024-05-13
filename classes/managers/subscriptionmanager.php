@@ -23,7 +23,6 @@
  */
 
 global $CFG;
-require_once('../../config.php'); // Include Moodle configuration
 require_once($CFG->dirroot . '/local/cloudsync/constants.php'); // Include Moodle configuration
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/awssecretsmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/azuresecretsmanager.php');

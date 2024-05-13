@@ -78,12 +78,7 @@ $mform = new vmcreate(null, array('id' => $requestID));
 $mform->set_data($request);
 
 if ($mform->is_cancelled()) {
-    // If the user presses cancel: TO BE CHANGED
-    echo "<script>console.log('This is saved')</script>";
-    putenv('PATH=/usr/local/bin');
-    $output = shell_exec('cat /home/ubuntu/test');
-    $output = json_encode($output);
-    echo "<script>console.log(".$output.")</script>";
+    redirect(new moodle_url('/local/cloudsync/adminvmrequests.php', array('active'=>1)),  'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
 } else if ($fromform = $mform->get_data()) {
     // get the possible fields values based on the cloud provider selected
     $fields = return_var_by_provider_id($fromform->cloudtype, AWS_FIELDS, AZURE_FIELDS);
@@ -105,11 +100,11 @@ if ($mform->is_cancelled()) {
         'vmrequest',
         strstr(strstr(serialize($request), '"'), ':')
     ));
-    $vmrequest->close();
+    $vmrequest->approve($userid);
     $vmrequestmanager->update_request($vmrequest);
     
     // redirect back to the overview page
-    redirect($CFG->wwwroot . '/local/cloudsync/cloudadministration.php', 'Vm created succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect(new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'),  'Vm created succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
 // Output starts here

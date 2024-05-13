@@ -22,8 +22,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
-
 // Class that will be used to interact with cloud provider db
 class cloudprovidermanager {
     const PLUGINNAME = 'local_cloudsync';

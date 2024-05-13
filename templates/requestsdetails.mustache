@@ -116,13 +116,12 @@
                         {{^request.waiting}}
                             {{#request.approved}}
                                 <li class="list-group-item"><strong>{{#str}} userreqdetailsappat, local_cloudsync {{/str}}</strong>{{#userdate}} {{request.closed_at}} {{/userdate}}</li>
-                                <li class="list-group-item"><strong>{{#str}} userreqdetailsappmessage, local_cloudsync {{/str}}</strong>Nu e treaba ta</li>
-                                <li class="list-group-item"><strong>{{#str}} userreqdetailsappby, local_cloudsync {{/str}}</strong>Cineva</li>
+                                <li class="list-group-item"><strong>{{#str}} userreqdetailsappby, local_cloudsync {{/str}}</strong>{{request.closed_by_user}}</li>
                             {{/request.approved}}
                             {{^request.approved}}
                                 <li class="list-group-item"><strong>{{#str}} userreqdetailsrejat, local_cloudsync {{/str}}</strong>{{#userdate}} {{request.closed_at}} {{/userdate}}</li>
-                                <li class="list-group-item"><strong>{{#str}} userreqdetailsrejmessage, local_cloudsync {{/str}}</strong>Nu e treaba ta</li>
-                                <li class="list-group-item"><strong></strong>Cineva</li>
+                                <li class="list-group-item"><strong>{{#str}} userreqdetailsrejmessage, local_cloudsync {{/str}}</strong>{{request.close_message}}</li>
+                                <li class="list-group-item"><strong>{{#str}} userreqdetailsrejby, local_cloudsync {{/str}}</strong>{{request.closed_by_user}}</li>
                             {{/request.approved}}
                         {{/request.waiting}}
                     </ul>

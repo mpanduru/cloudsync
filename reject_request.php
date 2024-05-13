@@ -22,22 +22,23 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
+require('../../config.php');
 global $CFG;
-require_once($CFG->dirroot.'/local/cloudsync/constants.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/form/subscriptionform.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/managers/subscriptionmanager.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/managers/cloudprovidermanager.php');
-require_once($CFG->dirroot.'/local/cloudsync/lib.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/form/vmreject.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/models/vmrequest.php');
+require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
+global $USER;
 
+// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
         echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
-                            get_login_url(),
-                            $CFG->wwwroot);
+                              get_login_url(),
+                              $CFG->wwwroot);
         echo $OUTPUT->footer();
         die;
     }
@@ -45,31 +46,42 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
-// // Set the user id variable
-global $DB;
-$userid = $userid ? $userid : $USER->id;
+$id = required_param('request', PARAM_INT);
 
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/cloudsync/newsubscription.php'));
+$PAGE->set_url(new moodle_url('/local/cloudsync/dialogs/reject_request.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('newsubscriptiontitle', 'local_cloudsync'));
-$PAGE->set_heading(get_string('newsubscriptiontitle', 'local_cloudsync'));
+$PAGE->set_title(get_string('rejectrequesttitle', 'local_cloudsync'));
+$PAGE->set_heading(get_string('rejectrequesttitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
-$mform = new subscriptionform();
+// Set the user id variable
+$userid = $userid ? $userid : $USER->id;
+
+$requestmanager = new vmrequestmanager();
+$request = $requestmanager->get_request_by_id($id);
+
+$mform = new vmreject(null, array('request' => $id, 'owner' => get_user_name($request->owner_id)));
+$mform->set_data($request);
 
 if ($mform->is_cancelled()) {
-    redirect(new moodle_url('/local/cloudsync/subscriptions.php'),  'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
+    redirect(new moodle_url('/local/cloudsync/cloudadminrequest.php', array('id'=>$id)));
 } else if ($fromform = $mform->get_data()) {
-    $providermanager = new cloudprovidermanager();
-    $subscriptionmanager = new subscriptionmanager();
-    cloudsync_submit_subscription_creation($fromform, $providermanager, $subscriptionmanager);
+    $request = unserialize(sprintf(
+        'O:%d:"%s"%s',
+        strlen('vmrequest'),
+        'vmrequest',
+        strstr(strstr(serialize($request), '"'), ':')
+    ));
 
-    redirect(new moodle_url('/local/cloudsync/subscriptions.php'),  'Subscription added succesfully', null, \core\output\notification::NOTIFY_SUCCESS);
+    $request->reject($userid, $fromform->message);
+    $requestmanager->update_request($request);
+    redirect(new moodle_url('/local/cloudsync/adminvmrequests.php', array('active'=>0)),  'Request Rejected', null, \core\output\notification::NOTIFY_ERROR);
 } else {
 }
 
+// Output starts here
 echo $OUTPUT->header();
 $mform->display();
 echo $OUTPUT->footer();

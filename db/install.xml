@@ -57,6 +57,8 @@
         <FIELD NAME="teacher_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="created_at" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="closed_at" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="closed_by" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="close_message" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="vm_name" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="vm_os" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
@@ -69,6 +71,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="ownerid" TYPE="foreign" FIELDS="owner_id" REFTABLE="user" REFFIELDS="id"/>
         <KEY NAME="teacherid" TYPE="foreign" FIELDS="teacher_id" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="closedby" TYPE="foreign" FIELDS="closed_by" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="local_cloudsync_vm" COMMENT="Virtual machines created for the students">

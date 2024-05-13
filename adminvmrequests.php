@@ -27,6 +27,7 @@ require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
 global $USER;
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
@@ -64,13 +65,19 @@ $PAGE->requires->css('/local/cloudsync/styles.css');
 
 $requestmanager = new vmrequestmanager();
 if($active)
-    $requests = $requestmanager->get_requests_by_status('WAITING');
-else
-    $requests = $requestmanager->get_requests_by_status('CLOSED');
+    $requests = $requestmanager->get_requests_by_status(REQUEST_WAITING);
+else {
+    $all_requests = $requestmanager->get_all_requests();
+    $requests = [];
+    foreach ($all_requests as $request) {
+        if($request->status != REQUEST_WAITING)
+            $requests[] = $request;
+    }
+}
 
 foreach ($requests as $request) {
     $request->owner_name = get_user_name($request->owner_id);
-    $request->teacher_name = get_user_name($request->owner_id); // put teacher name
+    $request->teacher_name = get_user_name($request->teacher_id); // put teacher name
 }
 // Output starts here
 echo $OUTPUT->header(); // Display the header

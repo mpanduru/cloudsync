@@ -124,7 +124,12 @@ class vmcreate extends moodleform{
             $mform->hideIf('disk2' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
         }
 
-        $this->add_action_buttons(true, 'Create VM');
+        $this->add_action_buttons(true, 'Approve & Create VM');
+
+        $reject_url = new moodle_url('/local/cloudsync/reject_request.php');
+        $mform->addElement('static', 'rejectbutton', '', 
+            '<button type="button" class="btn btn-danger" onclick="location.href=\''.$reject_url.'?request='.$id.'\'">'.
+            get_string('vmcreate_reject', 'local_cloudsync').'</button>');
     }
 
     // Custom validation should be added here.

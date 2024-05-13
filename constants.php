@@ -26,6 +26,10 @@
 define('AWS_PROVIDER', 'AWS');
 define('AZURE_PROVIDER', 'AZURE');
 
+define('REQUEST_WAITING', 'Waiting');
+define('REQUEST_APPROVED', 'Approved');
+define('REQUEST_REJECTED', 'Rejected');
+
 // These will be displayed as choices for students when requesting virtual machines
 define('SUPPORTED_OS_VALUES', ['ubuntu 22.04']);
 define('SUPPORTED_MEMORY_VALUES', [1024, 2048, 4096, 8192]);

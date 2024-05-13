@@ -22,7 +22,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/secretsmanager.php');
 
 // Class that will be used to interact with aws subscription db

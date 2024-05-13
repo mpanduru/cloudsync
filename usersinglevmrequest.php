@@ -61,9 +61,10 @@ $requestmanager = new vmrequestmanager();
 $request = $requestmanager->get_request_by_id($requestId);
 $request->owner_name = get_user_name($request->owner_id);
 $request->teacher_name = get_user_name($request->teacher_id);
-$request->waiting = ($request->status == 'WAITING') ? true : false;
+$request->waiting = ($request->status == REQUEST_WAITING) ? true : false;
 if(!$request->waiting) {
-    $request->approved = ($request->status == 'CLOSED') ? true : false;
+    $request->closed_by_user = get_user_name($request->closed_by);
+    $request->approved = ($request->status == REQUEST_APPROVED) ? true : false;
     if($request->approved) {
         $vmmanager = new virtualmachinemanager();
         $keypairmanager = new keypairmanager();

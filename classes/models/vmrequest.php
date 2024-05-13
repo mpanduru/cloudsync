@@ -22,7 +22,9 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
+
+global $CFG;
+require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 
 // Class that will be used to create virtual machine requests models
 // before adding those to the database
@@ -42,7 +44,7 @@ class vmrequest {
      * @param int|string $seconddisk_storage The storage of the second disk requested for the virtual machine
      */
     public function __construct($owner_id, $teacher_id, $description, $vm_name, $vm_os, $vm_memory, $vm_vcpus, $rootdisk_storage, $seconddisk_storage) {
-        $this->{'status'} = 'WAITING';
+        $this->{'status'} = REQUEST_WAITING;
         $this->{'owner_id'} = $owner_id;
         $this->{'teacher_id'} = $teacher_id;
         $now = new DateTime("now", core_date::get_server_timezone_object());
@@ -165,10 +167,35 @@ class vmrequest {
 
      /**
      * Mark the vm request as closed
+     * 
+     * @param int $userId the id of the user that closed the request
      */
-    public function close() {
+    public function close($userId) {
         $now = new DateTime("now", core_date::get_server_timezone_object());
         $this->{'closed_at'} = $now->getTimestamp();
-        $this->{'status'} = 'CLOSED';
+        $this->{'closed_by'} = $userId;
+    }
+
+    /**
+     * Approve the vm request
+     * 
+     * @param int $userId the id of the user that approved the request
+     * @param string $message a message that the admin can leave for the user that requested the vm
+     */
+    public function approve($userId) {
+        $this->close($userId);
+        $this->{'status'} = REQUEST_APPROVED;
+    }
+
+    /**
+     * Reject the vm request
+     * 
+     * @param int $userId the id of the user that rejected the request
+     * @param string $message a message that the admin can leave for the user that requested the vm
+     */
+    public function reject($userId, $message) {
+        $this->close($userId);
+        $this->{'status'} = REQUEST_REJECTED;
+        $this->{'close_message'} = $message;
     }
 }

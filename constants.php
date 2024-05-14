@@ -22,6 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('SITE_TAG', 'CV');
 
 define('AWS_PROVIDER', 'AWS');
 define('AZURE_PROVIDER', 'AZURE');

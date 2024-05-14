@@ -97,28 +97,32 @@ class keypairmanager {
     }
 
     /**
-     * Get a key by name
+     * Get a key by name, subscription and region
      *
-     * @param int $name the name of the key searched
+     * @param string $name the name of the key searched
+     * @param int $subscription_id the subscription of the key searched
+     * @param string $region the string of the key searched
      * @return bool|stdClass the key that has the name=$name
      */
-    public function get_key_by_name($name) {
+    public function get_key($name, $subscription_id, $region) {
         global $DB;
 
-        $key = $DB->get_record(self::DB_TABLE, ['name' => $name]);
+        $key = $DB->get_record(self::DB_TABLE, ['name' => $name, 'subscription_id' => $subscription_id, 'region' => $region]);
         return $key;
     }
 
     /**
-     * Check if a key exists by name
+     * Check if a key exists by name, subscription and region
      *
-     * @param int $name the name of the key searched
+     * @param string $name the name of the key searched
+     * @param int $subscription_id the subscription of the key searched
+     * @param string $region the string of the key searched
      * @return bool whether or not the searched key exists in the database
      */
-    public function check_key_exists_by_name($name) {
+    public function check_key_exists($name, $subscription_id, $region) {
         global $DB;
 
-        $result = $DB->record_exists(self::DB_TABLE, ['name' => $name]);
+        $result = $DB->record_exists(self::DB_TABLE, ['name' => $name, 'subscription_id' => $subscription_id, 'region' => $region]);
         return $result;
     }
 

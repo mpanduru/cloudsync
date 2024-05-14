@@ -90,7 +90,9 @@ if ($mform->is_cancelled()) {
     $aws_helper = new aws_helper();
     $vm_manager = new virtualmachinemanager();
 
-    cloudsync_submit_vm_creation($fields, $fromform, $cloudprovidermanager, $request->owner_id, $userid, $requestID, 
+    $owner_name = get_user_name($request->owner_id);
+
+    cloudsync_submit_vm_creation($fields, $fromform, $cloudprovidermanager, $request->owner_id, $owner_name, $userid, $requestID, 
                                  $subscription_manager, $aws_helper, $vm_manager, $keypair_manager);
 
     // close the request

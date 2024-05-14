@@ -95,22 +95,22 @@ function local_cloudsync_extend_navigation(global_navigation $navigation){
    $vms_node->action = $usersshkeys_url;
 }
 
-function cloudsync_use_or_create_keypair($owner_id, $subscription_id, $name, $region, $helper, $keypair_manager, $client) {
+function cloudsync_use_or_create_keypair($owner_id, $owner_name, $subscription_id, $name, $keypair_id, $region, $helper, $keypair_manager, $client) {
    global $CFG;
    require_once($CFG->dirroot . '/local/cloudsync/classes/models/keypair.php');
 
-   if($helper->exists_key($client, $name)){
-      if($keypair_manager->check_key_exists_by_name($name)) {
-         return $keypair_manager->get_key_by_name($name);
+   if($helper->exists_key($client, $keypair_id)){
+      if($keypair_manager->check_key_exists($name, $subscription_id, $region)) {
+         return $keypair_manager->get_key($name, $subscription_id, $region);
       } else {
          throw new Exception("Key exists in cloud but not in db");
       }
    } else {
-      if($keypair_manager->check_key_exists_by_name($name)) {
+      if($keypair_manager->check_key_exists($name, $subscription_id, $region)) {
          throw new Exception("Key exists in db but not in cloud");
       } else {
          $keypair = new keypair($owner_id, $subscription_id, $name, $region);
-         $key = $helper->create_key($client, $name, 'mpanduru');
+         $key = $helper->create_key($client, $name, $owner_name);
          $keypair->setKeypairValue($key->private_key_value);
          $keypair->setKeypairId($key->key_name);
          $id = $keypair_manager->create_key($keypair);
@@ -120,12 +120,16 @@ function cloudsync_use_or_create_keypair($owner_id, $subscription_id, $name, $re
    }
 }
 
-function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovider_manager, $request_owner, 
+function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovider_manager, $request_owner_id, $request_owner_name,
                                       $admin_id, $request_id, $subscription_manager, $helper, $vm_manager, $keypair_manager) {
    global $CFG;
    require_once($CFG->dirroot . '/local/cloudsync/classes/models/keypair.php');
    require_once($CFG->dirroot . '/local/cloudsync/classes/models/vm.php');
    require_once($CFG->dirroot . '/local/cloudsync/constants.php');
+
+   $user_short = str_replace(' ', '_', strtolower($request_owner_name));
+   $keyname = $user_short  . '_key';
+   $keypair_id = 'cloudsync_' . $keyname . '_' . SITE_TAG;
 
    $provider = $cloudprovider_manager->get_provider_type_by_id($formdata->cloudtype);
       
@@ -134,18 +138,18 @@ function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovide
    $client = $helper->create_connection($provider_fields["region"][$formdata->{'region' . $provider}], 
                                           $secrets->access_key_id, $secrets->access_key_secret);
 
-   $keypair = cloudsync_use_or_create_keypair($request_owner, $formdata->{'subscription' . $provider}, 'mpanduru_key',
-                                              $provider_fields["region"][$formdata->{'region' . $provider}], $helper,
+   $keypair = cloudsync_use_or_create_keypair($request_owner_id, $request_owner_name, $formdata->{'subscription' . $provider}, $keyname, 
+                                              $keypair_id, $provider_fields["region"][$formdata->{'region' . $provider}], $helper,
                                               $keypair_manager, $client);
 
-   $instance_id = $helper->create_instance($client, 'mpanduru', $formdata->vm_name, 'ami-04e5276ebb8451442', 
+   $instance_id = $helper->create_instance($client, $user_short, $formdata->vm_name, 'ami-04e5276ebb8451442', 
                                              $provider_fields["type"][$formdata->{'type' . $provider}], 
                                              SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
                                              SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}],
                                              $keypair->keypair_id);
    
    
-   $vm = new vm($request_owner, $admin_id, $request_id, $keypair->id, $formdata->vm_name, 
+   $vm = new vm($request_owner_id, $admin_id, $request_id, $keypair->id, $formdata->vm_name, 
                $formdata->{'subscription' . $provider}, 
                $provider_fields["region"][$formdata->{'region' . $provider}], 
                $provider_fields["architecture"][$formdata->{'architecture' . $provider}], 

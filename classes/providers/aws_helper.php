@@ -24,6 +24,7 @@
 
 global $CFG;
 require($CFG->dirroot . '/local/cloudsync/vendor/autoload.php');
+require($CFG->dirroot . '/local/cloudsync/constants.php');
 
 // Class that will be used to administrate the resources that live
 // on AWS subscriptions
@@ -131,7 +132,7 @@ class aws_helper {
                         ],
                         [
                             'Key' => 'Name',
-                            'Value' => $name,
+                            'Value' => 'cloudsync_' . $name . '_' . SITE_TAG,
                         ],
                     ],
                 ],
@@ -153,7 +154,7 @@ class aws_helper {
     public function create_key(Aws\Ec2\Ec2Client $ec2Client, $key_name, $owner) {
         $result = $ec2Client->createKeyPair([
             'KeyFormat' => 'pem',
-            'KeyName' => $key_name,
+            'KeyName' => 'cloudsync_' . $key_name . '_' . SITE_TAG,
             'KeyType' => 'rsa',
             'TagSpecifications' => [
                 [
@@ -239,7 +240,7 @@ class aws_helper {
     public function create_security_group_with_rule(Aws\Ec2\Ec2Client $ec2Client, $sg_description, $name, $port, $protocol, $range, $rule_description) {
         $sg_result = $ec2Client->createSecurityGroup([
             'Description' => $sg_description,
-            'GroupName' => $name
+            'GroupName' => 'cloudsync_' . $name . '_' . SITE_TAG,
         ]);
 
         $rule_result = $ec2Client->authorizeSecurityGroupIngress([

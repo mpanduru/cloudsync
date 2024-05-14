@@ -191,7 +191,7 @@ function cloudsync_submit_subscription_creation($formdata, $providermanager, $su
    $subscription->setId($id);
 }
 
-function get_vm_connection_details($vm) {
+function get_vm_connection_details($vm, $vmmanager) {
    global $CFG;
    require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
    require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
@@ -204,6 +204,13 @@ function get_vm_connection_details($vm) {
    $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
 
    $instance_details = $helper->describe_instance($client, $vm->instance_id);
+
+   $status = $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
+   if($status && $status != DB_TO_AWS_STATES[$vm->status]){
+      $vm->status = AWS_TO_DB_STATES[$instance_details['Reservations'][0]['Instances'][0]['State']['Name']];
+      $vmmanager->update_vm($vm);
+  }
+
    return $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName'];
 }
 

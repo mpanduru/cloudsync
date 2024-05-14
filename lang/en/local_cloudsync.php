@@ -211,3 +211,7 @@ $string['reqdetailscloudinfo'] = 'VM Cloud information';
 $string['rejectrequesttitle'] = 'Reject Request';
 $string['rejectrequestquestion1'] = 'Are you sure you want to reject ';
 $string['rejectrequestquestion2'] = '\'s request?';
+$string['vmnotrunninguser'] = 'Your vm is not running. Please contact your administrator for more information.';
+$string['adminvmlistdeleted'] = ' (Deleted)';
+$string['adminvmlistseedeleted'] = 'Jump to deleted VMs';
+$string['adminvmlistseeactive'] = 'Jump to active VMs';

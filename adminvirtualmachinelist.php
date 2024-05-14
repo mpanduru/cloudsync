@@ -43,19 +43,42 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
+$active = optional_param('active', 1, PARAM_BOOL);
+
 // Set up the page
 $PAGE->set_url(new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('virtualmachinestitle', 'local_cloudsync'));
-$PAGE->set_heading(get_string('virtualmachinestitle', 'local_cloudsync'));
+if($active){
+    $PAGE->set_title(get_string('virtualmachinestitle', 'local_cloudsync') . get_string('adminvmrequestsactivetitle', 'local_cloudsync'));
+    $PAGE->set_heading(get_string('virtualmachinestitle', 'local_cloudsync') . get_string('adminvmrequestsactivetitle', 'local_cloudsync'));
+} else {
+    $PAGE->set_title(get_string('virtualmachinestitle', 'local_cloudsync') . get_string('adminvmlistdeleted', 'local_cloudsync'));
+    $PAGE->set_heading(get_string('virtualmachinestitle', 'local_cloudsync') . get_string('adminvmlistdeleted', 'local_cloudsync'));
+}
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
 $vmmanager = new virtualmachinemanager();
 $subscriptionmanager = new subscriptionmanager();
-$vms = $vmmanager->get_all_vms();
-foreach ($vms as $vm) {
-    $vm->subscription_name = $subscriptionmanager->get_subscription_by_id($vm->subscription_id)->name;
+
+$vms = [];
+$all_vms = $vmmanager->get_all_vms();
+
+if($active){
+    foreach ($all_vms as $vm) {
+        if($vm->status != 'Deleted'){
+            $vm->subscription_name = $subscriptionmanager->get_subscription_by_id($vm->subscription_id)->name;
+            $vms[] = $vm;
+        }
+    }
+}
+else {
+    foreach ($all_vms as $vm) {
+        if($vm->status == 'Deleted'){
+            $vm->subscription_name = $subscriptionmanager->get_subscription_by_id($vm->subscription_id)->name;
+            $vms[] = $vm;
+        }
+    }
 }
 
 // Output starts here
@@ -63,6 +86,8 @@ echo $OUTPUT->header(); // Display the header
 
 $templatecontext = (object)[
     'vms' => array_values($vms),
+    'active' => $active,
+    'vm_list_url' => new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'),
     'vm_url' => new moodle_url('/local/cloudsync/virtualmachinedetails.php'),
 ];
 echo $OUTPUT->render_from_template('local_cloudsync/adminvmlist', $templatecontext);

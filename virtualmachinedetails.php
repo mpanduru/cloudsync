@@ -30,6 +30,7 @@ require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmana
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
+require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 
 // Make sure the user is logged in
@@ -79,6 +80,12 @@ $request->teacher_name = get_user_name($request->teacher_id);
 
 $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
 $instance_details = $helper->describe_instance($client, $vm->instance_id);
+
+$status = $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
+if($status && $status != DB_TO_AWS_STATES[$vm->status]){
+    $vm->status = AWS_TO_DB_STATES[$instance_details['Reservations'][0]['Instances'][0]['State']['Name']];
+    $vmmanager->update_vm($vm);
+}
 
 // Output starts here
 echo $OUTPUT->header(); // Display the header

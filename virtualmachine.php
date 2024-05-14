@@ -63,20 +63,27 @@ $vm = $vmmanager->get_vm_by_id($vmId);
 if($vm->owner_id != $userid){
    throw new Exception('You are not allowed to access this resource!');
 }
+if($vm->status == 'Deleted'){
+    throw new Exception('You do not have access to this virtual machine since it has been deleted.');
+}
+
 $vm_keypair = vm_keypair_prompt($vm, $vmmanager);
 // Output starts here
 echo $OUTPUT->header(); // Display the header
+
 if($vm_keypair) {
     $templatecontext = (object)[
         'ssh_key' => $vm_keypair,
     ];
     echo $OUTPUT->render_from_template('local_cloudsync/firstaccessvm', $templatecontext);
 } else {
-    $public_dns = get_vm_connection_details($vm);
+    $public_dns = get_vm_connection_details($vm, $vmmanager);
+    $running = $vm->status == 'Running';
     
     $templatecontext = (object)[
         'user' => 'student',
         'public_dns' => $public_dns,
+        'running' => $running
     ];
     echo $OUTPUT->render_from_template('local_cloudsync/virtualmachine', $templatecontext);
 }

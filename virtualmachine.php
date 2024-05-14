@@ -26,7 +26,9 @@ require_once('../../config.php'); // Include Moodle configuration
 global $USER;
 global $CFG;
 require_once($CFG->dirroot . '/local/cloudsync/lib.php');
+require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
 
 // Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
@@ -77,13 +79,18 @@ if($vm_keypair) {
     ];
     echo $OUTPUT->render_from_template('local_cloudsync/firstaccessvm', $templatecontext);
 } else {
+    $keymanager = new keypairmanager();
+    $key = $keymanager->get_key_by_id($vm->vm_key_id);
+
+    $user_short = str_replace(' ', '_', strtolower(get_user_name($userid)));
     $public_dns = get_vm_connection_details($vm, $vmmanager);
     $running = $vm->status == 'Running';
     
     $templatecontext = (object)[
-        'user' => 'student',
+        'user' => $user_short,
         'public_dns' => $public_dns,
-        'running' => $running
+        'running' => $running,
+        'key_name' => $key->name
     ];
     echo $OUTPUT->render_from_template('local_cloudsync/virtualmachine', $templatecontext);
 }

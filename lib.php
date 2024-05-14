@@ -111,6 +111,8 @@ function cloudsync_use_or_create_keypair($owner_id, $owner_name, $subscription_i
       } else {
          $keypair = new keypair($owner_id, $subscription_id, $name, $region);
          $key = $helper->create_key($client, $name, $owner_name);
+         $key_public = $helper->get_public_key($client, $name);
+         $keypair->setKeypairPublicValue($key_public);
          $keypair->setKeypairValue($key->private_key_value);
          $keypair->setKeypairId($key->key_name);
          $id = $keypair_manager->create_key($keypair);
@@ -118,6 +120,17 @@ function cloudsync_use_or_create_keypair($owner_id, $owner_name, $subscription_i
          return $keypair;
       }
    }
+}
+
+function cloudsync_use_or_create_security_group($client, $helper, $sg_description, $name, $tag, $port, $protocol, $range, $rule_description) {
+   if($helper->exists_security_group($client, $tag)) {
+      $sg_id = $helper->get_security_group($client, $tag);
+      $sg_id = $sg_id['SecurityGroups'][0]['GroupId'];
+   } else {
+      $sg_id = $helper->create_security_group_with_rule($client, $sg_description, $name, $tag, $port, $protocol, $range, $rule_description);
+   }
+
+   return $sg_id;
 }
 
 function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovider_manager, $request_owner_id, $request_owner_name,
@@ -141,12 +154,14 @@ function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovide
    $keypair = cloudsync_use_or_create_keypair($request_owner_id, $request_owner_name, $formdata->{'subscription' . $provider}, $keyname, 
                                               $keypair_id, $provider_fields["region"][$formdata->{'region' . $provider}], $helper,
                                               $keypair_manager, $client);
-
+   $security_group_id = cloudsync_use_or_create_security_group($client, $helper, 'SSH Security Group', 'SSH', 'ssh', 22,
+                                                               'tcp', '0.0.0.0/0', 'SSH rule');
+   
    $instance_id = $helper->create_instance($client, $user_short, $formdata->vm_name, 'ami-04e5276ebb8451442', 
                                              $provider_fields["type"][$formdata->{'type' . $provider}], 
                                              SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
                                              SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}],
-                                             $keypair->keypair_id);
+                                             $keypair->keypair_id, $security_group_id, $keypair->public_value);
    
    
    $vm = new vm($request_owner_id, $admin_id, $request_id, $keypair->id, $formdata->vm_name, 
@@ -184,7 +199,12 @@ function cloudsync_submit_subscription_creation($formdata, $providermanager, $su
    require_once($CFG->dirroot . '/local/cloudsync/classes/models/subscription.php');
    require_once($CFG->dirroot.'/local/cloudsync/classes/models/aws_secrets.php');
    require_once($CFG->dirroot.'/local/cloudsync/classes/models/azure_secrets.php');
+   require_once($CFG->dirroot.'/local/cloudsync/classes/providers/aws_helper.php');
    require_once($CFG->dirroot . '/local/cloudsync/constants.php');
+
+   // try{
+   $helper = new aws_helper();
+   $helper->test_secrets(SUPPORTED_AWS_REGIONS[0], $formdata->aws_access_key_id, $formdata->aws_secret_access_key);
 
    $subscription = new subscription($formdata->cloudprovider, $formdata->subscriptionname);
    $provider_type = $providermanager->get_provider_type_by_id($formdata->cloudprovider);
@@ -201,6 +221,10 @@ function cloudsync_submit_subscription_creation($formdata, $providermanager, $su
 
    $id = $subscriptionmanager->create_subscription($subscription, $secrets);
    $subscription->setId($id);
+   // } catch (Exception $e) {
+   //    throw new Exception('Something went wrong! Please check if the subscription secrets are correct or 
+   //                         your subscription has the necessary policies to create cloud resources.');
+   // }
 }
 
 function get_vm_connection_details($vm, $vmmanager) {
@@ -237,6 +261,7 @@ function vm_keypair_prompt($vm, $virtualmachine_manager) {
    if(empty($vm->accessed_at)) {
       $keymanager = new keypairmanager();
       $key = $keymanager->get_key_by_id($vm->vm_key_id);
+      echo "<script>console.log(".json_encode($key).")</script>";
       $returnvalue = nl2br($key->value);
    }
    $vm = unserialize(sprintf(

@@ -97,12 +97,21 @@ class keypair {
         $this->{'keypair_id'} = $keypair_id;
     }
 
-         /**
+     /**
      * Set the keypair value
      *
      * @param string $keypair_value the keypair value
      */
     public function setKeypairValue($keypair_value) {
         $this->{'value'} = $keypair_value;
+    }
+
+     /**
+     * Set the keypair public value
+     *
+     * @param string $keypair_public_value the keypair value
+     */
+    public function setKeypairPublicValue($keypair_public_value) {
+        $this->{'public_value'} = $keypair_public_value;
     }
 }

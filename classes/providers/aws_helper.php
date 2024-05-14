@@ -71,6 +71,7 @@ class aws_helper {
      *
      * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
      * @param string $instance_id the id of the searched instance (from the aws cloud)
+     * @return Aws\Result $result the instances that match the search
      */
     public function describe_instance(Aws\Ec2\Ec2Client $ec2Client, $instance_id) {
         $result = $ec2Client->describeInstances([
@@ -91,9 +92,10 @@ class aws_helper {
      * @param int $rootdisk the storage for the root disk of the virtual machine
      * @param int|string $seconddisk the storage for the secondary disk of the virtual machine
      * @param string $key_name the name of the ssh key used to connect to the virtual machine
+     * @param string $security_group_id the name of the security group used to create the virtual machine
      * @return string id of the created instance in AWS
      */
-    public function create_instance(Aws\Ec2\Ec2Client $ec2Client, $owner, $name, $image_id, $instance_type, $rootdisk, $seconddisk, $key_name) {
+    public function create_instance(Aws\Ec2\Ec2Client $ec2Client, $owner, $name, $image_id, $instance_type, $rootdisk, $seconddisk, $key_name, $security_group_id, $public_key) {
         $blockDeviceMappings = [
             [
                 'DeviceName' => '/dev/xvda',
@@ -114,8 +116,10 @@ class aws_helper {
                 ],
             ];
         }
+
+        $user_data = $this->create_user_data($owner, $public_key);
         
-        $result = $ec2Client->runInstances([
+        $params = [
             'BlockDeviceMappings' => $blockDeviceMappings,
             'ImageId' => $image_id,
             'InstanceType' => $instance_type,
@@ -137,7 +141,14 @@ class aws_helper {
                     ],
                 ],
             ],
-        ]);
+            'UserData' => $user_data,
+        ];
+
+        if (!empty($security_group_id)) {
+            $params['SecurityGroupIds'] = [$security_group_id];
+        }
+
+        $result = $ec2Client->runInstances($params);
 
         $Instance = $result->get('Instances');
         return $Instance[0]['InstanceId'];
@@ -175,6 +186,24 @@ class aws_helper {
         ];
 
         return $key;
+    }
+
+     /**
+     * Get the public value of a keypair in AWS
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $key_name the name of the key
+     * @return string the public key
+     */
+    public function get_public_key(Aws\Ec2\Ec2Client $ec2Client, $key_name) {
+        $result = $ec2Client->describeKeyPairs([
+            'IncludePublicKey' => true,
+            'KeyNames' => [
+                'cloudsync_' . $key_name . '_' . SITE_TAG,
+            ],
+        ]);
+
+        return $result['KeyPairs'][0]['PublicKey'];
     }
 
      /**
@@ -231,16 +260,28 @@ class aws_helper {
      * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
      * @param string $sg_description short description for the security group
      * @param string $name the name of the security group
+     * @param string $tag a tag for the security group, can be a purpose
      * @param int $port the open port for the security group rule
      * @param string $protocol the protocol used for the rule
      * @param string $range the ip range used for the rule
      * @param string $rule_description short description for the rule
      * @return string the security group ID
      */
-    public function create_security_group_with_rule(Aws\Ec2\Ec2Client $ec2Client, $sg_description, $name, $port, $protocol, $range, $rule_description) {
+    public function create_security_group_with_rule(Aws\Ec2\Ec2Client $ec2Client, $sg_description, $name, $tag, $port, $protocol, $range, $rule_description) {
         $sg_result = $ec2Client->createSecurityGroup([
             'Description' => $sg_description,
             'GroupName' => 'cloudsync_' . $name . '_' . SITE_TAG,
+            'TagSpecifications' => [
+                [
+                    'ResourceType' => 'security-group',
+                    'Tags' => [
+                        [
+                            'Key' => 'Purpose',
+                            'Value' => 'cloudsync_' . $tag . '_' . SITE_TAG,
+                        ],
+                    ],
+                ],
+            ],
         ]);
 
         $rule_result = $ec2Client->authorizeSecurityGroupIngress([
@@ -279,5 +320,131 @@ class aws_helper {
         ]);
 
         return true;
+    }
+
+     /**
+     * 
+     * Delete a key
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $name the name of the key
+     * @return bool whether or not the keypair delete action started
+     */
+    public function delete_key(Aws\Ec2\Ec2Client $ec2Client, $name) {
+        $result = $ec2Client->deleteKeyPair([
+            'KeyName' => $name,
+        ]);
+
+        return true;
+    }
+
+     /**
+     * 
+     * Delete a security group
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $group_id the security group id
+     * @return bool whether or not the security group delete action started
+     */
+    public function delete_security_group(Aws\Ec2\Ec2Client $ec2Client, $group_id) {
+        $result = $ec2Client->deleteSecurityGroup([
+            'GroupId' => $group_id,
+        ]);
+
+        return true;
+    }
+
+     /**
+     * 
+     * Test an AWS account to make sure a subscription is valid
+     *
+     * @param string $region the region of the connection
+     * @param string $access_key the access_key of the aws subscription
+     * @param string $access_key_secret the access_key_secret of the aws subscription
+     * @return bool whether or not the subscription is valid
+     */
+    public function test_secrets($region, $access_key, $access_key_secret) {
+        $client = $this->create_connection($region, $access_key, $access_key_secret);
+        $test_sg_ssh = $this->create_security_group_with_rule($client, 'None', 'test_SG', 'ssh',
+                                                              22, 'tcp', '0.0.0.0/0', 'None');
+        $test_ssh_key = $this->create_key($client, 'test_keypair', 'test_owner');   
+        $public_ssh_key = $this->get_public_key($client, 'test_keypair');                                                           
+        $test_instance = $this->create_instance($client, 'test_owner', 'test_instance', 'ami-04e5276ebb8451442', 't2.micro',
+                                                8, 'None', $test_ssh_key->key_name, '', $public_ssh_key);
+
+        $this->delete_instance($client, $test_instance);
+        $this->delete_key($client, $test_ssh_key->key_name);       
+        $this->delete_security_group($client, $test_sg_ssh);
+        
+        return true;
+    }
+
+     /**
+     * Get an existing security group on the AWS Cloud
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $tag the tag of the security group
+     * @return Aws\Result the searched security group
+     */
+    public function get_security_group(Aws\Ec2\Ec2Client $ec2Client, $tag) {
+        $result = $ec2Client->describeSecurityGroups([
+            'Filters' => [
+                [
+                    'Name' => 'tag:Purpose',
+                    'Values' => [
+                        'cloudsync_' . $tag . '_' . SITE_TAG,
+                    ],
+                ],
+            ],
+        ]);
+
+        return $result;
+    }
+
+     /**
+     * Verify an existing security group on the AWS Cloud
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $tag the tag of the security group
+     * @return boolean whether or not the key exists on the cloud
+     */
+    public function exists_security_group(Aws\Ec2\Ec2Client $ec2Client, $tag) {
+        $waiterName = 'SecurityGroupExists';
+        $waiterOptions = [
+            'Filters' => [
+                [
+                    'Name' => 'tag:Purpose',
+                    'Values' => [
+                        'cloudsync_' . $tag . '_' . SITE_TAG,
+                    ],
+                ],
+            ],
+            '@waiter' => [
+                'delay' => 3,
+                'maxAttempts' => 1
+            ]
+        ];
+
+        try {
+            $ec2Client->waitUntil($waiterName, $waiterOptions);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+     /**
+     * 
+     * Create Userdata to use for the vm
+     *
+     * @param string $username the username of the vm
+     * @param string $public_key the public key of the vm
+     * @return string the userdata
+     */
+    public function create_user_data($username, $public_key) {
+        $string_data = "#cloud-config\ncloud_final_modules:\n- [users-groups,always]\nusers:\n  - name: " . $username . "\n    groups: [ wheel ]\n    sudo: [ \"ALL=(ALL) NOPASSWD:ALL\" ]\n    shell: /bin/bash\n    ssh-authorized-keys:\n    - " . $public_key;
+
+        $user_data = base64_encode($string_data);
+        return $user_data;
     }
 }

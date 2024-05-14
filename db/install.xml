@@ -83,6 +83,7 @@
         <FIELD NAME="request_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="created_at" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="deleted_at" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="deleted_by" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="subscription_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="region" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="architecture" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
@@ -101,6 +102,7 @@
         <KEY NAME="requestid" TYPE="foreign" FIELDS="request_id" REFTABLE="local_cloudsync_vmreqest" REFFIELDS="id"/>
         <KEY NAME="subscriptionid" TYPE="foreign" FIELDS="subscription_id" REFTABLE="local_cloudsync_subs" REFFIELDS="id"/>
         <KEY NAME="vmkeyid" TYPE="foreign" FIELDS="vm_key_id" REFTABLE="local_cloudsync_vm_key" REFFIELDS="id"/>
+        <KEY NAME="deletedby" TYPE="foreign" FIELDS="deleted_by" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="local_cloudsync_vm_key" COMMENT="The keys of the existing virtual machines">

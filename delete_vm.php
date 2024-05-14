@@ -23,7 +23,12 @@
  */
 
 global $CFG;
-require('../../../config.php');
+require('../../config.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/models/vm.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
+global $USER;
 
 // Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
@@ -41,26 +46,45 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
+// Set the user id variable
+$userid = $userid ? $userid : $USER->id;
+
 $confirm = optional_param('confirm', 0, PARAM_BOOL);
 $id = required_param('vm', PARAM_INT);
 
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/cloudsync/dialogs/delete_vm.php'));
+$PAGE->set_url(new moodle_url('/local/cloudsync/delete_vm.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('deletevmtitle', 'local_cloudsync'));
 $PAGE->set_heading(get_string('deletevmtitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
+$vmmanager = new virtualmachinemanager();
+$vm = $vmmanager->get_vm_by_id($id);
+
 if ($confirm) {
-    // Do the functionality here
-    echo "<script>console.log('This works!!!')</script>";
-    redirect(new moodle_url('/local/cloudsync/mycloud.php'));
+    $subscriptionmanager = new subscriptionmanager();
+    $helper = new aws_helper();
+
+    $secrets = $subscriptionmanager->get_secrets_by_subscription_id($vm->subscription_id);
+    $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+    $helper->delete_instance($client, $vm->instance_id);
+
+    $vm = unserialize(sprintf(
+        'O:%d:"%s"%s',
+        strlen('vm'),
+        'vm',
+        strstr(strstr(serialize($vm), '"'), ':')
+    ));
+    $vm->markDeleted($userid);
+    $vmmanager->update_vm($vm);
+    redirect(new moodle_url('/local/cloudsync/mycloud.php'),  'Virtual Machine deleted succesfully', null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
 $yesurl = new moodle_url($PAGE->url, array('confirm'=>1, 'vm'=>$id));
 $nourl = new moodle_url('/local/cloudsync/mycloud.php');
-$message = get_string('deletevmquestion', 'local_cloudsync') . $id . '?';
+$message = get_string('deletevmquestion', 'local_cloudsync') . $vm->name . '?';
 
 // Output starts here
 echo $OUTPUT->header();

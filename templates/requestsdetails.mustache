@@ -138,6 +138,10 @@
                                 <ul class="list-group">
                                     <li class="list-group-item "><strong>{{#str}} userreqdetailsvmname, local_cloudsync {{/str}}</strong><a href="{{vm_url}}?id={{id}}">{{vm.name}}</a></li>
                                     <li class="list-group-item"><strong>{{#str}} userreqdetailsvmstatus, local_cloudsync {{/str}}</strong>{{vm.status}}</li>
+                                    {{#vm.deleted}}
+                                        <li class="list-group-item"><strong>{{#str}} userreqdetailsdeletedat, local_cloudsync {{/str}}</strong>{{#userdate}} {{vm.deleted_at}} {{/userdate}}</li>
+                                        <li class="list-group-item"><strong>{{#str}} userreqdetailsdeletedby, local_cloudsync {{/str}}</strong>{{vm.deletedby_name}}</li>
+                                    {{/vm.deleted}}
                                     <li class="list-group-item"><strong>{{#str}} userreqdetailsvmkey, local_cloudsync {{/str}}</strong>{{vm.key_name}}</li>
                                     <li class="list-group-item"><strong>{{#str}} userreqdetailsvmos, local_cloudsync {{/str}}</strong>Ubuntu 22.04</li>
                                     <li class="list-group-item"><strong>{{#str}} userreqdetailsvmmemory, local_cloudsync {{/str}}</strong>{{vm.memory}} MB</li>

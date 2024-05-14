@@ -203,8 +203,10 @@ class vm {
      /**
      * Mark the vm as deleted
      */
-    public function markDeleted() {
+    public function markDeleted($userid) {
+        $this->{'status'} = 'Deleted';
         $now = new DateTime("now", core_date::get_server_timezone_object());
         $this->{'deleted_at'} = $now->getTimestamp();
+        $this->{'deleted_by'} = $userid;
     }
 }

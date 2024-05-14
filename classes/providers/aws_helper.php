@@ -261,4 +261,22 @@ class aws_helper {
 
         return $sg_result['GroupId'];
     }
+
+     /**
+     * 
+     * Delete an instance
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $instance_id the cloud instance id
+     * @return bool whether or not the instance delete action started
+     */
+    public function delete_instance(Aws\Ec2\Ec2Client $ec2Client, $instance_id) {
+        $result = $ec2Client->terminateInstances([
+            'InstanceIds' => [
+                $instance_id,
+            ],
+        ]);
+
+        return true;
+    }
 }

@@ -218,3 +218,5 @@ $string['adminvmlistseeactive'] = 'Jump to active VMs';
 $string['usersshkeystitle'] = 'My SSH keys';
 $string['usersshkeysname'] = 'Key name';
 $string['usersshkeysvms'] = 'Virtual machines associated';
+$string['userreqdetailsdeletedat'] = 'Deleted at: ';
+$string['userreqdetailsdeletedby'] = 'Deleted by: ';

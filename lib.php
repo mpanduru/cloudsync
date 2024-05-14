@@ -213,11 +213,13 @@ function get_vm_connection_details($vm, $vmmanager) {
 
    $instance_details = $helper->describe_instance($client, $vm->instance_id);
 
-   $status = $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
-   if($status && $status != DB_TO_AWS_STATES[$vm->status]){
-      $vm->status = AWS_TO_DB_STATES[$instance_details['Reservations'][0]['Instances'][0]['State']['Name']];
-      $vmmanager->update_vm($vm);
-  }
+   if($vm->status != 'Deleted'){
+      $status = $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
+      if($status && $status != DB_TO_AWS_STATES[$vm->status]){
+         $vm->status = AWS_TO_DB_STATES[$instance_details['Reservations'][0]['Instances'][0]['State']['Name']];
+         $vmmanager->update_vm($vm);
+      }
+   }
 
    return $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName'];
 }

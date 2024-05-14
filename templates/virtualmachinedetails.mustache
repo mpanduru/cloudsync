@@ -26,6 +26,13 @@
     }
 }}
 
+{{^vm.deleted}}
+<div class="row">
+    <div class="col">
+        <input type="button" class="btn btn-danger float-right" onclick="location.href='{{delete_url}}?vm={{vm.id}}'" value="{{#str}} deletevmtitle, local_cloudsync {{/str}}">
+    </div>
+</div>
+{{/vm.deleted}}
 <div class="mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -93,21 +100,27 @@
                                 {{#str}} vmdetailsreqno2nddisk, local_cloudsync {{/str}}
                             {{/request.seconddisk_storage}}
                         </li>
+                        {{#vm.deleted}}
+                            <li class="list-group-item"><strong>{{#str}} userreqdetailsdeletedat, local_cloudsync {{/str}}</strong>{{#userdate}} {{vm.deleted_at}} {{/userdate}}</li>
+                            <li class="list-group-item"><strong>{{#str}} userreqdetailsdeletedby, local_cloudsync {{/str}}</strong>{{vm.deletedby_name}}</li>
+                        {{/vm.deleted}}
                     </ul>
                 </div>
             </div>
-            <div class="card mt-3">
-                <div class="card-header bg-primary text-white">
-                    {{#str}} vmdetailsnetinfo, local_cloudsync {{/str}}
+            {{^vm.deleted}}
+                <div class="card mt-3">
+                    <div class="card-header bg-primary text-white">
+                        {{#str}} vmdetailsnetinfo, local_cloudsync {{/str}}
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>{{#str}} vmdetailsprivateip, local_cloudsync {{/str}}</strong>{{private_ip}}</li>
+                            <li class="list-group-item"><strong>{{#str}} vmdetailspublicip, local_cloudsync {{/str}}</strong>{{public_ip}}</li>
+                            <li class="list-group-item"><strong>{{#str}} vmdetailspublicdns, local_cloudsync {{/str}}</strong>{{public_dns}}</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        <li class="list-group-item"><strong>{{#str}} vmdetailsprivateip, local_cloudsync {{/str}}</strong>{{private_ip}}</li>
-                        <li class="list-group-item"><strong>{{#str}} vmdetailspublicip, local_cloudsync {{/str}}</strong>{{public_ip}}</li>
-                        <li class="list-group-item"><strong>{{#str}} vmdetailspublicdns, local_cloudsync {{/str}}</strong>{{public_dns}}</li>
-                    </ul>
-                </div>
-            </div>
+            {{/vm.deleted}}
         </div>
     </div>
 </div>

@@ -69,7 +69,7 @@ echo $OUTPUT->header(); // Display the header
 $templatecontext = (object)[
     'machines' => array_values($machines),
     'accessurl' => new moodle_url('/local/cloudsync/cloudrequest.php'),
-    'deleteurl' => new moodle_url('/local/cloudsync/dialogs/delete_vm.php'),
+    'deleteurl' => new moodle_url('/local/cloudsync/delete_vm.php'),
     'vmurl' => new moodle_url('/local/cloudsync/virtualmachine.php')
 ];
 

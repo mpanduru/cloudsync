@@ -77,14 +77,20 @@ $key = $keypairmanager->get_key_by_id($vm->vm_key_id);
 $request = $requestmanager->get_request_by_id($vm->request_id);
 $request->teacher_name = get_user_name($request->teacher_id);
 
+if($vm->status != 'Deleted') {
+    $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+    $instance_details = $helper->describe_instance($client, $vm->instance_id);
 
-$client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
-$instance_details = $helper->describe_instance($client, $vm->instance_id);
-
-$status = $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
-if($status && $status != DB_TO_AWS_STATES[$vm->status]){
-    $vm->status = AWS_TO_DB_STATES[$instance_details['Reservations'][0]['Instances'][0]['State']['Name']];
-    $vmmanager->update_vm($vm);
+    $status = $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
+    if($status && $status != DB_TO_AWS_STATES[$vm->status]){
+        $vm->status = AWS_TO_DB_STATES[$instance_details['Reservations'][0]['Instances'][0]['State']['Name']];
+        $vmmanager->update_vm($vm);
+    }
+} else {
+    $vm->deleted = $vm->status == 'Deleted';
+    if($vm->deleted) {
+        $vm->deletedby_name = get_user_name($vm->deleted_by);
+    }
 }
 
 // Output starts here
@@ -98,7 +104,8 @@ $templatecontext = (object)[
     'request' => $request,
     'private_ip' => $instance_details['Reservations'][0]['Instances'][0]['PrivateIpAddress'],
     'public_ip' => $instance_details['Reservations'][0]['Instances'][0]['PublicIpAddress'],
-    'public_dns' => $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName']
+    'public_dns' => $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName'],
+    'delete_url' =>  new moodle_url('/local/cloudsync/delete_vm.php'),
 ];
 echo $OUTPUT->render_from_template('local_cloudsync/virtualmachinedetails', $templatecontext);
 echo $OUTPUT->footer();

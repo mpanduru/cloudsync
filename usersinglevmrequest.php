@@ -73,6 +73,10 @@ if(!$request->waiting) {
         $vm->key_name = $keypairmanager->get_key_by_id($vm->vm_key_id)->name;
         $vm->vcpus = SUPPORTED_AWS_TYPES_VCPUS[$vm->type];
         $vm->memory = SUPPORTED_AWS_TYPES_MEMORY[$vm->type];
+        $vm->deleted = $vm->status == 'Deleted';
+        if($vm->deleted) {
+            $vm->deletedby_name = get_user_name($vm->deleted_by);
+        }
     }
 }
 

@@ -222,4 +222,43 @@ class aws_helper {
             return false;
         }
     }
+
+     /**
+     * 
+     * Create a security group on the AWS Cloud and add an inbound rule to it
+     *
+     * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
+     * @param string $sg_description short description for the security group
+     * @param string $name the name of the security group
+     * @param int $port the open port for the security group rule
+     * @param string $protocol the protocol used for the rule
+     * @param string $range the ip range used for the rule
+     * @param string $rule_description short description for the rule
+     * @return string the security group ID
+     */
+    public function create_security_group_with_rule(Aws\Ec2\Ec2Client $ec2Client, $sg_description, $name, $port, $protocol, $range, $rule_description) {
+        $sg_result = $ec2Client->createSecurityGroup([
+            'Description' => $sg_description,
+            'GroupName' => $name
+        ]);
+
+        $rule_result = $ec2Client->authorizeSecurityGroupIngress([
+            'GroupId' => $sg_result['GroupId'],
+            'IpPermissions' => [
+                [
+                    'FromPort' => $port,
+                    'IpProtocol' => $protocol,
+                    'IpRanges' => [
+                        [
+                            'CidrIp' => $range,
+                            'Description' => $rule_description,
+                        ],
+                    ],
+                    'ToPort' => $port,
+                ],
+            ],
+        ]);
+
+        return $sg_result['GroupId'];
+    }
 }

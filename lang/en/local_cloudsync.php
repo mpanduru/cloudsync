@@ -215,3 +215,6 @@ $string['vmnotrunninguser'] = 'Your vm is not running. Please contact your admin
 $string['adminvmlistdeleted'] = ' (Deleted)';
 $string['adminvmlistseedeleted'] = 'Jump to deleted VMs';
 $string['adminvmlistseeactive'] = 'Jump to active VMs';
+$string['usersshkeystitle'] = 'My SSH keys';
+$string['usersshkeysname'] = 'Key name';
+$string['usersshkeysvms'] = 'Virtual machines associated';

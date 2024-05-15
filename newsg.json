@@ -1,0 +1,20 @@
+{
+    "properties": {
+      "securityRules": [
+        {
+          "name": "ssh-rule",
+          "properties": {
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "destinationPortRange": "22",
+            "sourcePortRange": "*",
+            "priority": 101,
+            "direction": "Inbound"
+          }
+        }
+      ]
+    },
+    "location": "eastus"
+  }

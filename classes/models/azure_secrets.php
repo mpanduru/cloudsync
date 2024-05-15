@@ -33,12 +33,16 @@ class azure_secrets {
      * @param string $tenant_id The id of the tenant from azure
      * @param string $app_id The id of the app from azure
      * @param string $secret The secret of the specified app
+     * @param string $azure_subscription_id The ID of the azure subscription
+     * @param string $resource_group The name of the azure resource group
      */
-    public function __construct($subscription_id, $tenant_id, $app_id, $secret) {
+    public function __construct($subscription_id, $tenant_id, $app_id, $secret, $azure_subscription_id, $resource_group) {
         $this->{'subscription_id'} = $subscription_id;
         $this->{'tenant_id'} = $tenant_id;
         $this->{'app_id'} = $app_id;
         $this->{'secret'} = $secret;
+        $this->{'azure_subscription_id'} = $azure_subscription_id;
+        $this->{'resource_group'} = $resource_group;
     }
 
      /**
@@ -86,5 +90,34 @@ class azure_secrets {
      */
     public function setSecret($secret) {
         $this->{'secret'} = $secret;
+    }
+
+     /**
+     * Set the AZURE Subscription ID
+     *
+     * @param string $azure_subscription_id the AZURE Subscription ID
+     */
+    public function setAzureSubscriptionId($azure_subscription_id) {
+        $this->{'azure_subscription_id'} = $azure_subscription_id;
+    }
+
+     /**
+     * Set the resource group managed by the subscription
+     *
+     * @param string $resource_group the resource group managed by the subscription
+     */
+    public function setResourceGroup($resource_group) {
+        $this->{'resource_group'} = $resource_group;
+    }
+
+     /**
+     * Set the token that will be used to manage Azure cloud
+     *
+     * @param string $value the value of the token
+     * @param int $expires_on the timestamp the token expires on (UNIX time)
+     */
+    public function setToken($value, $expires_on) {
+        $this->{'token'} = $value;
+        $this->{'token_expires_on'} = $expires_on;
     }
 }

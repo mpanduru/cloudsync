@@ -1,0 +1,95 @@
+{
+    "location": "eastus",
+    "tags": {
+        "owner": "mpanduru"
+    },
+    "properties": {
+        "hardwareProfile": {
+            "vmSize": "Standard_B1s"
+        },
+        "additionalCapabilities": {
+            "hibernationEnabled": false
+        },
+        "storageProfile": {
+            "imageReference": {
+                "publisher": "canonical",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+            },
+            "osDisk": {
+                "osType": "Linux",
+                "name": "mpanduruVmDisk",
+                "createOption": "FromImage",
+                "caching": "ReadWrite",
+                "managedDisk": {
+                    "storageAccountType": "Premium_LRS"
+                },
+                "deleteOption": "Delete",
+                "diskSizeGB": 30
+            },
+            "diskControllerType": "SCSI"
+        },
+        "osProfile": {
+            "computerName": "mpanduruVm",
+            "adminUsername": "mpanduru",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "ssh": {
+                    "publicKeys": [
+                        {
+                            "path": "/home/mpanduru/.ssh/authorized_keys",
+                            "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCv6/7owCjWc0kDW+kwdYuW6OKHTg5PivdrOnNyidyna7YVVA6xot7LlitsuNq9QVU0aMXCmKxIZkYmpMXY6kc9TUqX/zgrfMp83nqokHrQ/oqFHhYP3Fh8fj9J3ndXziqYEFJaVQoP3bltREWuyMfXj8qu/pyq1qDSdO77qjwXl3TTzCuKqjEA85F5sq52/J9Y9nRlccK872zdygO2XlqFE63uN7l75Q0MBUgJnw+nfLan6nLUywApERlAttxrSC5Z/lykqKXVNPzUeBCdpXN2Bt/MfFJhaGypku2lHVYb6IQxFcoNivrbd2eQ8OBKD7b3NjBf6bkO2+UtkVEJEpWDlBmNG/yg+LrDjcuiBLYQ2U6MoWPzyHVoqq4kSVNOOUz94+oQ6Iesuxm/0gETLAJc4fNEkELzk9vy4kZkozNW/nSJdTluouyGxE92eJcq1SqMy7em2tSlHsbMtI0ylj40lMPDzYQltdOwtyQgEUwoAb86fim6ramwsdypL8g1M18= marius@MariusP"
+                        }
+                    ]
+                }
+            }
+        },
+        "securityProfile": {
+            "uefiSettings": {
+                "secureBootEnabled": true,
+                "vTpmEnabled": true
+            },
+            "securityType": "TrustedLaunch"
+        },
+        "networkProfile": {
+            "networkApiVersion": "2020-11-01",
+            "networkInterfaceConfigurations": [
+                {
+                    "name": "mpanduruVmNIC",
+                    "properties": {
+                        "primary": true,
+                        "deleteOption": "Delete",
+                        "ipConfigurations": [
+                            {
+                                "name": "mpanduruIPConfig",
+                                "properties": {
+                                    "primary": true,
+                                    "publicIPAddressConfiguration": {
+                                        "name": "mpanduru-test-config",
+                                        "properties": {
+                                            "deleteOption": "Delete",
+                                            "publicIPAllocationMethod": "Static"
+                                        }
+                                    },
+                                    "subnet": {
+                                        "id": "/subscriptions/122a4684-b48f-44b0-abac-b115fbd68380/resourceGroups/mpanduru-rg-test/providers/Microsoft.Network/virtualNetworks/mpanduru-vNet/subnets/mpanduru-subnet"
+                                    },
+                                    "privateIPAddressVersion": "IPv4"
+                                }
+                            }
+                        ],
+                        "networkSecurityGroup": {
+                            "id": "/subscriptions/122a4684-b48f-44b0-abac-b115fbd68380/resourceGroups/mpanduru-rg-test/providers/Microsoft.Network/networkSecurityGroups/ssh-test"
+                        }
+                    }
+                }
+            ]
+        },
+        "diagnosticsProfile": {
+            "bootDiagnostics": {
+                "enabled": true
+            }
+        }
+    }
+}

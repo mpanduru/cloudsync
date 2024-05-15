@@ -29,9 +29,38 @@
 <div class="row ml-3 mr-3">
     <h3 class="text-danger mb-5">{{#str}} firstaccessattention, local_cloudsync {{/str}}</h1>
     <h5 class="mb-6">{{#str}} firstaccessmessage, local_cloudsync {{/str}}</h3>
-
 </div>
 <div class="row d-flex justify-content-center">
+    <h3 class="text-center">{{#str}} firstaccessinstructionstitle, local_cloudsync {{/str}}</h3>
+</div>
+<div class="row d-flex justify-content-center">
+    <ol>
+        <li class="mt-4">{{#str}} firstaccessinstr1, local_cloudsync {{/str}}</li>
+        <li class="mt-2">{{#str}} firstaccessinstr2, local_cloudsync {{/str}}</li>
+        <li class="mt-2">{{#str}} firstaccessinstr3, local_cloudsync {{/str}}"{{vm.name}}_{{key_name}}.pem"</li>
+        <li class="mt-2">{{#str}} firstaccessinstr4, local_cloudsync {{/str}}
+            <ol class="mt-2">
+                <li class="mt-2"><strong>{{#str}} changesshpermissionslinux, local_cloudsync {{/str}}</strong>
+                    <pre class="bg-light p-3 rounded">chmod 400 "{{vm.name}}_{{key_name}}.pem"</pre>
+                </li>
+                <li class="mt-2"><strong>{{#str}} changesshpermissionswindows, local_cloudsync {{/str}}</strong>
+                    <ol>
+                        <li>{{#str}} changesshpermissionswindows1, local_cloudsync {{/str}}"{{vm.name}}_{{key_name}}.pem"</li>
+                        <li>{{#str}} changesshpermissionswindows2, local_cloudsync {{/str}}</li>
+                        <li>{{#str}} changesshpermissionswindows3, local_cloudsync {{/str}}</li>
+                        <li>{{#str}} changesshpermissionswindows4, local_cloudsync {{/str}}</li>
+                        <li>{{#str}} changesshpermissionswindows5, local_cloudsync {{/str}}</li>
+                        <li>{{#str}} changesshpermissionswindows6, local_cloudsync {{/str}}</li>
+                        <li>{{#str}} changesshpermissionswindows7, local_cloudsync {{/str}}</li>
+                        <li>{{#str}} changesshpermissionswindows8, local_cloudsync {{/str}}</li>
+                    </ol>
+                </li>
+            </ol>
+        </li>
+        <li class="mt-2">{{#str}} firstaccessinstr5, local_cloudsync {{/str}}</li>
+    </ol>
+</div>
+<div class="row d-flex justify-content-center mt-3">
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
         {{#str}} showkeybutton, local_cloudsync {{/str}}
     </button>

@@ -262,7 +262,6 @@ function vm_keypair_prompt($vm, $virtualmachine_manager) {
    if(empty($vm->accessed_at)) {
       $keymanager = new keypairmanager();
       $key = $keymanager->get_key_by_id($vm->vm_key_id);
-      echo "<script>console.log(".json_encode($key).")</script>";
       $returnvalue = nl2br($key->value);
    }
    $vm = unserialize(sprintf(

@@ -40,10 +40,27 @@
                 <ol>
                     <li class="mt-4">{{#str}} vmaccessstep1, local_cloudsync {{/str}}</li>
                     <li class="mt-2">{{#str}} vmaccessstep2, local_cloudsync {{/str}}</li>
-                    <li class="mt-2">{{#str}} vmaccessstep3, local_cloudsync {{/str}}</li>
-                    <pre class="bg-light p-3 rounded">{{#str}} vmaccessstep3command, local_cloudsync {{/str}}</pre>
+                    <li class="mt-2">{{#str}} changesshpermissions, local_cloudsync {{/str}} {{#str}} changesshpermissions2, local_cloudsync {{/str}}
+                        <ol class="mt-2">
+                            <li class="mt-2"><strong>{{#str}} changesshpermissionslinux, local_cloudsync {{/str}}</strong>
+                                <pre class="bg-light p-3 rounded">{{#str}} vmaccessstep3command, local_cloudsync {{/str}}"{{vm.name}}_{{key_name}}.pem"</pre>
+                            </li>
+                            <li class="mt-2"><strong>{{#str}} changesshpermissionswindows, local_cloudsync {{/str}}</strong>
+                                <ol>
+                                    <li>{{#str}} changesshpermissionswindows1, local_cloudsync {{/str}}"{{vm.name}}_{{key_name}}.pem"</li>
+                                    <li>{{#str}} changesshpermissionswindows2, local_cloudsync {{/str}}</li>
+                                    <li>{{#str}} changesshpermissionswindows3, local_cloudsync {{/str}}</li>
+                                    <li>{{#str}} changesshpermissionswindows4, local_cloudsync {{/str}}</li>
+                                    <li>{{#str}} changesshpermissionswindows5, local_cloudsync {{/str}}</li>
+                                    <li>{{#str}} changesshpermissionswindows6, local_cloudsync {{/str}}</li>
+                                    <li>{{#str}} changesshpermissionswindows7, local_cloudsync {{/str}}</li>
+                                    <li>{{#str}} changesshpermissionswindows8, local_cloudsync {{/str}}</li>
+                                </ol>
+                            </li>
+                        </ol>
+                    </li>
                     <li class="mt-2">{{#str}} vmaccessstep4, local_cloudsync {{/str}}</li>
-                    <pre class="bg-light p-3 rounded">{{#str}} vmaccessstep4command, local_cloudsync {{/str}}{{user}}@{{public_dns}}</pre>
+                    <pre class="bg-light p-3 rounded">ssh -i "{{vm.name}}_{{key_name}}.pem" {{user}}@{{public_dns}}</pre>
                 </ol>
             </div>
         </div>

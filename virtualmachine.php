@@ -70,23 +70,25 @@ if($vm->status == 'Deleted'){
 }
 
 $vm_keypair = vm_keypair_prompt($vm, $vmmanager);
+$keymanager = new keypairmanager();
+$key = $keymanager->get_key_by_id($vm->vm_key_id);
 // Output starts here
 echo $OUTPUT->header(); // Display the header
 
 if($vm_keypair) {
     $templatecontext = (object)[
+        'vm' => $vm,
         'ssh_key' => $vm_keypair,
+        'key_name' => $key->name
     ];
     echo $OUTPUT->render_from_template('local_cloudsync/firstaccessvm', $templatecontext);
 } else {
-    $keymanager = new keypairmanager();
-    $key = $keymanager->get_key_by_id($vm->vm_key_id);
-
     $user_short = str_replace(' ', '_', strtolower(get_user_name($userid)));
     $public_dns = get_vm_connection_details($vm, $vmmanager);
     $running = $vm->status == 'Running';
     
     $templatecontext = (object)[
+        'vm' => $vm,
         'user' => $user_short,
         'public_dns' => $public_dns,
         'running' => $running,

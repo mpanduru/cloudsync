@@ -60,9 +60,9 @@ define('SUPPORTED_SECONDDISK_VALUES', ['None', 8, 16, 32, 64, 128, 256, 512]);
 define('SUPPORTED_AWS_REGIONS', ['us-east-1', 'eu-central-1', 'eu-west-1']);
 define('SUPPORTED_AZURE_REGIONS', ['East US', 'Norway East']);
 
-// These will be the architectures that can be used for the virtual machines
-define('SUPPORTED_AWS_ARCHITECTURES', ['x64', 'Arm64']);
-define('SUPPORTED_AZURE_ARCHITECTURES', ['x86', 'Arm']);
+// These will be the OS that can be used for the virtual machines
+define('SUPPORTED_AWS_OS', ['ubuntu 22.04']);
+define('SUPPORTED_AZURE_OS', ['ubuntu 22.04']);
 
 // These will be the types / falvors that can be used for the virtual machines
 define('SUPPORTED_AWS_TYPES', ['t2.nano', 't2.micro', 't2.small', 't2.medium', 't2.large', 't3.nano', 't3.micro', 
@@ -146,15 +146,19 @@ define('SUPPORTED_AZURE_TYPES_MEMORY', array(
     'B2s' => 4096,
     'B2ms' => 8192,
 ));
+define('SUPPORTED_AZURE_OS_IMAGES', array(
+    'ubuntu 22.04' => 'ami-04b70fa74e45c3917',
+));
 
 define('AWS_FIELDS', array(
-    "os" => SUPPORTED_AWS_OS_IMAGES,
+    "os_name" => SUPPORTED_AWS_OS,
+    "os_image" => SUPPORTED_AWS_OS_IMAGES,
     "region" => SUPPORTED_AWS_REGIONS,
-    "architecture" => SUPPORTED_AWS_ARCHITECTURES,
     "type" => SUPPORTED_AWS_TYPES
 ));
 define('AZURE_FIELDS', array(
+    "os_name" => SUPPORTED_AZURE_OS,
+    "os_image" => SUPPORTED_AZURE_OS_IMAGES,
     "region" => SUPPORTED_AZURE_REGIONS,
-    "architecture" => SUPPORTED_AZURE_ARCHITECTURES,
     "type" => SUPPORTED_AZURE_TYPES
 ));

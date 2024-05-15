@@ -101,11 +101,11 @@ class vmcreate extends moodleform{
             $mform->disabledIf('region' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('region' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
-            $mform->addElement('select', 'architecture' . $cloudprovider->name, get_string('vmcreate_architecture', 'local_cloudsync'), 
-                                    return_var_by_provider_id($cloudprovider->id, SUPPORTED_AWS_ARCHITECTURES, SUPPORTED_AZURE_ARCHITECTURES));
-            $mform->setDefault('architecture' . $cloudprovider->name, '0');
-            $mform->disabledIf('architecture' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
-            $mform->hideIf('architecture' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
+            $mform->addElement('select', 'os' . $cloudprovider->name, get_string('vmcreate_os', 'local_cloudsync'), 
+                                    return_var_by_provider_id($cloudprovider->id, SUPPORTED_AWS_OS, SUPPORTED_AZURE_OS));
+            $mform->setDefault('os' . $cloudprovider->name, '0');
+            $mform->disabledIf('os' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
+            $mform->hideIf('os' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
             $mform->addElement('select', 'type' . $cloudprovider->name, get_string('vmcreate_type', 'local_cloudsync'), 
                                     $this->init_type_options($cloudprovider->id));

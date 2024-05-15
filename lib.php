@@ -157,17 +157,18 @@ function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovide
    $security_group_id = cloudsync_use_or_create_security_group($client, $helper, 'SSH Security Group', 'SSH', 'ssh', 22,
                                                                'tcp', '0.0.0.0/0', 'SSH rule');
    
-   $instance_id = $helper->create_instance($client, $user_short, $formdata->vm_name, 'ami-04e5276ebb8451442', 
-                                             $provider_fields["type"][$formdata->{'type' . $provider}], 
-                                             SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
-                                             SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}],
-                                             $keypair->keypair_id, $security_group_id, $keypair->public_value);
+   $instance_id = $helper->create_instance($client, $user_short, $formdata->vm_name, 
+                                           $provider_fields["os_image"][$provider_fields["os_name"][$formdata->{'os' . $provider}]], 
+                                           $provider_fields["type"][$formdata->{'type' . $provider}], 
+                                           SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
+                                           SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}],
+                                           $keypair->keypair_id, $security_group_id, $keypair->public_value);
    
    
    $vm = new vm($request_owner_id, $admin_id, $request_id, $keypair->id, $formdata->vm_name, 
                $formdata->{'subscription' . $provider}, 
                $provider_fields["region"][$formdata->{'region' . $provider}], 
-               $provider_fields["architecture"][$formdata->{'architecture' . $provider}], 
+               $provider_fields["os_name"][$formdata->{'os' . $provider}], 
                $provider_fields["type"][$formdata->{'type' . $provider}], 
                SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
                SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}]);

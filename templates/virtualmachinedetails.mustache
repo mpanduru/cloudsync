@@ -57,7 +57,7 @@
                             {{/vm.deleted_at}}
                         </li>
                         <li class="list-group-item"><strong>{{#str}} subscriptionvmsvmregion, local_cloudsync {{/str}}</strong>{{vm.region}}</li>
-                        <li class="list-group-item"><strong>{{#str}} vmdetailsvmarch, local_cloudsync {{/str}}</strong>{{vm.architecture}}</li>
+                        <li class="list-group-item"><strong>{{#str}} vmdetailsvmos, local_cloudsync {{/str}}</strong>{{vm.os}}</li>
                         <li class="list-group-item"><strong>{{#str}} vmdetailstype, local_cloudsync {{/str}}</strong>{{vm.type}}</li>
                         <li class="list-group-item"><strong>{{#str}} vmdetailsstorage, local_cloudsync {{/str}}</strong>
                         Disk 1: {{vm.rootdisk_storage}} GB
@@ -68,7 +68,14 @@
                         <li class="list-group-item"><strong>{{#str}} subscriptionvmsvmstatus, local_cloudsync {{/str}}</strong>{{vm.status}}</li>
                         <li class="list-group-item"><strong>{{#str}} subscriptionvmscloudid, local_cloudsync {{/str}}</strong>{{vm.instance_id}}</li>
                         <li class="list-group-item"><strong>{{#str}} vmdetailssshkey, local_cloudsync {{/str}}</strong>{{key_name}}</li>
-                        <li class="list-group-item"><strong>{{#str}} subscriptionvmslastused, local_cloudsync {{/str}}</strong>{{#userdate}} {{vm.accessed_at}} {{/userdate}}</li>
+                        <li class="list-group-item"><strong>{{#str}} subscriptionvmslastused, local_cloudsync {{/str}}</strong>
+                        {{#vm.accessed_at}}
+                            {{#userdate}} {{vm.accessed_at}} {{/userdate}}
+                        {{/vm.accessed_at}}
+                        {{^vm.accessed_at}}
+                                {{#str}} adminvmlistnotaccessed, local_cloudsync {{/str}}
+                        {{/vm.accessed_at}}
+                        </li>
                     </ul>
                 </div>
             </div>

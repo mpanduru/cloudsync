@@ -36,12 +36,12 @@ class vm {
      * @param string $name The name of the virtual machine
      * @param int $subscription_id The id of the subscription the vm is created on (from moodle db)
      * @param string $region The region the vm is created on
-     * @param string $architecture The cpu architecture of the virtual machine
+     * @param string $os The cpu os of the virtual machine
      * @param string $type The type of the virtual machine (specifications)
      * @param int $rootdisk_storage The storage of the root disk for the virtual machine
      * @param int|string $seconddisk_storage The storage of the second disk for the virtual machine
      */
-    public function __construct($owner_id, $cloud_admin_id, $request_id, $vm_key_id, $name, $subscription_id, $region, $architecture, $type, $rootdisk_storage, $seconddisk_storage) {
+    public function __construct($owner_id, $cloud_admin_id, $request_id, $vm_key_id, $name, $subscription_id, $region, $os, $type, $rootdisk_storage, $seconddisk_storage) {
         $this->{'owner_id'} = $owner_id;
         $this->{'cloud_admin_id'} = $cloud_admin_id;
         $this->{'request_id'} = $request_id;
@@ -51,7 +51,7 @@ class vm {
         $this->{'created_at'} = $now->getTimestamp();
         $this->{'subscription_id'} = $subscription_id;
         $this->{'region'} = $region;
-        $this->{'architecture'} = $architecture;
+        $this->{'os'} = $os;
         $this->{'type'} = $type;
         $this->{'rootdisk_storage'} = $rootdisk_storage;
         if($seconddisk_storage != 'None')
@@ -136,12 +136,12 @@ class vm {
     }
 
      /**
-     * Set the architecture of the vm
+     * Set the os of the vm
      *
-     * @param string $architecture the architecture of the vm
+     * @param string $os the os of the vm
      */
-    public function setArchitecture($architecture) {
-        $this->{'architecture'} = $architecture;
+    public function setOS($os) {
+        $this->{'os'} = $os;
     }
 
      /**

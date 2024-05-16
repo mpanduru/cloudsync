@@ -27,7 +27,9 @@ require('../../config.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/models/vm.php');
+require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_helper.php');
 global $USER;
 
 // Make sure the user is logged in
@@ -65,11 +67,11 @@ $vm = $vmmanager->get_vm_by_id($id);
 
 if ($confirm) {
     $subscriptionmanager = new subscriptionmanager();
-    $helper = new aws_helper();
 
     $secrets = $subscriptionmanager->get_secrets_by_subscription_id($vm->subscription_id);
-    $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
-    $helper->delete_instance($client, $vm->instance_id);
+    $subscription = $subscriptionmanager->get_subscription_by_id($vm->subscription_id);
+    $helper = return_var_by_provider_id($subscription->cloud_provider_id, new aws_helper(), new azure_helper());
+    $helper->cloudsync_delete_instance($vm, $secrets);
 
     $vm = unserialize(sprintf(
         'O:%d:"%s"%s',

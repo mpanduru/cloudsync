@@ -134,7 +134,7 @@ function cloudsync_use_or_create_security_group($client, $helper, $sg_descriptio
 }
 
 function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovider_manager, $request_owner_id, $request_owner_name,
-                                      $admin_id, $request_id, $subscription_manager, $helper, $vm_manager, $keypair_manager) {
+                                      $admin_id, $request_id, $subscription_manager, $vm_manager, $keypair_manager) {
    global $CFG;
    require_once($CFG->dirroot . '/local/cloudsync/classes/models/keypair.php');
    require_once($CFG->dirroot . '/local/cloudsync/classes/models/vm.php');
@@ -142,30 +142,18 @@ function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovide
 
    $user_short = str_replace(' ', '_', strtolower($request_owner_name));
    $keyname = $user_short  . '_key';
-   $keypair_id = 'cloudsync_' . $keyname . '_' . SITE_TAG;
 
    $provider = $cloudprovider_manager->get_provider_type_by_id($formdata->cloudtype);
-      
+   $subscription = $subscription_manager->get_subscription_by_id($formdata->{'subscription' . $provider});
    $secrets = $subscription_manager->get_secrets_by_subscription_id($formdata->{'subscription' . $provider});
 
-   $client = $helper->create_connection($provider_fields["region"][$formdata->{'region' . $provider}], 
-                                          $secrets->access_key_id, $secrets->access_key_secret);
+   if($keypair_manager->check_key_exists($keyname, $formdata->{'subscription' . $provider}, $provider_fields["region"][$formdata->{'region' . $provider}])) {
+      $keypair =  $keypair_manager->get_key($keyname, $formdata->{'subscription' . $provider}, $provider_fields["region"][$formdata->{'region' . $provider}]);
+   } else {
+      $keypair = false;
+   }
 
-   $keypair = cloudsync_use_or_create_keypair($request_owner_id, $request_owner_name, $formdata->{'subscription' . $provider}, $keyname, 
-                                              $keypair_id, $provider_fields["region"][$formdata->{'region' . $provider}], $helper,
-                                              $keypair_manager, $client);
-   $security_group_id = cloudsync_use_or_create_security_group($client, $helper, 'SSH Security Group', 'SSH', 'ssh', 22,
-                                                               'tcp', '0.0.0.0/0', 'SSH rule');
-   
-   $instance_id = $helper->create_instance($client, $user_short, $formdata->vm_name, 
-                                           $provider_fields["os_image"][$provider_fields["os_name"][$formdata->{'os' . $provider}]], 
-                                           $provider_fields["type"][$formdata->{'type' . $provider}], 
-                                           SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
-                                           SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}],
-                                           $keypair->keypair_id, $security_group_id, $keypair->public_value);
-   
-   
-   $vm = new vm($request_owner_id, $admin_id, $request_id, $keypair->id, $formdata->vm_name, 
+   $vm = new vm($request_owner_id, $admin_id, $request_id, $formdata->vm_name, 
                $formdata->{'subscription' . $provider}, 
                $provider_fields["region"][$formdata->{'region' . $provider}], 
                $provider_fields["os_name"][$formdata->{'os' . $provider}], 
@@ -173,6 +161,8 @@ function cloudsync_submit_vm_creation($provider_fields, $formdata, $cloudprovide
                SUPPORTED_ROOTDISK_VALUES[$formdata->{'disk1' . $provider}], 
                SUPPORTED_SECONDDISK_VALUES[$formdata->{'disk2' . $provider}]);
 
+   $helper = return_var_by_provider_id($subscription->cloud_provider_id, new aws_helper(), new azure_helper());
+   $instance_id = $helper->cloudsync_create_virtualmachine($vm, $secrets, $subscription_manager, $keypair, $keypair_manager, $request_owner_id, $request_owner_name);
    $vm->setVmInstanceId($instance_id);
    $vm_id = $vm_manager->create_vm($vm);
    $vm->setId($vm_id);
@@ -201,31 +191,36 @@ function cloudsync_submit_subscription_creation($formdata, $providermanager, $su
    require_once($CFG->dirroot.'/local/cloudsync/classes/models/aws_secrets.php');
    require_once($CFG->dirroot.'/local/cloudsync/classes/models/azure_secrets.php');
    require_once($CFG->dirroot.'/local/cloudsync/classes/providers/aws_helper.php');
+   require_once($CFG->dirroot.'/local/cloudsync/classes/providers/azure_helper.php');
    require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 
-   // try{
-   $helper = new aws_helper();
-   $helper->test_secrets(SUPPORTED_AWS_REGIONS[0], $formdata->aws_access_key_id, $formdata->aws_secret_access_key);
+   try{
+      $subscription = new subscription($formdata->cloudprovider, $formdata->subscriptionname);
+      $provider_type = $providermanager->get_provider_type_by_id($formdata->cloudprovider);
+      switch ($provider_type) {
+         case AWS_PROVIDER:
+            $secrets = new aws_secrets($subscription->id, $formdata->aws_access_key_id, $formdata->aws_secret_access_key);
+            $helper = new aws_helper();
+            break;
+         case AZURE_PROVIDER:
+            $secrets = new azure_secrets($subscription->id, $formdata->tenant_id, $formdata->app_id, $formdata->password,
+                                          $formdata->azure_subscription_id, $formdata->resource_group);
+            $helper = new azure_helper();
+            break;
+         default:
+            throw new Exception("Unknown provider type: $provider_type");
+      }
 
-   $subscription = new subscription($formdata->cloudprovider, $formdata->subscriptionname);
-   $provider_type = $providermanager->get_provider_type_by_id($formdata->cloudprovider);
-   switch ($provider_type) {
-      case AWS_PROVIDER:
-         $secrets = new aws_secrets($subscription->id, $formdata->aws_access_key_id, $formdata->aws_secret_access_key);
-         break;
-      case AZURE_PROVIDER:
-         $secrets = new azure_secrets($subscription->id, $formdata->tenant_id, $formdata->app_id, $formdata->password);
-         break;
-      default:
-         throw new Exception("Unknown provider type: $provider_type");
+      $valid = $helper->test_secrets($secrets);
+
+      if($valid) {
+         $id = $subscriptionmanager->create_subscription($subscription, $secrets);
+         $subscription->setId($id);
+      }
+   } catch (Exception $e) {
+      throw new Exception('Something went wrong! Please check if the subscription secrets are correct or 
+                           your subscription has the necessary policies to create cloud resources.');
    }
-
-   $id = $subscriptionmanager->create_subscription($subscription, $secrets);
-   $subscription->setId($id);
-   // } catch (Exception $e) {
-   //    throw new Exception('Something went wrong! Please check if the subscription secrets are correct or 
-   //                         your subscription has the necessary policies to create cloud resources.');
-   // }
 }
 
 function get_vm_connection_details($vm, $vmmanager) {
@@ -233,24 +228,29 @@ function get_vm_connection_details($vm, $vmmanager) {
    require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
    require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
    require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
+   require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_helper.php');
 
    $subscription_manager = new subscriptionmanager();
+   $subscription = $subscription_manager->get_subscription_by_id($vm->subscription_id);
    $secrets = $subscription_manager->get_secrets_by_subscription_id($vm->subscription_id);
-
-   $helper = new aws_helper();  // DE INLOCUIT CU AMBELE
-   $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
-
-   $instance_details = $helper->describe_instance($client, $vm->instance_id);
+   
+   $helper = return_var_by_provider_id($subscription->cloud_provider_id, new aws_helper(), new azure_helper());
+   $connection_string = $helper->get_instance_connection_string($vm, $secrets);
 
    if($vm->status != 'Deleted'){
-      $status = $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
-      if($status && $status != DB_TO_AWS_STATES[$vm->status]){
-         $vm->status = AWS_TO_DB_STATES[$instance_details['Reservations'][0]['Instances'][0]['State']['Name']];
+      $status = $helper->get_instance_status($vm, $secrets);
+      
+      $states = return_var_by_provider_id($subscription->cloud_provider_id, [AWS_TO_DB_STATES, DB_TO_AWS_STATES], [AZURE_TO_DB_STATES, DB_TO_AZURE_STATES]);
+      if($status && $status != $states[1][$vm->status]){
+         $vm->status = $states[0][$status];
+         $vmmanager->update_vm($vm);
+      } else if (!$status){
+         $vm->status = 'Deleted';
          $vmmanager->update_vm($vm);
       }
    }
 
-   return $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName'];
+   return $connection_string;
 }
 
 function vm_keypair_prompt($vm, $virtualmachine_manager) {

@@ -24,7 +24,6 @@
 
 global $CFG;
 require($CFG->dirroot . '/local/cloudsync/vendor/autoload.php');
-require($CFG->dirroot . '/local/cloudsync/constants.php');
 
 // Class that will be used to administrate the resources that live
 // on AWS subscriptions
@@ -49,6 +48,55 @@ class aws_helper {
         ]);
 
         return $ec2Client;
+    }
+
+     /**
+     * Create a virtual machine for a moodle user via an existing virtual machine from db
+     */
+    public function cloudsync_create_virtualmachine($vm, $secrets, $subscriptionmanager, $keypair, $keypairmanager, $owner_id, $owner_name) {
+        $user_short = str_replace(' ', '_', strtolower($owner_name));
+        $keyname = $user_short  . '_key';
+        $keypair_id = 'cloudsync_' . $keyname . '_' . $vm->region . '_'. SITE_TAG;
+
+        // Create the connection to the cloud
+        $client = $this->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+
+        // Create the ssh key
+        if($keypair){
+            if(!$this->exists_key($client, $keypair->keypair_id)) {
+                throw new Exception("Key exists in db but not in cloud");
+            }
+        } else {
+            if($this->exists_key($client, $keypair_id)) {
+                throw new Exception("Key exists in cloud but not in db");
+            } else {
+                $keypair = new keypair($owner_id, $vm->subscription_id, $keyname, $vm->region);
+                $key = $this->create_key($client, $keypair_id, $owner_name);
+                $key_public = $this->get_public_key($client, $keypair_id);
+                $keypair->setKeypairPublicValue($key_public);
+                $keypair->setKeypairValue($key->private_key_value);
+                $keypair->setKeypairId($key->key_name);
+                $id = $keypairmanager->create_key($keypair);
+                $keypair->setId($id);
+            }
+        }
+
+        $vm->setKeypair($keypair->id);
+
+        // Create the security group
+        if($this->exists_security_group($client, 'cloudsync_ssh_' . SITE_TAG)) {
+            $sg_id = $this->get_security_group($client, 'cloudsync_ssh_' . SITE_TAG);
+            $sg_id = $sg_id['SecurityGroups'][0]['GroupId'];
+        } else {
+            $sg_id = $this->create_security_group_with_rule($client, 'SSH Security Group', 'SSH', 'cloudsync_ssh_' . SITE_TAG, 
+                                                            22, 'tcp', '0.0.0.0/0', 'SSH rule');
+        }
+
+        // Create the instance
+        $instance_id = $this->create_instance($client, $user_short, $vm->name, AWS_FIELDS["os_image"][$vm->os], $vm->type,
+                                $vm->rootdisk_storage, $vm->seconddisk_storage, $keypair->keypair_id, $sg_id, $keypair->public_value);
+
+        return $instance_id;
     }
 
      /**
@@ -158,14 +206,14 @@ class aws_helper {
      * Create an ssh key on the AWS cloud
      *
      * @param Aws\Ec2\Ec2Client $ec2Client the client of the connection (created with create_connection function)
-     * @param string $key_name the name of the key
+     * @param string $keypair_id the name of the key
      * @param string $owner the name of the owner of the key
      * @return object an object that holds the created key name and its value
      */
-    public function create_key(Aws\Ec2\Ec2Client $ec2Client, $key_name, $owner) {
+    public function create_key(Aws\Ec2\Ec2Client $ec2Client, $keypair_id, $owner) {
         $result = $ec2Client->createKeyPair([
             'KeyFormat' => 'pem',
-            'KeyName' => 'cloudsync_' . $key_name . '_' . SITE_TAG,
+            'KeyName' => $keypair_id,
             'KeyType' => 'rsa',
             'TagSpecifications' => [
                 [
@@ -199,7 +247,7 @@ class aws_helper {
         $result = $ec2Client->describeKeyPairs([
             'IncludePublicKey' => true,
             'KeyNames' => [
-                'cloudsync_' . $key_name . '_' . SITE_TAG,
+                $key_name,
             ],
         ]);
 
@@ -322,6 +370,12 @@ class aws_helper {
         return true;
     }
 
+    public function cloudsync_delete_instance($vm, $secrets) {
+        $client = $this->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+
+        return $this->delete_instance($client, $vm->instance_id);
+    }
+
      /**
      * 
      * Delete a key
@@ -351,31 +405,6 @@ class aws_helper {
             'GroupId' => $group_id,
         ]);
 
-        return true;
-    }
-
-     /**
-     * 
-     * Test an AWS account to make sure a subscription is valid
-     *
-     * @param string $region the region of the connection
-     * @param string $access_key the access_key of the aws subscription
-     * @param string $access_key_secret the access_key_secret of the aws subscription
-     * @return bool whether or not the subscription is valid
-     */
-    public function test_secrets($region, $access_key, $access_key_secret) {
-        $client = $this->create_connection($region, $access_key, $access_key_secret);
-        $test_sg_ssh = $this->create_security_group_with_rule($client, 'None', 'test_SG', 'ssh',
-                                                              22, 'tcp', '0.0.0.0/0', 'None');
-        $test_ssh_key = $this->create_key($client, 'test_keypair', 'test_owner');   
-        $public_ssh_key = $this->get_public_key($client, 'test_keypair');                                                           
-        $test_instance = $this->create_instance($client, 'test_owner', 'test_instance', 'ami-04e5276ebb8451442', 't2.micro',
-                                                8, 'None', $test_ssh_key->key_name, '', $public_ssh_key);
-
-        $this->delete_instance($client, $test_instance);
-        $this->delete_key($client, $test_ssh_key->key_name);       
-        $this->delete_security_group($client, $test_sg_ssh);
-        
         return true;
     }
 
@@ -447,4 +476,57 @@ class aws_helper {
         $user_data = base64_encode($string_data);
         return $user_data;
     }
+
+    public function get_instance_connection_string($vm, $secrets) {
+        $client = $this->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+
+        $instance_details = $this->describe_instance($client, $vm->instance_id);
+        
+        return $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName'];
+    }
+
+    public function get_instance_status($vm, $secrets) {
+        $client = $this->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+
+        $instance_details = $this->describe_instance($client, $vm->instance_id);
+        
+        return $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
+    }
+
+    public function get_netinfo($vm, $secrets) {
+        $client = $this->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+
+        $instance_details = $this->describe_instance($client, $vm->instance_id);
+        
+        $netinfo = (object)[ 
+            'private_ip' => $instance_details['Reservations'][0]['Instances'][0]['PrivateIpAddress'],
+            'public_ip' => $instance_details['Reservations'][0]['Instances'][0]['PublicIpAddress'],
+            'public_dns' => $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName'],
+        ];
+
+        return $netinfo;
+    }
+
+    /**
+    * 
+    * Test an AWS account to make sure a subscription is valid
+    *
+    * @param object $secrets the secrets that are going to be tested
+    * @return bool whether or not the subscription is valid
+    */
+   public function test_secrets($secrets) {
+       $client = $this->create_connection('us-east-1', $secrets->access_key_id, $secrets->access_key_secret);
+       $test_sg_ssh = $this->create_security_group_with_rule($client, 'None', 'test_SG', 'ssh',
+                                                             22, 'tcp', '0.0.0.0/0', 'None');
+       $test_ssh_key = $this->create_key($client, 'test_keypair', 'test_owner');   
+       $public_ssh_key = $this->get_public_key($client, 'test_keypair');                                                           
+       $test_instance = $this->create_instance($client, 'test_owner', 'test_instance', 'ami-04e5276ebb8451442', 't2.micro',
+                                               8, 'None', $test_ssh_key->key_name, '', $public_ssh_key);
+
+       $this->delete_instance($client, $test_instance);
+       $this->delete_key($client, $test_ssh_key->key_name);       
+       $this->delete_security_group($client, $test_sg_ssh);
+       
+       return true;
+   }
 }

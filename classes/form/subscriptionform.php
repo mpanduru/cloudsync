@@ -106,6 +106,12 @@ class subscriptionform extends moodleform {
         $form->addElement('password', 'password', 'Azure Password');
         $form->disabledIf('password', $dependenton, 'ne', $id);
         $form->hideIf('password', $dependenton, 'ne', $id);
+        $form->addElement('text', 'azure_subscription_id', 'Azure Subscription ID');
+        $form->disabledIf('azure_subscription_id', $dependenton, 'ne', $id);
+        $form->hideIf('azure_subscription_id', $dependenton, 'ne', $id);
+        $form->addElement('text', 'resource_group', 'Resource group');
+        $form->disabledIf('resource_group', $dependenton, 'ne', $id);
+        $form->hideIf('resource_group', $dependenton, 'ne', $id);
     }
 }
  

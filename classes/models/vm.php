@@ -32,7 +32,6 @@ class vm {
      * @param int $owner_id the id of the user the vm is created for
      * @param int $cloud_admin_id the id of the user that approved the vm request
      * @param int $request_id the id of the request for the created vm
-     * @param int $vm_key_id the id of the keypair for the created vm
      * @param string $name The name of the virtual machine
      * @param int $subscription_id The id of the subscription the vm is created on (from moodle db)
      * @param string $region The region the vm is created on
@@ -41,11 +40,10 @@ class vm {
      * @param int $rootdisk_storage The storage of the root disk for the virtual machine
      * @param int|string $seconddisk_storage The storage of the second disk for the virtual machine
      */
-    public function __construct($owner_id, $cloud_admin_id, $request_id, $vm_key_id, $name, $subscription_id, $region, $os, $type, $rootdisk_storage, $seconddisk_storage) {
+    public function __construct($owner_id, $cloud_admin_id, $request_id, $name, $subscription_id, $region, $os, $type, $rootdisk_storage, $seconddisk_storage) {
         $this->{'owner_id'} = $owner_id;
         $this->{'cloud_admin_id'} = $cloud_admin_id;
         $this->{'request_id'} = $request_id;
-        $this->{'vm_key_id'} = $vm_key_id;
         $this->{'name'} = $name;
         $now = new DateTime("now", core_date::get_server_timezone_object());
         $this->{'created_at'} = $now->getTimestamp();

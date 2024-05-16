@@ -76,14 +76,15 @@ if(!$request->waiting) {
         $vm = $vmmanager->get_vm_by_requestId($requestId);
         $subscription = $subscriptionmanager->get_subscription_by_id($vm->subscription_id);
         $provider = $cloudprovidermanager->get_provider_by_id($subscription->cloud_provider_id);
+        $fields = return_var_by_provider_id($subscriptionmanager->get_subscription_by_id($vm->subscription_id)->cloud_provider_id, AWS_FIELDS, AZURE_FIELDS);
 
         $vm->deleted = $vm->status == 'Deleted';
         if($vm->deleted) {
             $vm->deletedby_name = get_user_name($vm->deleted_by);
         }
         $vm->key_name = $keypairmanager->get_key_by_id($vm->vm_key_id)->name;
-        $vm->vcpus = SUPPORTED_AWS_TYPES_VCPUS[$vm->type];
-        $vm->memory = SUPPORTED_AWS_TYPES_MEMORY[$vm->type];
+        $vm->vcpus = $fields['types_vcpus'][$vm->type];
+        $vm->memory = $fields['types_memory'][$vm->type];
         $vm->provider = $provider->name;
         $vm->subscription = $subscription->name;
     }

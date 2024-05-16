@@ -30,6 +30,7 @@ require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmana
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_helper.php');
 require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 
@@ -64,7 +65,6 @@ $subscriptionmanager = new subscriptionmanager();
 $cloudprovidermanager = new cloudprovidermanager();
 $keypairmanager = new keypairmanager();
 $requestmanager = new vmrequestmanager();
-$helper = new aws_helper();
 
 $vm = $vmmanager->get_vm_by_id($vmId);
 $vm->owner_name = get_user_name($vm->owner_id);
@@ -77,21 +77,26 @@ $key = $keypairmanager->get_key_by_id($vm->vm_key_id);
 $request = $requestmanager->get_request_by_id($vm->request_id);
 $request->teacher_name = get_user_name($request->teacher_id);
 
-if($vm->status != 'Deleted') {
-    $client = $helper->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
-    $instance_details = $helper->describe_instance($client, $vm->instance_id);
-
-    $status = $instance_details['Reservations'][0]['Instances'][0]['State']['Name'];
-    if($status && $status != DB_TO_AWS_STATES[$vm->status]){
-        $vm->status = AWS_TO_DB_STATES[$instance_details['Reservations'][0]['Instances'][0]['State']['Name']];
-        $vmmanager->update_vm($vm);
+$helper = return_var_by_provider_id($subscription->cloud_provider_id, new aws_helper(), new azure_helper());
+if($vm->status != 'Deleted'){
+    $status = $helper->get_instance_status($vm, $secrets);
+    
+    $states = return_var_by_provider_id($subscription->cloud_provider_id, [AWS_TO_DB_STATES, DB_TO_AWS_STATES], [AZURE_TO_DB_STATES, DB_TO_AZURE_STATES]);
+    if($status && $status != $states[1][$vm->status]){
+       $vm->status = $states[0][$status];
+       $vmmanager->update_vm($vm);
+    } else if (!$status){
+       $vm->status = 'Deleted';
+       $vmmanager->update_vm($vm);
     }
 } else {
     $vm->deleted = $vm->status == 'Deleted';
     if($vm->deleted) {
         $vm->deletedby_name = get_user_name($vm->deleted_by);
     }
-}
+} 
+
+$netinfo = $helper->get_netinfo($vm, $secrets);
 
 // Output starts here
 echo $OUTPUT->header(); // Display the header
@@ -102,9 +107,9 @@ $templatecontext = (object)[
     'provider_name' => $provider->name,
     'key_name' => $key->name,
     'request' => $request,
-    'private_ip' => $instance_details['Reservations'][0]['Instances'][0]['PrivateIpAddress'],
-    'public_ip' => $instance_details['Reservations'][0]['Instances'][0]['PublicIpAddress'],
-    'public_dns' => $instance_details['Reservations'][0]['Instances'][0]['PublicDnsName'],
+    'private_ip' => $netinfo->private_ip,
+    'public_ip' => $netinfo->public_ip,
+    'public_dns' => $netinfo->public_dns,
     'delete_url' =>  new moodle_url('/local/cloudsync/delete_vm.php'),
 ];
 echo $OUTPUT->render_from_template('local_cloudsync/virtualmachinedetails', $templatecontext);

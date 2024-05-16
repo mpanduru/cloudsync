@@ -24,12 +24,54 @@
 
 global $CFG;
 require($CFG->dirroot . '/local/cloudsync/vendor/autoload.php');
-require($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
-require($CFG->dirroot . '/local/cloudsync/constants.php');
 
 // Class that will be used to administrate the resources that live
 // on AZURE subscriptions
 class azure_helper {
+
+     /**
+     * Create a virtual machine for a moodle user via an existing virtual machine from db
+     */
+    public function cloudsync_create_virtualmachine($vm, $secrets, $subscriptionmanager, $keypair, $keypairmanager, $owner_id, $owner_name) {
+        $user_short = str_replace(' ', '_', strtolower($owner_name));
+        $keyname = $user_short  . '_key';
+        $keypair_id = 'cloudsync_' . $keyname . '_' . $vm->region . '_'. SITE_TAG;
+
+        // Create the connection to the cloud
+        $token = $this->create_connection($subscriptionmanager, $vm->subscription_id);
+
+        // Create the ssh key
+        if($keypair){
+            if(!$this->key_exists($token, $secrets->azure_subscription_id, $secrets->resource_group, $keypair_id)) {
+                throw new Exception("Key exists in db but not in cloud");
+            }
+        } else {
+            if($this->key_exists($token, $secrets->azure_subscription_id, $secrets->resource_group, $keypair_id)) {
+                throw new Exception("Key exists in cloud but not in db");
+            } else {
+                $keypair = new keypair($owner_id, $vm->subscription_id, $keyname, $vm->region);
+                $key = $this->create_keypair($token, $secrets->azure_subscription_id, $secrets->resource_group, 
+                                             $vm->region, $keypair_id, $owner_name);
+                $keypair->setKeypairPublicValue($key->publicKey);
+                $keypair->setKeypairValue($key->privateKey);
+                $keypair->setKeypairId($keypair_id);
+                $id = $keypairmanager->create_key($keypair);
+                $keypair->setId($id);
+            }
+        }
+
+        $vm->setKeypair($keypair->id);
+
+        // Create the instance
+        $instance_id = $this->create_instance($token, $secrets->azure_subscription_id, $secrets->resource_group, 
+                                              $vm->region, $vm->name, $owner_name, $vm->type, 'cloudsync_disk_' . $vm->name . SITE_TAG,
+                                              $vm->rootdisk_storage, $user_short, 'userhost', 'cloudsync_NIC_' . $vm->name . SITE_TAG,
+                                              'cloudsync_IPconfig_' . $vm->name . SITE_TAG, 'cloudsync_publicIP_' . $vm->name . SITE_TAG,
+                                              'cloudsync_vnet_eastus_' . SITE_TAG, 'cloudsync_subnet_eastus_' . SITE_TAG,
+                                              'cloudsync_ssh_eastus_' . SITE_TAG, $keypair->public_value);
+
+        return $instance_id->name;
+    }
 
      /**
      * Build a request that will be used to manage azure resources
@@ -83,10 +125,10 @@ class azure_helper {
                         throw new Exception('Error decoding JSON');
                     }
                 }
-                return $response->getBody();
+                return $wrong_status;
             }
             else {
-                return $response->getBody();
+                return $wrong_status;
             }
           }
           catch(HTTP_Request2_Exception $e) {
@@ -330,7 +372,7 @@ class azure_helper {
                             \"publicKeys\": [
                                 {
                                     \"path\": \"/home/".$os_username."/.ssh/authorized_keys\",
-                                    \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCv6/7owCjWc0kDW+kwdYuW6OKHTg5PivdrOnNyidyna7YVVA6xot7LlitsuNq9QVU0aMXCmKxIZkYmpMXY6kc9TUqX/zgrfMp83nqokHrQ/oqFHhYP3Fh8fj9J3ndXziqYEFJaVQoP3bltREWuyMfXj8qu/pyq1qDSdO77qjwXl3TTzCuKqjEA85F5sq52/J9Y9nRlccK872zdygO2XlqFE63uN7l75Q0MBUgJnw+nfLan6nLUywApERlAttxrSC5Z/lykqKXVNPzUeBCdpXN2Bt/MfFJhaGypku2lHVYb6IQxFcoNivrbd2eQ8OBKD7b3NjBf6bkO2+UtkVEJEpWDlBmNG/yg+LrDjcuiBLYQ2U6MoWPzyHVoqq4kSVNOOUz94+oQ6Iesuxm/0gETLAJc4fNEkELzk9vy4kZkozNW/nSJdTluouyGxE92eJcq1SqMy7em2tSlHsbMtI0ylj40lMPDzYQltdOwtyQgEUwoAb86fim6ramwsdypL8g1M18= marius@MariusP\"
+                                    \"keyData\": \"".$public_key."\"
                                 }
                             ]
                         }
@@ -468,6 +510,170 @@ class azure_helper {
         );
 
         $request = $this->build_request($url, HTTP_Request2::METHOD_GET, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        return $response;
+    }
+
+    public function get_key($token, $azure_subscription_id, $resource_group, $name) {
+        $url = 'https://management.azure.com/subscriptions/'.$azure_subscription_id.'/resourceGroups/'.$resource_group.
+               '/providers/Microsoft.Compute/sshPublicKeys/'.$name.'?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_GET, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        return $response;
+    }
+
+    public function key_exists($token, $azure_subscription_id, $resource_group, $name) {
+        $key = $this->get_key($token, $azure_subscription_id, $resource_group, $name);
+
+        if($key) {
+            return true;
+        }
+        return $key;
+    }
+
+    /**
+    * 
+    * Test an Azure account to make sure a subscription is valid
+    *
+    * @param object $secrets the secrets that are going to be tested
+    * @return bool whether or not the subscription is valid
+    */
+    public function test_secrets($secrets) {
+        $token = $this->get_token($secrets->tenant_id, $secrets->app_id, $secrets->secret);
+        $virtual_network = $this->create_virtual_network($token, $secrets->azure_subscription_id, $secrets->resource_group, 'eastus', 
+                                               'cloudsync_vnet_eastus_' . SITE_TAG, 'cloudsync', '10.0.0.0/16', '10.0.0.0/24',
+                                               'cloudsync_subnet_eastus_' . SITE_TAG);
+
+        if($virtual_network) {
+            $security_group = $this->create_security_group_with_rule($token, $secrets->azure_subscription_id, $secrets->resource_group, 
+                                                            'eastus', 'cloudsync_ssh_eastus_' . SITE_TAG, 'cloudsync', 22, 'Tcp', '*', 
+                                                            101, 'SSH');
+
+            if($security_group) {
+                return true;
+            }
+            return $security_group;
+        }
+        return $virtual_network;
+    }
+
+    public function get_instance($token, $azure_subscription_id, $resource_group, $name) {
+        $url = 'https://management.azure.com/subscriptions/'.$azure_subscription_id.'/resourceGroups/'.$resource_group.
+               '/providers/Microsoft.Compute/virtualMachines/'.$name.'?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_GET, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        return $response;
+    }
+
+    public function get_nic($token, $id) {
+        $url = 'https://management.azure.com' . $id . '?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_GET, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        return $response;
+    }
+
+    public function get_public_ip($token, $id) {
+        $url = 'https://management.azure.com' . $id . '?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_GET, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        return $response;
+    }
+
+    public function get_instance_connection_string($vm, $secrets) {
+        $token = $this->create_connection(new subscriptionmanager(), $vm->subscription_id);
+
+        $instance = $this->get_instance($token, $secrets->azure_subscription_id, $secrets->resource_group, $vm->instance_id);
+        $NIC = $this->get_nic($token, $instance->properties->networkProfile->networkInterfaces[0]->id);
+        $publicIP = $this->get_public_ip($token, $NIC->properties->ipConfigurations[0]->properties->publicIPAddress->id);
+
+        return $publicIP->properties->ipAddress;
+    }
+
+    public function get_netinfo($vm, $secrets) {
+        $token = $this->create_connection(new subscriptionmanager(), $vm->subscription_id);
+
+        $instance = $this->get_instance($token, $secrets->azure_subscription_id, $secrets->resource_group, $vm->instance_id);
+        $NIC = $this->get_nic($token, $instance->properties->networkProfile->networkInterfaces[0]->id);
+        $publicIP = $this->get_public_ip($token, $NIC->properties->ipConfigurations[0]->properties->publicIPAddress->id);
+
+        $privateIP = $NIC->properties->ipConfigurations[0]->properties->privateIPAddress;
+
+        $netinfo = (object)[ 
+            'private_ip' => $privateIP,
+            'public_ip' => $publicIP->properties->ipAddress,
+            'public_dns' => 'None',
+        ];
+
+        return $netinfo;
+    }
+
+    public function get_instance_status($vm, $secrets) {
+        $token = $this->create_connection(new subscriptionmanager(), $vm->subscription_id);
+
+        $url = 'https://management.azure.com/subscriptions/'.$secrets->azure_subscription_id.'/resourceGroups/'.$secrets->resource_group.
+               '/providers/Microsoft.Compute/virtualMachines/'.$vm->instance_id.'/InstanceView?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_GET, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        if ($response->statuses[0]->displayStatus != 'Provisioning succeeded'){
+            return 'pending';
+        }
+        return $response->statuses[1]->displayStatus;
+    }
+
+    public function cloudsync_delete_instance($vm, $secrets) {
+        $token = $this->create_connection(new subscriptionmanager(), $vm->subscription_id);
+
+        $url = 'https://management.azure.com/subscriptions/'.$secrets->azure_subscription_id.'/resourceGroups/'.$secrets->resource_group.
+                '/providers/Microsoft.Compute/virtualMachines/'.$vm->instance_id.'?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_DELETE, $header, null, null);
 
         $response = $this->send_request($request, false, false, true);
 

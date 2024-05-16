@@ -36,6 +36,7 @@ require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinema
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_helper.php');
 require_once($CFG->dirroot . '/local/cloudsync/lib.php');
 
 // Make sure the user is logged in
@@ -87,13 +88,12 @@ if ($mform->is_cancelled()) {
     $cloudprovidermanager = new cloudprovidermanager();
     $subscription_manager = new subscriptionmanager();
     $keypair_manager = new keypairmanager();
-    $aws_helper = new aws_helper();
     $vm_manager = new virtualmachinemanager();
 
     $owner_name = get_user_name($request->owner_id);
 
     cloudsync_submit_vm_creation($fields, $fromform, $cloudprovidermanager, $request->owner_id, $owner_name, $userid, $requestID, 
-                                 $subscription_manager, $aws_helper, $vm_manager, $keypair_manager);
+                                 $subscription_manager, $vm_manager, $keypair_manager);
 
     // close the request
     $vmrequest = unserialize(sprintf(

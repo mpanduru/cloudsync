@@ -40,6 +40,14 @@ define('DB_TO_AWS_STATES', array(
     'Stopped' => 'stopped',
 ));
 
+define('DB_TO_AZURE_STATES', array(
+    'Pending' => 'pending',
+    'Running' => 'VM running',
+    'Shutting-down' => 'VM deallocating',
+    'Deleted' => 'None',
+    'Stopped' => 'VM deallocated',
+));
+
 define('AWS_TO_DB_STATES', array(
     'pending' => 'Pending',
     'running' => 'Running',
@@ -48,17 +56,24 @@ define('AWS_TO_DB_STATES', array(
     'stopping' => 'Stopping',
     'stopped' => 'Stopped',
 ));
+define('AZURE_TO_DB_STATES', array(
+    'pending' => 'Pending',
+    'VM running' => 'Running',
+    'VM deallocating' => 'Shutting-down',
+    'None' => 'Deleted',
+    'VM deallocated' => 'Stopped',
+));
 
 // These will be displayed as choices for students when requesting virtual machines
 define('SUPPORTED_OS_VALUES', ['ubuntu 22.04']);
 define('SUPPORTED_MEMORY_VALUES', [1024, 2048, 4096, 8192]);
 define('SUPPORTED_VCPUS_VALUES', [1, 2, 4, 6, 8]);
-define('SUPPORTED_ROOTDISK_VALUES', [8, 16, 32, 64, 128, 256, 512]);
+define('SUPPORTED_ROOTDISK_VALUES', [8, 16, 30, 64, 128, 256, 512]);
 define('SUPPORTED_SECONDDISK_VALUES', ['None', 8, 16, 32, 64, 128, 256, 512]);
 
 // These will be the regions that can be used to create virtual machines on
 define('SUPPORTED_AWS_REGIONS', ['us-east-1', 'eu-central-1', 'eu-west-1']);
-define('SUPPORTED_AZURE_REGIONS', ['East US', 'Norway East']);
+define('SUPPORTED_AZURE_REGIONS', ['eastus', 'westus']);
 
 // These will be the OS that can be used for the virtual machines
 define('SUPPORTED_AWS_OS', ['ubuntu 22.04']);
@@ -67,7 +82,7 @@ define('SUPPORTED_AZURE_OS', ['ubuntu 22.04']);
 // These will be the types / falvors that can be used for the virtual machines
 define('SUPPORTED_AWS_TYPES', ['t2.nano', 't2.micro', 't2.small', 't2.medium', 't2.large', 't3.nano', 't3.micro', 
             't3.small', 't3.medium', 't3.large', 't3a.nano', 't3a.micro', 't3a.small', 't3a.medium', 't3a.large']);
-define('SUPPORTED_AZURE_TYPES', ['B1ls', 'B1s', 'B1ms', 'B2s', 'B2ms']);
+define('SUPPORTED_AZURE_TYPES', ['Standard_B1s', 'Standard_B1ms', 'Standard_B2s', 'Standard_B2ms']);
 
 
 define('SUPPORTED_AWS_OS_IMAGES', array(
@@ -126,25 +141,22 @@ define('SUPPORTED_AWS_TYPES_MEMORY', array(
 ));
 
 define('SUPPORTED_AZURE_TYPES_SPEC_DESCRIPTION', array(
-    'B1ls' => 'vCPUs 1, 0.5 GiB RAM, 2 Data disks, 320 Max IOPS, 4 Gib Local storage (SCSI)',
-    'B1s' => 'vCPUs 1, 1 GiB RAM, 2 Data disks, 320 Max IOPS, 4 Gib Local storage (SCSI)',
-    'B1ms'=> 'vCPUs 1, 2 GiB RAM, 2 Data disks, 640 Max IOPS, 4 Gib Local storage (SCSI)',
-    'B2s' => 'vCPUs 2, 4 GiB RAM, 4 Data disks, 1280 Max IOPS, 8 Gib Local storage (SCSI)',
-    'B2ms' => 'vCPUs 2, 8 GiB RAM, 4 Data disks, 1920 Max IOPS, 16 Gib Local storage (SCSI)',
+    'Standard_B1s' => 'vCPUs 1, 1 GiB RAM, 2 Data disks, 320 Max IOPS, 4 Gib Local storage (SCSI)',
+    'Standard_B1ms'=> 'vCPUs 1, 2 GiB RAM, 2 Data disks, 640 Max IOPS, 4 Gib Local storage (SCSI)',
+    'Standard_B2s' => 'vCPUs 2, 4 GiB RAM, 4 Data disks, 1280 Max IOPS, 8 Gib Local storage (SCSI)',
+    'Standard_B2ms' => 'vCPUs 2, 8 GiB RAM, 4 Data disks, 1920 Max IOPS, 16 Gib Local storage (SCSI)',
 ));
 define('SUPPORTED_AZURE_TYPES_VCPUS', array(
-    'B1ls' => 1,
-    'B1s' => 1,
-    'B1ms'=> 1,
-    'B2s' => 2,
-    'B2ms' => 2,
+    'Standard_B1s' => 1,
+    'Standard_B1ms'=> 1,
+    'Standard_B2s' => 2,
+    'Standard_B2ms' => 2,
 ));
 define('SUPPORTED_AZURE_TYPES_MEMORY', array(
-    'B1ls' => 512,
-    'B1s' => 1024,
-    'B1ms'=> 2048,
-    'B2s' => 4096,
-    'B2ms' => 8192,
+    'Standard_B1s' => 1024,
+    'Standard_B1ms'=> 2048,
+    'Standard_B2s' => 4096,
+    'Standard_B2ms' => 8192,
 ));
 define('SUPPORTED_AZURE_OS_IMAGES', array(
     'ubuntu 22.04' => 'ami-04b70fa74e45c3917',
@@ -154,11 +166,15 @@ define('AWS_FIELDS', array(
     "os_name" => SUPPORTED_AWS_OS,
     "os_image" => SUPPORTED_AWS_OS_IMAGES,
     "region" => SUPPORTED_AWS_REGIONS,
-    "type" => SUPPORTED_AWS_TYPES
+    "type" => SUPPORTED_AWS_TYPES,
+    "types_vcpus" => SUPPORTED_AWS_TYPES_VCPUS,
+    "types_memory" => SUPPORTED_AWS_TYPES_MEMORY
 ));
 define('AZURE_FIELDS', array(
     "os_name" => SUPPORTED_AZURE_OS,
     "os_image" => SUPPORTED_AZURE_OS_IMAGES,
     "region" => SUPPORTED_AZURE_REGIONS,
-    "type" => SUPPORTED_AZURE_TYPES
+    "type" => SUPPORTED_AZURE_TYPES,
+    "types_vcpus" => SUPPORTED_AZURE_TYPES_VCPUS,
+    "types_memory" => SUPPORTED_AZURE_TYPES_MEMORY
 ));

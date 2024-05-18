@@ -26,10 +26,9 @@ global $CFG;
 require('../../config.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/models/vm.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_helper.php');
 global $USER;
 
 // Make sure the user is logged in
@@ -67,19 +66,11 @@ $vm = $vmmanager->get_vm_by_id($id);
 
 if ($confirm) {
     $subscriptionmanager = new subscriptionmanager();
-
     $secrets = $subscriptionmanager->get_secrets_by_subscription_id($vm->subscription_id);
     $subscription = $subscriptionmanager->get_subscription_by_id($vm->subscription_id);
-    $helper = return_var_by_provider_id($subscription->cloud_provider_id, new aws_helper(), new azure_helper());
-    $helper->cloudsync_delete_instance($vm, $secrets);
 
-    $vm = unserialize(sprintf(
-        'O:%d:"%s"%s',
-        strlen('vm'),
-        'vm',
-        strstr(strstr(serialize($vm), '"'), ':')
-    ));
-    $vm->markDeleted($userid);
+    $resourcecontroller = new resourcecontroller($subscription->cloud_provider_id);
+    $vm = $resourcecontroller->deleteVM($vm, $secrets, $userid);
     $vmmanager->update_vm($vm);
     redirect(new moodle_url('/local/cloudsync/mycloud.php'),  'Virtual Machine deleted succesfully', null, \core\output\notification::NOTIFY_SUCCESS);
 }

@@ -53,10 +53,9 @@ class aws_helper {
      /**
      * Create a virtual machine for a moodle user via an existing virtual machine from db
      */
-    public function cloudsync_create_virtualmachine($vm, $secrets, $subscriptionmanager, $keypair, $keypairmanager, $owner_id, $owner_name) {
-        $user_short = str_replace(' ', '_', strtolower($owner_name));
-        $keyname = $user_short  . '_key';
-        $keypair_id = 'cloudsync_' . $keyname . '_' . $vm->region . '_'. SITE_TAG;
+    public function cloudsync_create_virtualmachine($vm, $secrets, $subscriptionmanager, $keypair, $keypairmanager, $owner_name) {
+        $keyname = $owner_name  . '_' . $vm->name . '_key';
+        $keypair_id = CLOUDSYNC_RESOURCE . $keyname . '_' . $vm->region . '_'. SITE_TAG;
 
         // Create the connection to the cloud
         $client = $this->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
@@ -70,7 +69,7 @@ class aws_helper {
             if($this->exists_key($client, $keypair_id)) {
                 throw new Exception("Key exists in cloud but not in db");
             } else {
-                $keypair = new keypair($owner_id, $vm->subscription_id, $keyname, $vm->region);
+                $keypair = new keypair($vm->owner_id, $vm->subscription_id, $keyname, $vm->region);
                 $key = $this->create_key($client, $keypair_id, $owner_name);
                 $key_public = $this->get_public_key($client, $keypair_id);
                 $keypair->setKeypairPublicValue($key_public);
@@ -83,18 +82,13 @@ class aws_helper {
 
         $vm->setKeypair($keypair->id);
 
-        // Create the security group
-        if($this->exists_security_group($client, 'cloudsync_ssh_' . SITE_TAG)) {
-            $sg_id = $this->get_security_group($client, 'cloudsync_ssh_' . SITE_TAG);
-            $sg_id = $sg_id['SecurityGroups'][0]['GroupId'];
-        } else {
-            $sg_id = $this->create_security_group_with_rule($client, 'SSH Security Group', 'SSH', 'cloudsync_ssh_' . SITE_TAG, 
-                                                            22, 'tcp', '0.0.0.0/0', 'SSH rule');
-        }
+        $sg_id = $this->get_security_group($client, CLOUDSYNC_RESOURCE . SSH_TAG);
+        $sg_id = $sg_id['SecurityGroups'][0]['GroupId'];
 
         // Create the instance
-        $instance_id = $this->create_instance($client, $user_short, $vm->name, AWS_FIELDS["os_image"][$vm->os], $vm->type,
-                                $vm->rootdisk_storage, $vm->seconddisk_storage, $keypair->keypair_id, $sg_id, $keypair->public_value);
+        $instance_id = $this->create_instance($client, $owner_name, CLOUDSYNC_RESOURCE . $vm->name . '_' . SITE_TAG, 
+                                AWS_FIELDS["os_image"][$vm->region][$vm->os], $vm->type, $vm->rootdisk_storage, $vm->seconddisk_storage, 
+                                $keypair->keypair_id, $sg_id, $keypair->public_value);
 
         return $instance_id;
     }
@@ -146,7 +140,7 @@ class aws_helper {
     public function create_instance(Aws\Ec2\Ec2Client $ec2Client, $owner, $name, $image_id, $instance_type, $rootdisk, $seconddisk, $key_name, $security_group_id, $public_key) {
         $blockDeviceMappings = [
             [
-                'DeviceName' => '/dev/xvda',
+                'DeviceName' => '/dev/sda1',
                 'Ebs' => [
                     'DeleteOnTermination' => true,
                     'VolumeSize' => $rootdisk,
@@ -184,7 +178,7 @@ class aws_helper {
                         ],
                         [
                             'Key' => 'Name',
-                            'Value' => 'cloudsync_' . $name . '_' . SITE_TAG,
+                            'Value' => $name,
                         ],
                     ],
                 ],
@@ -318,14 +312,14 @@ class aws_helper {
     public function create_security_group_with_rule(Aws\Ec2\Ec2Client $ec2Client, $sg_description, $name, $tag, $port, $protocol, $range, $rule_description) {
         $sg_result = $ec2Client->createSecurityGroup([
             'Description' => $sg_description,
-            'GroupName' => 'cloudsync_' . $name . '_' . SITE_TAG,
+            'GroupName' => $name,
             'TagSpecifications' => [
                 [
                     'ResourceType' => 'security-group',
                     'Tags' => [
                         [
                             'Key' => 'Purpose',
-                            'Value' => 'cloudsync_' . $tag . '_' . SITE_TAG,
+                            'Value' => $tag,
                         ],
                     ],
                 ],
@@ -421,7 +415,7 @@ class aws_helper {
                 [
                     'Name' => 'tag:Purpose',
                     'Values' => [
-                        'cloudsync_' . $tag . '_' . SITE_TAG,
+                        $tag,
                     ],
                 ],
             ],
@@ -444,7 +438,7 @@ class aws_helper {
                 [
                     'Name' => 'tag:Purpose',
                     'Values' => [
-                        'cloudsync_' . $tag . '_' . SITE_TAG,
+                        $tag,
                     ],
                 ],
             ],
@@ -471,7 +465,20 @@ class aws_helper {
      * @return string the userdata
      */
     public function create_user_data($username, $public_key) {
-        $string_data = "#cloud-config\ncloud_final_modules:\n- [users-groups,always]\nusers:\n  - name: " . $username . "\n    groups: [ wheel ]\n    sudo: [ \"ALL=(ALL) NOPASSWD:ALL\" ]\n    shell: /bin/bash\n    ssh-authorized-keys:\n    - " . $public_key;
+        $string_data = "#cloud-config
+        cloud_final_modules:
+          - [users-groups,always]
+        preserve_hostname: false
+        hostname: " . SITE_TAG . "
+        fqdn: " . SITE_TAG . ".local
+        manage_etc_hosts: true
+        users:
+          - name: " . $username . "
+            groups: [ wheel ]
+            sudo: [ \"ALL=(ALL) NOPASSWD:ALL\" ]
+            shell: /bin/bash
+            ssh-authorized-keys:
+              - " . $public_key;
 
         $user_data = base64_encode($string_data);
         return $user_data;
@@ -514,19 +521,38 @@ class aws_helper {
     * @param object $secrets the secrets that are going to be tested
     * @return bool whether or not the subscription is valid
     */
-   public function test_secrets($secrets) {
-       $client = $this->create_connection('us-east-1', $secrets->access_key_id, $secrets->access_key_secret);
-       $test_sg_ssh = $this->create_security_group_with_rule($client, 'None', 'test_SG', 'ssh',
-                                                             22, 'tcp', '0.0.0.0/0', 'None');
-       $test_ssh_key = $this->create_key($client, 'test_keypair', 'test_owner');   
-       $public_ssh_key = $this->get_public_key($client, 'test_keypair');                                                           
-       $test_instance = $this->create_instance($client, 'test_owner', 'test_instance', 'ami-04e5276ebb8451442', 't2.micro',
-                                               8, 'None', $test_ssh_key->key_name, '', $public_ssh_key);
+   public function create_initial_resources($secrets) {
+    foreach (SUPPORTED_AWS_REGIONS as $region) {
+        $client = $this->create_connection($region, $secrets->access_key_id, $secrets->access_key_secret);
+        $sg_ssh = $this->create_security_group_with_rule($client, SSH_DESCRIPTION, CLOUDSYNC_RESOURCE . SSH_SECURITY_GROUP . $region . '_' . SITE_TAG, 
+                                                         CLOUDSYNC_RESOURCE . SSH_TAG,  SSH_PORT, 'tcp', '0.0.0.0/0', SSH_RULE);
+                                                    
+        if(!$sg_ssh) {
+            return false;
+        }
+    }
+    
+    return true;
+    }
 
-       $this->delete_instance($client, $test_instance);
-       $this->delete_key($client, $test_ssh_key->key_name);       
-       $this->delete_security_group($client, $test_sg_ssh);
-       
-       return true;
-   }
+    /**
+    * 
+    * Test an AWS account to make sure a subscription is valid
+    *
+    * @param object $secrets the secrets that are going to be tested
+    * @return bool whether or not the subscription is valid
+    */
+    public function delete_initial_resources($secrets) {
+        foreach (SUPPORTED_AWS_REGIONS as $region) {
+            $client = $this->create_connection($region, $secrets->access_key_id, $secrets->access_key_secret);
+            $sg_ssh = $this->create_security_group_with_rule($client, SSH_DESCRIPTION, CLOUDSYNC_RESOURCE . SSH_SECURITY_GROUP . $region . '_' . SITE_TAG, 
+                                                             CLOUDSYNC_RESOURCE . SSH_TAG,  SSH_PORT, 'tcp', '0.0.0.0/0', SSH_RULE);
+                                                        
+            if(!$sg_ssh) {
+                return false;
+            }
+        }
+        
+        return true;
+        }
 }

@@ -41,17 +41,31 @@ class vmrequestmanager {
         return $request_id;
     }
 
-     /**
-     * Get all vm requests
-     *
-     * @return array An array of requests indexed by first column.
-     */
-    public function get_all_requests() {
-        global $DB;
+    /**
+    * Get all vm requests
+    *
+    * @return array An array of requests indexed by first column.
+    */
+   public function get_all_requests() {
+       global $DB;
 
-        $requests = $DB->get_records(self::DB_TABLE);
-        return $requests;
-    }
+       $requests = $DB->get_records(self::DB_TABLE);
+       return $requests;
+   }
+
+   /**
+   * Get all closed vm requests
+   *
+   * @return array An array of requests indexed by first column.
+   */
+  public function get_all_closed_requests() {
+      global $DB;
+      $where = "status != :status";
+      $params = ['status' => REQUEST_WAITING];
+
+      $requests = $DB->get_records_select(self::DB_TABLE, $where, $params);
+      return $requests;
+  }
 
      /**
      * Get all vm requests that are in specific state

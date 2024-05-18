@@ -29,8 +29,7 @@ require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudproviderman
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_helper.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
 require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 
@@ -77,26 +76,21 @@ $key = $keypairmanager->get_key_by_id($vm->vm_key_id);
 $request = $requestmanager->get_request_by_id($vm->request_id);
 $request->teacher_name = get_user_name($request->teacher_id);
 
-$helper = return_var_by_provider_id($subscription->cloud_provider_id, new aws_helper(), new azure_helper());
-if($vm->status != 'Deleted'){
-    $status = $helper->get_instance_status($vm, $secrets);
-    
-    $states = return_var_by_provider_id($subscription->cloud_provider_id, [AWS_TO_DB_STATES, DB_TO_AWS_STATES], [AZURE_TO_DB_STATES, DB_TO_AZURE_STATES]);
-    if($status && $status != $states[1][$vm->status]){
-       $vm->status = $states[0][$status];
-       $vmmanager->update_vm($vm);
-    } else if (!$status){
-       $vm->status = 'Deleted';
-       $vmmanager->update_vm($vm);
-    }
-} else {
-    $vm->deleted = $vm->status == 'Deleted';
-    if($vm->deleted) {
-        $vm->deletedby_name = get_user_name($vm->deleted_by);
-    }
+
+$resourcecontroller = new resourcecontroller($subscription->cloud_provider_id);
+
+$new_status = $resourcecontroller->get_vm_status($vm, $secrets);
+if($vm->status != $new_status) {
+    $vm->status = $new_status;
+    $vmmanager->update_vm($vm);
+}
+
+$vm->deleted = $vm->status == 'Deleted';
+if($vm->deleted) {
+    $vm->deletedby_name = get_user_name($vm->deleted_by);
 } 
 
-$netinfo = $helper->get_netinfo($vm, $secrets);
+$netinfo = $resourcecontroller->get_netinfo($vm, $secrets);
 
 // Output starts here
 echo $OUTPUT->header(); // Display the header

@@ -65,7 +65,7 @@ class vmrequestform extends moodleform {
         $mform->addElement('select', 'processor', get_string('vmrequest_processor', 'local_cloudsync'), SUPPORTED_VCPUS_VALUES);
         $mform->setDefault('processor', '0');
 
-        $mform->addElement('select', 'rootdisk_storage', get_string('vmrequest_disk1_storage', 'local_cloudsync'), SUPPORTED_ROOTDISK_VALUES);
+        $mform->addElement('select', 'rootdisk_storage', get_string('vmrequest_disk1_storage', 'local_cloudsync'), SUPPORTED_AWS_ROOTDISK_VALUES);
         $mform->setDefault('rootdisk_storage', '0');
 
         $mform->addElement('select', 'disk2_storage', get_string('vmrequest_disk2_storage', 'local_cloudsync'), SUPPORTED_SECONDDISK_VALUES);

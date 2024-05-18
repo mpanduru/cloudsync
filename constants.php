@@ -24,6 +24,19 @@
 
 define('SITE_TAG', 'CV');
 
+define('CLOUDSYNC_RESOURCE', 'cloudsync_');
+define('SSH_SECURITY_GROUP', 'ssh_');
+define('SSH_TAG', 'SSH');
+define('SSH_DESCRIPTION', 'Cloudsync SSH Security Group');
+define('SSH_PORT', 22);
+define('SSH_RULE', 'SSH rule');
+
+define('NIC_RESOURCE', 'NIC_');
+define('IPCONFIG_RESOURCE', 'IPconfig_');
+define('PUBLICIP_RESOURCE', 'publicIP_');
+define('VNET_RESOURCE', 'vnet_');
+define('SUBNET_RESOURCE', 'subnet_');
+
 define('AWS_PROVIDER', 'AWS');
 define('AZURE_PROVIDER', 'AZURE');
 
@@ -68,8 +81,10 @@ define('AZURE_TO_DB_STATES', array(
 define('SUPPORTED_OS_VALUES', ['ubuntu 22.04']);
 define('SUPPORTED_MEMORY_VALUES', [1024, 2048, 4096, 8192]);
 define('SUPPORTED_VCPUS_VALUES', [1, 2, 4, 6, 8]);
-define('SUPPORTED_ROOTDISK_VALUES', [8, 16, 30, 64, 128, 256, 512]);
 define('SUPPORTED_SECONDDISK_VALUES', ['None', 8, 16, 32, 64, 128, 256, 512]);
+
+define('SUPPORTED_AWS_ROOTDISK_VALUES', [8, 16, 32, 64, 128, 256, 512]);
+define('SUPPORTED_AZURE_ROOTDISK_VALUES', [30, 64, 128, 256, 512]);
 
 // These will be the regions that can be used to create virtual machines on
 define('SUPPORTED_AWS_REGIONS', ['us-east-1', 'eu-central-1', 'eu-west-1']);
@@ -85,9 +100,21 @@ define('SUPPORTED_AWS_TYPES', ['t2.nano', 't2.micro', 't2.small', 't2.medium', '
 define('SUPPORTED_AZURE_TYPES', ['Standard_B1s', 'Standard_B1ms', 'Standard_B2s', 'Standard_B2ms']);
 
 
-define('SUPPORTED_AWS_OS_IMAGES', array(
+define('SUPPORTED_AWS_OS_IMAGES_USEAST1', array(
     'ubuntu 22.04' => 'ami-04b70fa74e45c3917',
 ));
+define('SUPPORTED_AWS_OS_IMAGES_EUCENTRAL1', array(
+    'ubuntu 22.04' => 'ami-01e444924a2233b07',
+));
+define('SUPPORTED_AWS_OS_IMAGES_EUWEST1', array(
+    'ubuntu 22.04' => 'ami-0776c814353b4814d',
+));
+define('SUPPORTED_AWS_OS_IMAGES', array(
+    'us-east-1' => SUPPORTED_AWS_OS_IMAGES_USEAST1,
+    'eu-central-1' => SUPPORTED_AWS_OS_IMAGES_EUCENTRAL1,
+    'eu-west-1' => SUPPORTED_AWS_OS_IMAGES_EUWEST1,
+));
+
 define('SUPPORTED_AWS_TYPES_SPEC_DESCRIPTION', array(
     't2.nano' => 'vCPUs1, architecture i386, x86_64, 0.5 GiB RAM, Network Performance Low to Moderate',
     't2.micro' => 'vCPUs 1, architecture i386, x86_64, 1 GiB RAM, Network Performance Low to Moderate',
@@ -159,13 +186,21 @@ define('SUPPORTED_AZURE_TYPES_MEMORY', array(
     'Standard_B2ms' => 8192,
 ));
 define('SUPPORTED_AZURE_OS_IMAGES', array(
-    'ubuntu 22.04' => 'ami-04b70fa74e45c3917',
+    'ubuntu 22.04' => "{
+        \"publisher\": \"canonical\",
+        \"offer\": \"0001-com-ubuntu-server-jammy\",
+        \"sku\": \"22_04-lts-gen2\",
+        \"version\": \"latest\"
+    }",
 ));
 
 define('AWS_FIELDS', array(
     "os_name" => SUPPORTED_AWS_OS,
     "os_image" => SUPPORTED_AWS_OS_IMAGES,
     "region" => SUPPORTED_AWS_REGIONS,
+    "disk" => SUPPORTED_AWS_ROOTDISK_VALUES,
+    "provider_to_db_states" => AWS_TO_DB_STATES,
+    "db_to_provider_states" => DB_TO_AWS_STATES,
     "type" => SUPPORTED_AWS_TYPES,
     "types_vcpus" => SUPPORTED_AWS_TYPES_VCPUS,
     "types_memory" => SUPPORTED_AWS_TYPES_MEMORY
@@ -174,6 +209,9 @@ define('AZURE_FIELDS', array(
     "os_name" => SUPPORTED_AZURE_OS,
     "os_image" => SUPPORTED_AZURE_OS_IMAGES,
     "region" => SUPPORTED_AZURE_REGIONS,
+    "disk" => SUPPORTED_AZURE_ROOTDISK_VALUES,
+    "provider_to_db_states" => AZURE_TO_DB_STATES,
+    "db_to_provider_states" => DB_TO_AZURE_STATES,
     "type" => SUPPORTED_AZURE_TYPES,
     "types_vcpus" => SUPPORTED_AZURE_TYPES_VCPUS,
     "types_memory" => SUPPORTED_AZURE_TYPES_MEMORY

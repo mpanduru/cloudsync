@@ -55,14 +55,7 @@ $PAGE->set_heading(get_string('virtualmachinestitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
 $vmmanager = new virtualmachinemanager();
-$all_machines = $vmmanager->get_vms_by_user($userid);
-$machines = [];
-
-foreach ($all_machines as $machine) {
-    if($machine->status != 'Deleted'){
-        $machines[] = $machine;
-    }
-}
+$machines = $vmmanager->get_active_vms_by_user($userid);
 
 // Output starts here
 echo $OUTPUT->header(); // Display the header

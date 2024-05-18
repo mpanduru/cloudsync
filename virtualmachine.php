@@ -28,6 +28,8 @@ global $CFG;
 require_once($CFG->dirroot . '/local/cloudsync/lib.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
 
 // Make sure the user is logged in
@@ -60,7 +62,10 @@ $vmId = required_param('id', PARAM_INT);
 $userid = $userid ? $userid : $USER->id;
 
 $vmmanager = new virtualmachinemanager();
+$keymanager = new keypairmanager();
+
 $vm = $vmmanager->get_vm_by_id($vmId);
+$key = $keymanager->get_key_by_id($vm->vm_key_id);
 
 if($vm->owner_id != $userid){
    throw new Exception('You are not allowed to access this resource!');
@@ -69,9 +74,21 @@ if($vm->status == 'Deleted'){
     throw new Exception('You do not have access to this virtual machine since it has been deleted.');
 }
 
-$vm_keypair = vm_keypair_prompt($vm, $vmmanager);
-$keymanager = new keypairmanager();
-$key = $keymanager->get_key_by_id($vm->vm_key_id);
+$vm_keypair = false;
+
+if(empty($vm->accessed_at)) {
+   $vm_keypair = nl2br($key->value);
+}
+
+$vm = unserialize(sprintf(
+   'O:%d:"%s"%s',
+   strlen('vm'),
+   'vm',
+   strstr(strstr(serialize($vm), '"'), ':')
+));
+$vm->markAccessed();
+$vmmanager->update_vm($vm);
+
 // Output starts here
 echo $OUTPUT->header(); // Display the header
 
@@ -83,14 +100,27 @@ if($vm_keypair) {
     ];
     echo $OUTPUT->render_from_template('local_cloudsync/firstaccessvm', $templatecontext);
 } else {
+    $subscriptionmanager = new subscriptionmanager();
+    $subscription = $subscriptionmanager->get_subscription_by_id($vm->subscription_id);
+    $secrets = $subscriptionmanager->get_secrets_by_subscription_id($vm->subscription_id);
+    $resourcecontroller = new resourcecontroller($subscription->cloud_provider_id);
+
+    $new_status = $resourcecontroller->get_vm_status($vm, $secrets);
+    if($vm->status != $new_status) {
+        $vm->status = $new_status;
+        $vmmanager->update_vm($vm);
+    }
+    if($vm->status == 'Running'){
+        $connection_host = $resourcecontroller->get_connection_host($vm, $secrets);
+    }
+
     $user_short = str_replace(' ', '_', strtolower(get_user_name($userid)));
-    $public_dns = get_vm_connection_details($vm, $vmmanager);
     $running = $vm->status == 'Running';
     
     $templatecontext = (object)[
         'vm' => $vm,
         'user' => $user_short,
-        'public_dns' => $public_dns,
+        'public_dns' => $connection_host,
         'running' => $running,
         'key_name' => $key->name
     ];

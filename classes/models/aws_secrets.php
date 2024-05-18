@@ -30,13 +30,17 @@ class aws_secrets {
      * Constructor.
      *
      * @param int $subscription_id The id of the subscription which holds these secrets
-     * @param string $access_key_id The access key id from aws
-     * @param string $access_key_secret The secret of the specified access key
      */
-    public function __construct($subscription_id, $access_key_id, $access_key_secret) {
+    public function __construct($subscription_id) {
         $this->{'subscription_id'} = $subscription_id;
-        $this->{'access_key_id'} = $access_key_id;
-        $this->{'access_key_secret'} = $access_key_secret;
+    }
+
+    /**
+    * @param object $secrets An object that has the secrets as fields
+    */
+    public function setSecretsData($secrets) {
+        $this->{'access_key_id'} = $secrets->access_key_id;
+        $this->{'access_key_secret'} = $secrets->access_key_secret;
     }
 
      /**

@@ -61,24 +61,14 @@ $PAGE->requires->css('/local/cloudsync/styles.css');
 $vmmanager = new virtualmachinemanager();
 $subscriptionmanager = new subscriptionmanager();
 
-$vms = [];
-$all_vms = $vmmanager->get_all_vms();
-
-if($active){
-    foreach ($all_vms as $vm) {
-        if($vm->status != 'Deleted'){
-            $vm->subscription_name = $subscriptionmanager->get_subscription_by_id($vm->subscription_id)->name;
-            $vms[] = $vm;
-        }
-    }
+if($active) {
+    $vms = $vmmanager->get_active_vms();
+} else {
+    $vms = $vmmanager->get_deleted_vms();
 }
-else {
-    foreach ($all_vms as $vm) {
-        if($vm->status == 'Deleted'){
-            $vm->subscription_name = $subscriptionmanager->get_subscription_by_id($vm->subscription_id)->name;
-            $vms[] = $vm;
-        }
-    }
+
+foreach ($vms as $vm) {
+    $vm->subscription_name = $subscriptionmanager->get_subscription_by_id($vm->subscription_id)->name;
 }
 
 // Output starts here

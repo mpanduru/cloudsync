@@ -30,19 +30,20 @@ class azure_secrets {
      * Constructor.
      *
      * @param int $subscription_id The id of the subscription which holds these secrets
-     * @param string $tenant_id The id of the tenant from azure
-     * @param string $app_id The id of the app from azure
-     * @param string $secret The secret of the specified app
-     * @param string $azure_subscription_id The ID of the azure subscription
-     * @param string $resource_group The name of the azure resource group
      */
-    public function __construct($subscription_id, $tenant_id, $app_id, $secret, $azure_subscription_id, $resource_group) {
+    public function __construct($subscription_id) {
         $this->{'subscription_id'} = $subscription_id;
-        $this->{'tenant_id'} = $tenant_id;
-        $this->{'app_id'} = $app_id;
-        $this->{'secret'} = $secret;
-        $this->{'azure_subscription_id'} = $azure_subscription_id;
-        $this->{'resource_group'} = $resource_group;
+    }
+
+    /**
+    * @param object $secrets An object that has the secrets as fields
+    */
+    public function setSecretsData($secrets) {
+        $this->{'tenant_id'} = $secrets->tenant_id;
+        $this->{'app_id'} = $secrets->app_id;
+        $this->{'secret'} = $secrets->secret;
+        $this->{'azure_subscription_id'} = $secrets->azure_subscription_id;
+        $this->{'resource_group'} = $secrets->resource_group;
     }
 
      /**

@@ -25,19 +25,10 @@
 require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
 global $USER;
-global $DB;
-require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/form/vmcreate.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/models/vmrequest.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/managers/cloudprovidermanager.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/managers/keypairmanager.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_helper.php');
-require_once($CFG->dirroot . '/local/cloudsync/lib.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
 
 // Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
@@ -81,29 +72,9 @@ $mform->set_data($request);
 if ($mform->is_cancelled()) {
     redirect(new moodle_url('/local/cloudsync/adminvmrequests.php', array('active'=>1)),  'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
 } else if ($fromform = $mform->get_data()) {
-    // get the possible fields values based on the cloud provider selected
-    $fields = return_var_by_provider_id($fromform->cloudtype, AWS_FIELDS, AZURE_FIELDS);
+    $resourcecontroller = new resourcecontroller($fromform->cloudtype);
 
-    // create the necessary providers in order to create the vm
-    $cloudprovidermanager = new cloudprovidermanager();
-    $subscription_manager = new subscriptionmanager();
-    $keypair_manager = new keypairmanager();
-    $vm_manager = new virtualmachinemanager();
-
-    $owner_name = get_user_name($request->owner_id);
-
-    cloudsync_submit_vm_creation($fields, $fromform, $cloudprovidermanager, $request->owner_id, $owner_name, $userid, $requestID, 
-                                 $subscription_manager, $vm_manager, $keypair_manager);
-
-    // close the request
-    $vmrequest = unserialize(sprintf(
-        'O:%d:"%s"%s',
-        strlen('vmrequest'),
-        'vmrequest',
-        strstr(strstr(serialize($request), '"'), ':')
-    ));
-    $vmrequest->approve($userid);
-    $vmrequestmanager->update_request($vmrequest);
+    $resourcecontroller->create_virtual_machine($fromform, $userid, $request);
     
     // redirect back to the overview page
     redirect(new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'),  'Vm created succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);

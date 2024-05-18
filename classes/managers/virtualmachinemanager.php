@@ -80,6 +80,47 @@ class virtualmachinemanager {
     }
 
     /**
+    * Get all active (non-deleted) vms
+    *
+    * @return array An array of vms indexed by first column.
+    */
+   public function get_active_vms() {
+       global $DB;
+       $where = "status != :status";
+       $params = ['status' => 'Deleted'];
+
+       $vms = $DB->get_records_select(self::DB_TABLE, $where, $params);
+       return $vms;
+   }
+
+   /**
+   * Get all deleted vms
+   *
+   * @return array An array of vms indexed by first column.
+   */
+  public function get_deleted_vms() {
+      global $DB;
+
+      $vms = $DB->get_records(self::DB_TABLE, ['status' => 'Deleted']);
+      return $vms;
+  }
+
+     /**
+     * Get all active (non-deleted) vms that belong to a specific user
+     *
+     * @param int $user_id the id of the user
+     * @return array An array of vms indexed by first column.
+     */
+    public function get_active_vms_by_user($user_id) {
+        global $DB;
+        $where = "owner_id = :owner_id AND status != :status";
+        $params = ['owner_id' => $user_id, 'status' => 'Deleted'];
+
+        $vms = $DB->get_records_select(self::DB_TABLE, $where, $params);
+        return $vms;
+    }
+
+    /**
      * Get a vm by id
      *
      * @param int $id the id of the vm searched

@@ -24,11 +24,8 @@
 
 require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
-require_once($CFG->dirroot.'/local/cloudsync/constants.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/form/subscriptionform.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/managers/subscriptionmanager.php');
-require_once($CFG->dirroot.'/local/cloudsync/classes/managers/cloudprovidermanager.php');
-require_once($CFG->dirroot.'/local/cloudsync/lib.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/resourcecontroller.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -62,9 +59,18 @@ $mform = new subscriptionform();
 if ($mform->is_cancelled()) {
     redirect(new moodle_url('/local/cloudsync/subscriptions.php'),  'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
 } else if ($fromform = $mform->get_data()) {
-    $providermanager = new cloudprovidermanager();
-    $subscriptionmanager = new subscriptionmanager();
-    cloudsync_submit_subscription_creation($fromform, $providermanager, $subscriptionmanager);
+    $secretsData = (object) [
+        'access_key_id' => $fromform->aws_access_key_id,
+        'access_key_secret' => $fromform->aws_secret_access_key,
+        'tenant_id' => $fromform->tenant_id,
+        'app_id' => $fromform->app_id,
+        'secret' => $fromform->password,
+        'azure_subscription_id' => $fromform->azure_subscription_id,
+        'resource_group' => $fromform->resource_group
+    ];
+
+    $resourcecontroller = new resourcecontroller($fromform->cloudprovider);
+    $resourcecontroller->create_subscription($secretsData, $fromform->subscriptionname, $fromform->cloudprovider);
 
     redirect(new moodle_url('/local/cloudsync/subscriptions.php'),  'Subscription added succesfully', null, \core\output\notification::NOTIFY_SUCCESS);
 } else {

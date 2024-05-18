@@ -28,7 +28,7 @@ require_once('../../config.php'); // Include Moodle configuration
 require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/form/vmrequestform.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
-require_once($CFG->dirroot . '/local/cloudsync/lib.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/models/vmrequest.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -62,7 +62,15 @@ if ($mform->is_cancelled()) {
     redirect($CFG->wwwroot . '/local/cloudsync/mycloud.php', 'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
 } else if ($fromform = $mform->get_data()) {
     $vmrequestmanager = new vmrequestmanager();
-    cloudsync_submit_vm_request($fromform, $vmrequestmanager, $userid);
+    $request = new vmrequest($userid, $fromform->teacher, $fromform->description, $fromform->vmname, 
+                             SUPPORTED_OS_VALUES[$fromform->os],
+                             SUPPORTED_MEMORY_VALUES[$fromform->memory], 
+                             SUPPORTED_VCPUS_VALUES[$fromform->processor], 
+                             SUPPORTED_AWS_ROOTDISK_VALUES[$fromform->rootdisk_storage], 
+                             SUPPORTED_SECONDDISK_VALUES[$fromform->disk2_storage]);
+    
+    $id = $vmrequestmanager->create_request($request);
+    $request->setId($id);
 
     // redirect back to the vms page
     redirect($CFG->wwwroot . '/local/cloudsync/mycloud.php', 'Request Sent Succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);

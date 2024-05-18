@@ -67,12 +67,7 @@ $requestmanager = new vmrequestmanager();
 if($active)
     $requests = $requestmanager->get_requests_by_status(REQUEST_WAITING);
 else {
-    $all_requests = $requestmanager->get_all_requests();
-    $requests = [];
-    foreach ($all_requests as $request) {
-        if($request->status != REQUEST_WAITING)
-            $requests[] = $request;
-    }
+    $requests = $requestmanager->get_all_closed_requests();
 }
 
 foreach ($requests as $request) {

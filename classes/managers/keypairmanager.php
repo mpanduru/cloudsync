@@ -66,21 +66,35 @@ class keypairmanager {
         return $keys;
     }
 
-     /**
-     * Get all keys that belong to a specific user from a specific region
-     * and subscription
-     *
-     * @param int $user_id the id of the user
-     * @param int $subscription_id the id of the subscription
-     * @param string $region the specific region
-     * @return array An array of keys indexed by first column.
-     */
-    public function get_user_keys_by_subscription_and_region($user_id, $subscription_id, $region) {
-        global $DB;
+    /**
+    * Get the key that belongs to a specific user from a specific region
+    * and subscription
+    *
+    * @param int $user_id the id of the user
+    * @param int $subscription_id the id of the subscription
+    * @param string $region the specific region
+    * @return bool|stdClass the searched key
+    */
+   public function get_user_key_by_subscription_and_region($user_id, $subscription_id, $region) {
+       global $DB;
 
-        $keys = $DB->get_records(self::DB_TABLE, ['owner_id' => $user_id, 'subscription_id' => $subscription_id, 'region' => $region]);
-        return $keys;
-    }
+       $keys = $DB->get_record(self::DB_TABLE, ['owner_id' => $user_id, 'subscription_id' => $subscription_id, 'region' => $region]);
+       return $keys;
+   }
+
+   /**
+   * Get the key that belongs to a specific user from a specific subscription
+   *
+   * @param int $user_id the id of the user
+   * @param int $subscription_id the id of the subscription
+   * @return bool|stdClass the searched key
+   */
+  public function get_user_key_by_subscription($user_id, $subscription_id) {
+      global $DB;
+
+      $keys = $DB->get_record(self::DB_TABLE, ['owner_id' => $user_id, 'subscription_id' => $subscription_id]);
+      return $keys;
+  }
 
     /**
      * Get a key by id
@@ -113,17 +127,31 @@ class keypairmanager {
     }
 
     /**
-     * Check if a key exists by name, subscription and region
+     * Check if a user has a key on a specific subscription and region
      *
-     * @param string $name the name of the key searched
+     * @param string $user_id the id of the user
+     * @param int $subscription_id the subscription of the key searched
+     * @return bool whether or not the searched key exists in the database
+     */
+    public function check_user_key_by_subscription($user_id, $subscription_id) {
+        global $DB;
+
+        $result = $DB->record_exists(self::DB_TABLE, ['owner_id' => $user_id, 'subscription_id' => $subscription_id]);
+        return $result;
+    }
+
+    /**
+     * Check if a user has a key on a specific subscription and region
+     *
+     * @param string $user_id the id of the user
      * @param int $subscription_id the subscription of the key searched
      * @param string $region the string of the key searched
      * @return bool whether or not the searched key exists in the database
      */
-    public function check_key_exists($name, $subscription_id, $region) {
+    public function check_user_key_by_subscription_and_region($user_id, $subscription_id, $region) {
         global $DB;
 
-        $result = $DB->record_exists(self::DB_TABLE, ['name' => $name, 'subscription_id' => $subscription_id, 'region' => $region]);
+        $result = $DB->record_exists(self::DB_TABLE, ['owner_id' => $user_id, 'subscription_id' => $subscription_id, 'region' => $region]);
         return $result;
     }
 

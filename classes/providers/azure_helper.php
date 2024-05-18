@@ -32,10 +32,9 @@ class azure_helper {
      /**
      * Create a virtual machine for a moodle user via an existing virtual machine from db
      */
-    public function cloudsync_create_virtualmachine($vm, $secrets, $subscriptionmanager, $keypair, $keypairmanager, $owner_id, $owner_name) {
-        $user_short = str_replace(' ', '_', strtolower($owner_name));
-        $keyname = $user_short  . '_key';
-        $keypair_id = 'cloudsync_' . $keyname . '_' . $vm->region . '_'. SITE_TAG;
+    public function cloudsync_create_virtualmachine($vm, $secrets, $subscriptionmanager, $keypair, $keypairmanager, $owner_name) {
+        $keyname = $owner_name  . '_' . $vm->name . '_key';
+        $keypair_id = CLOUDSYNC_RESOURCE . $keyname . '_'. SITE_TAG;
 
         // Create the connection to the cloud
         $token = $this->create_connection($subscriptionmanager, $vm->subscription_id);
@@ -49,7 +48,7 @@ class azure_helper {
             if($this->key_exists($token, $secrets->azure_subscription_id, $secrets->resource_group, $keypair_id)) {
                 throw new Exception("Key exists in cloud but not in db");
             } else {
-                $keypair = new keypair($owner_id, $vm->subscription_id, $keyname, $vm->region);
+                $keypair = new keypair($vm->owner_id, $vm->subscription_id, $keyname, $vm->region);
                 $key = $this->create_keypair($token, $secrets->azure_subscription_id, $secrets->resource_group, 
                                              $vm->region, $keypair_id, $owner_name);
                 $keypair->setKeypairPublicValue($key->publicKey);
@@ -64,11 +63,14 @@ class azure_helper {
 
         // Create the instance
         $instance_id = $this->create_instance($token, $secrets->azure_subscription_id, $secrets->resource_group, 
-                                              $vm->region, $vm->name, $owner_name, $vm->type, 'cloudsync_disk_' . $vm->name . SITE_TAG,
-                                              $vm->rootdisk_storage, $user_short, 'userhost', 'cloudsync_NIC_' . $vm->name . SITE_TAG,
-                                              'cloudsync_IPconfig_' . $vm->name . SITE_TAG, 'cloudsync_publicIP_' . $vm->name . SITE_TAG,
-                                              'cloudsync_vnet_eastus_' . SITE_TAG, 'cloudsync_subnet_eastus_' . SITE_TAG,
-                                              'cloudsync_ssh_eastus_' . SITE_TAG, $keypair->public_value);
+                                              $vm->region, $vm->name, $owner_name, $vm->type, CLOUDSYNC_RESOURCE . $vm->name . '_' . SITE_TAG,
+                                              $vm->rootdisk_storage, SITE_TAG, CLOUDSYNC_RESOURCE . NIC_RESOURCE . $vm->name . '_' . SITE_TAG,
+                                              CLOUDSYNC_RESOURCE . IPCONFIG_RESOURCE . $vm->name . SITE_TAG, 
+                                              CLOUDSYNC_RESOURCE . PUBLICIP_RESOURCE . $vm->name . SITE_TAG,
+                                              CLOUDSYNC_RESOURCE . VNET_RESOURCE . $vm->region . '_' . SITE_TAG, 
+                                              CLOUDSYNC_RESOURCE . SUBNET_RESOURCE . $vm->region . '_' . SITE_TAG,
+                                              CLOUDSYNC_RESOURCE . SSH_SECURITY_GROUP . $vm->region . '_' . SITE_TAG, $keypair->public_value, $vm->os,
+                                              $vm->seconddisk_storage);
 
         return $instance_id->name;
     }
@@ -125,10 +127,10 @@ class azure_helper {
                         throw new Exception('Error decoding JSON');
                     }
                 }
-                return $wrong_status;
+                return $response->getBody();
             }
             else {
-                return $wrong_status;
+                return $response->getBody();
             }
           }
           catch(HTTP_Request2_Exception $e) {
@@ -297,6 +299,7 @@ class azure_helper {
         $request = $this->build_request($url, HTTP_Request2::METHOD_PUT, $header, $request_body, null);
 
         $response = $this->send_request($request, false, false, true);
+        echo "<script>console.log(".json_encode($response).")</script>";
 
         return $response;
     }
@@ -325,10 +328,25 @@ class azure_helper {
      * @return object|false returns the virtual machine if everything goes well, otherwise false
      */
     public function create_instance($token, $azure_subscription_id, $resource_group, $location, $name, $owner, $type, $disk_name, $disk_size,
-                                    $os_username, $host_name, $nic_name, $ip_config_name, $public_ip_name, $vnet_name, 
-                                    $subnet_name, $securitygroup_name, $public_key) {
+                                    $host_name, $nic_name, $ip_config_name, $public_ip_name, $vnet_name, $subnet_name, $securitygroup_name, 
+                                    $public_key, $os_image, $data_disk_size) {
         $url = 'https://management.azure.com/subscriptions/'.$azure_subscription_id.'/resourceGroups/'.$resource_group.
                 '/providers/Microsoft.Compute/virtualMachines/'.$name.'?api-version=2023-09-01';
+
+
+        $datadisks = "";
+        if ($data_disk_size != 0 && $data_disk_size != 'None') {
+            $datadisks = "
+            \"dataDisks\": [
+                {
+                    \"lun\": 0,
+                    \"createOption\": \"Empty\",
+                    \"caching\": \"None\",
+                    \"diskSizeGB\": ".$data_disk_size.",
+                    \"deleteOption\": \"Delete\"
+                }
+            ],";
+        }
 
         $request_body = "
         {
@@ -344,12 +362,7 @@ class azure_helper {
                     \"hibernationEnabled\": false
                 },
                 \"storageProfile\": {
-                    \"imageReference\": {
-                        \"publisher\": \"canonical\",
-                        \"offer\": \"0001-com-ubuntu-server-jammy\",
-                        \"sku\": \"22_04-lts-gen2\",
-                        \"version\": \"latest\"
-                    },
+                    \"imageReference\": ".SUPPORTED_AZURE_OS_IMAGES[$os_image].",
                     \"osDisk\": {
                         \"osType\": \"Linux\",
                         \"name\": \"".$disk_name."\",
@@ -361,17 +374,18 @@ class azure_helper {
                         \"deleteOption\": \"Delete\",
                         \"diskSizeGB\": ".$disk_size."
                     },
+                    ".$datadisks."
                     \"diskControllerType\": \"SCSI\"
                 },
                 \"osProfile\": {
                     \"computerName\": \"".$host_name."\",
-                    \"adminUsername\": \"".$os_username."\",
+                    \"adminUsername\": \"".$owner."\",
                     \"linuxConfiguration\": {
                         \"disablePasswordAuthentication\": true,
                         \"ssh\": {
                             \"publicKeys\": [
                                 {
-                                    \"path\": \"/home/".$os_username."/.ssh/authorized_keys\",
+                                    \"path\": \"/home/".$owner."/.ssh/authorized_keys\",
                                     \"keyData\": \"".$public_key."\"
                                 }
                             ]
@@ -437,6 +451,8 @@ class azure_helper {
         $request = $this->build_request($url, HTTP_Request2::METHOD_PUT, $header, $request_body, null);
 
         $response = $this->send_request($request, false, false, true);
+        echo "<script>console.log(".json_encode($response).")</script>";
+
 
         return $response;
     }
@@ -548,23 +564,27 @@ class azure_helper {
     * @param object $secrets the secrets that are going to be tested
     * @return bool whether or not the subscription is valid
     */
-    public function test_secrets($secrets) {
+    public function create_initial_resources($secrets) {
         $token = $this->get_token($secrets->tenant_id, $secrets->app_id, $secrets->secret);
-        $virtual_network = $this->create_virtual_network($token, $secrets->azure_subscription_id, $secrets->resource_group, 'eastus', 
-                                               'cloudsync_vnet_eastus_' . SITE_TAG, 'cloudsync', '10.0.0.0/16', '10.0.0.0/24',
-                                               'cloudsync_subnet_eastus_' . SITE_TAG);
 
-        if($virtual_network) {
-            $security_group = $this->create_security_group_with_rule($token, $secrets->azure_subscription_id, $secrets->resource_group, 
-                                                            'eastus', 'cloudsync_ssh_eastus_' . SITE_TAG, 'cloudsync', 22, 'Tcp', '*', 
-                                                            101, 'SSH');
+        foreach (SUPPORTED_AZURE_REGIONS as $region) {
+            $virtual_network = $this->create_virtual_network($token, $secrets->azure_subscription_id, $secrets->resource_group, $region, 
+                                                CLOUDSYNC_RESOURCE . VNET_RESOURCE . $region . '_' . SITE_TAG, 
+                                                'cloudsync', '10.0.0.0/16', '10.0.0.0/24',
+                                                CLOUDSYNC_RESOURCE . SUBNET_RESOURCE . $region . '_' . SITE_TAG);
 
-            if($security_group) {
-                return true;
+            if($virtual_network) {
+                $security_group = $this->create_security_group_with_rule($token, $secrets->azure_subscription_id, $secrets->resource_group, 
+                                                                $region, CLOUDSYNC_RESOURCE . SSH_SECURITY_GROUP . $region . '_' . SITE_TAG, 'cloudsync', 
+                                                                SSH_PORT, 'Tcp', '*', 101, SSH_TAG);
+
+                if(!$security_group) {
+                    return false;
+                }
             }
-            return $security_group;
         }
-        return $virtual_network;
+        
+        return true;
     }
 
     public function get_instance($token, $azure_subscription_id, $resource_group, $name) {

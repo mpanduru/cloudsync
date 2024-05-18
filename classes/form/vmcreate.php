@@ -113,7 +113,8 @@ class vmcreate extends moodleform{
             $mform->disabledIf('type' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('type' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
 
-            $mform->addElement('select', 'disk1' . $cloudprovider->name, get_string('vmcreate_disk1', 'local_cloudsync'), SUPPORTED_ROOTDISK_VALUES);
+            $mform->addElement('select', 'disk1' . $cloudprovider->name, get_string('vmcreate_disk1', 'local_cloudsync'),
+                                    $this->init_rootdisk_options($cloudprovider->id));
             $mform->setDefault('disk1' . $cloudprovider->name, '0');
             $mform->disabledIf('disk1' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
             $mform->hideIf('disk1' . $cloudprovider->name, 'cloudtype', 'ne', $cloudprovider->id);
@@ -185,5 +186,12 @@ class vmcreate extends moodleform{
         }
 
         return $array;
+    }
+
+    // Returns all the supported types based on the cloud provider
+    private function init_rootdisk_options($provider_id) {
+        $disks = return_var_by_provider_id($provider_id, SUPPORTED_AWS_ROOTDISK_VALUES, SUPPORTED_AZURE_ROOTDISK_VALUES);
+
+        return $disks;
     }
 }

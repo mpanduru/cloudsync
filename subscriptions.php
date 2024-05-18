@@ -66,7 +66,6 @@ echo $OUTPUT->header(); // Display the header
 $templatecontext = (object)[
     'subscriptions' => array_values($subscriptions),
     'new_subscription_url' => new moodle_url('/local/cloudsync/newsubscription.php'),
-    // 'deleteurl' => new moodle_url('/local/cloudsync/dialogs/delete_vm.php'),
     'subscriptionvms_url' => new moodle_url('/local/cloudsync/subscriptionvms.php')
 ];
 

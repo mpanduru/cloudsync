@@ -36,6 +36,7 @@ class subscription {
     public function __construct($cloud_provider_id, $name) {
         $this->{'cloud_provider_id'} = $cloud_provider_id;
         $this->{'name'} = $name;
+        $this->{'status'} = 'Active';
     }
 
      /**
@@ -66,4 +67,14 @@ class subscription {
     public function setName($name) {
         $this->{'name'} = $name;
     }
+
+    /**
+    * Mark the subscription as deleted
+    */
+   public function markDeleted($userid) {
+       $this->{'status'} = 'Deleted';
+       $now = new DateTime("now", core_date::get_server_timezone_object());
+       $this->{'deleted_at'} = $now->getTimestamp();
+       $this->{'deleted_by'} = $userid;
+   }
 }

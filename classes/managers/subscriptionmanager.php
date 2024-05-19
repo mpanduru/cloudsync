@@ -68,7 +68,7 @@ class subscriptionmanager {
         $subscription_id = $DB->insert_record(self::DB_TABLE, $subscription, true);
         $secrets->{'subscription_id'} = $subscription_id;
         $secrets_id = $secretsManager->create_secrets($secrets);
-        if ($secrets_id);
+        if ($secrets_id)
             return $subscription_id;
         return false;
     }
@@ -82,6 +82,18 @@ class subscriptionmanager {
         global $DB;
 
         $subscriptions = $DB->get_records(self::DB_TABLE);
+        return $subscriptions;
+    }
+
+    /**
+     * Get all active subscriptions
+     *
+     * @return array An array of subscriptions indexed by first column.
+     */
+    public function get_all_active_subscriptions() {
+        global $DB;
+
+        $subscriptions = $DB->get_records(self::DB_TABLE, ['status' => 'Active']);
         return $subscriptions;
     }
 
@@ -132,10 +144,10 @@ class subscriptionmanager {
      * @param int $id the id of the cloud provider
      * @return array the subscription that has the id=$id
      */
-    public function get_subscriptions_by_provider_id($id) {
+    public function get_active_subscriptions_by_provider_id($id) {
         global $DB;
 
-        $subscriptions = $DB->get_records(self::DB_TABLE, ['cloud_provider_id' => $id]);
+        $subscriptions = $DB->get_records(self::DB_TABLE, ['status' => 'Active', 'cloud_provider_id' => $id]);
         return $subscriptions;
     }
 
@@ -188,6 +200,23 @@ class subscriptionmanager {
             $result = $DB->delete_records(self::DB_TABLE, ['id' => $id]);
             return $result;
         }
+        return $result_secrets;
+    }
+
+    /**
+     * Delete a subscription
+     *
+     * @param int $id the id of the subscription to delete
+     * @return bool true
+     */
+    public function delete_all_subscription_secrets($id) {
+        global $DB;
+
+        $provider_id_object = $this->get_subscription_fields_by_id($id, 'cloud_provider_id');
+        $secretsManager = $this->createSecretsManager($provider_id_object->cloud_provider_id);
+        $subscription_secrets = self::get_secrets_by_subscription_id($id);
+        $result_secrets = $secretsManager->delete_secrets($subscription_secrets->id);
+        
         return $result_secrets;
     }
 }

@@ -22,11 +22,15 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
+require('../../config.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
+require_once($CFG->dirroot . '/local/cloudsync/constants.php');
+require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
+global $USER;
 
+// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
@@ -42,33 +46,42 @@ if (!empty($CFG->forceloginforprofiles)) {
     require_login();
 }
 
+// Set the user id variable
+$userid = $userid ? $userid : $USER->id;
+
+$confirm = optional_param('confirm', 0, PARAM_BOOL);
+$id = required_param('subscription', PARAM_INT);
+
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/cloudsync/subscriptions.php'));
+$PAGE->set_url(new moodle_url('/local/cloudsync/delete_subscription.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('subscriptionspagetitle', 'local_cloudsync'));
-$PAGE->set_heading(get_string('subscriptionspagetitle', 'local_cloudsync'));
+$PAGE->set_title(get_string('deletesubscriptiontitle', 'local_cloudsync'));
+$PAGE->set_heading(get_string('deletesubscriptiontitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
 $subscriptionmanager = new subscriptionmanager();
-$subscriptions = $subscriptionmanager->get_all_active_subscriptions();
-$providermanager = new cloudprovidermanager();
-$providers = $providermanager->get_all_providers();
-foreach ($providers as $provider) {
-    $providers_by_id[$provider->id] = $provider;
+$subscription = $subscriptionmanager->get_subscription_by_id($id);
+
+if ($confirm) {
+    $secrets = $subscriptionmanager->get_secrets_by_subscription_id($subscription->id);
+
+    $resourcecontroller = new resourcecontroller($subscription->cloud_provider_id);
+    $subscription = $resourcecontroller->deleteSubscription($subscription, $secrets, $userid);
+    $subscriptionmanager->update_subscription($subscription);
+    
+    redirect(new moodle_url('/local/cloudsync/subscriptions.php'),  'Subscription deleted succesfully', null, \core\output\notification::NOTIFY_SUCCESS);
 }
-foreach ($subscriptions as $subscription) {
-    $subscriptions[$subscription->id]->provider_name = $providers_by_id[$subscription->cloud_provider_id]->name;
-}
+
+$yesurl = new moodle_url($PAGE->url, array('confirm'=>1, 'subscription'=>$id));
+$nourl = new moodle_url('/local/cloudsync/subscriptions.php');
+$message = get_string('deletesubscriptionquestion', 'local_cloudsync') . $subscription->name . '?';
 
 // Output starts here
-echo $OUTPUT->header(); // Display the header
-$templatecontext = (object)[
-    'subscriptions' => array_values($subscriptions),
-    'new_subscription_url' => new moodle_url('/local/cloudsync/newsubscription.php'),
-    'delete_subscription_url' => new moodle_url('/local/cloudsync/delete_subscription.php'),
-    'subscriptionvms_url' => new moodle_url('/local/cloudsync/subscriptionvms.php')
-];
+echo $OUTPUT->header();
 
-echo $OUTPUT->render_from_template('local_cloudsync/subscriptions', $templatecontext);
-echo $OUTPUT->footer(); // Display the footer
+// A confirm message will be displayed, if the user accepts it 
+// he will be redirected to $yesurl otherwise he will be 
+// redirected to $nourl
+echo $OUTPUT->confirm($message, $yesurl, $nourl);
+echo $OUTPUT->footer();

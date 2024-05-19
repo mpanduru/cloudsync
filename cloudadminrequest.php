@@ -62,25 +62,33 @@ $userid = $userid ? $userid : $USER->id;
 // Search for the request and show names of the owner and teacher instead of id
 $vmrequestmanager = new vmrequestmanager();
 $request = $vmrequestmanager->get_request_by_id($requestID);
-$request->user = get_user_name($request->owner_id);
-$request->teacher = get_user_name($request->teacher_id);
 
-// Init the form
-$mform = new vmcreate(null, array('id' => $requestID));
-$mform->set_data($request);
-
-if ($mform->is_cancelled()) {
-    redirect(new moodle_url('/local/cloudsync/adminvmrequests.php', array('active'=>1)),  'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
-} else if ($fromform = $mform->get_data()) {
-    $resourcecontroller = new resourcecontroller($fromform->cloudtype);
-
-    $resourcecontroller->create_virtual_machine($fromform, $userid, $request);
-    
-    // redirect back to the overview page
-    redirect(new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'),  'Vm created succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);
+if ($request->status != REQUEST_WAITING) {
+    echo $OUTPUT->header(); // Display the header
+    echo 'This request is already ' . $request->status . '. You do not have permission to change it.';
+    echo $OUTPUT->footer();
 }
+else {
+    $request->user = get_user_name($request->owner_id);
+    $request->teacher = get_user_name($request->teacher_id);
 
-// Output starts here
-echo $OUTPUT->header(); // Display the header
-$mform->display();
-echo $OUTPUT->footer();
+    // Init the form
+    $mform = new vmcreate(null, array('id' => $requestID));
+    $mform->set_data($request);
+
+    if ($mform->is_cancelled()) {
+        redirect(new moodle_url('/local/cloudsync/adminvmrequests.php', array('active'=>1)),  'Cancelled', null, \core\output\notification::NOTIFY_ERROR);
+    } else if ($fromform = $mform->get_data()) {
+        $resourcecontroller = new resourcecontroller($fromform->cloudtype);
+
+        $resourcecontroller->create_virtual_machine($fromform, $userid, $request);
+        
+        // redirect back to the overview page
+        redirect(new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'),  'Vm created succesfully!', null, \core\output\notification::NOTIFY_SUCCESS);
+    }
+
+    // Output starts here
+    echo $OUTPUT->header(); // Display the header
+    $mform->display();
+    echo $OUTPUT->footer();
+}

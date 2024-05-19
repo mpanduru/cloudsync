@@ -105,7 +105,9 @@ $string['subscriptionform_subscriptionname'] = 'Subscription Name';
 $string['subscriptionform_subscriptionname_help'] = 'The name that will be displayed to the other users when selecting this subscription';
 $string['subscriptionform_done'] = 'Save';
 $string['deletevmtitle'] = 'Delete Virtual Machine';
+$string['deletesubscriptiontitle'] = 'Delete Subscription';
 $string['deletevmquestion'] = 'Are you sure you want to delete vm ';
+$string['deletesubscriptionquestion'] = 'Are you sure you want to delete subscription ';
 $string['firstaccessattention'] = 'ATTENTION! DO NOT REFRESH THIS PAGE YET!';
 $string['firstaccessmessage'] = 'This is your first time accessing this virtual machine. Click the button below to get your SSH private key 
 for connecting to your virtual machine. Save the key on your device, then refresh the page to see the connection details. 

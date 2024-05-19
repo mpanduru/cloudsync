@@ -220,4 +220,26 @@ class resourcecontroller {
 
         return $vm;
     }
+
+    public function deleteSubscription($subscription, $secrets, $userid) {
+        $vmmanager = new virtualmachinemanager();
+        $keypairmanager = new keypairmanager();
+
+        $vms = $vmmanager->get_active_vms_from_subscription($subscription->id);
+        $keys = $keypairmanager->get_keys_by_subscription($subscription->id);
+        $this->resource_manager->destroy_resources($secrets, $vms, $keys, $subscription);
+        foreach ($vms as $vm) {
+            $vmmanager->update_vm($vm);
+        }
+
+        $subscription = unserialize(sprintf(
+            'O:%d:"%s"%s',
+            strlen('subscription'),
+            'subscription',
+            strstr(strstr(serialize($subscription), '"'), ':')
+        ));
+        $subscription->markDeleted($userid);
+
+        return $subscription;
+    }
 }

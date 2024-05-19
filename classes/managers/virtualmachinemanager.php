@@ -94,6 +94,20 @@ class virtualmachinemanager {
    }
 
    /**
+   * Get all active (non-deleted) vms
+   *
+   * @return array An array of vms indexed by first column.
+   */
+  public function get_active_vms_from_subscription($subscription_id) {
+      global $DB;
+      $where = "subscription_id = :subscription_id AND status != :status";
+      $params = ['subscription_id' => $subscription_id, 'status' => 'Deleted'];
+
+      $vms = $DB->get_records_select(self::DB_TABLE, $where, $params);
+      return $vms;
+  }
+
+   /**
    * Get all deleted vms
    *
    * @return array An array of vms indexed by first column.

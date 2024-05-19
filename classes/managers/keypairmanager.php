@@ -53,18 +53,31 @@ class keypairmanager {
         return $keys;
     }
 
-     /**
-     * Get all keys that belong to a specific user
-     *
-     * @param int $user_id the id of the user
-     * @return array An array of keys indexed by first column.
-     */
-    public function get_keys_by_user($user_id) {
-        global $DB;
+    /**
+    * Get all keys that belong to a specific user
+    *
+    * @param int $user_id the id of the user
+    * @return array An array of keys indexed by first column.
+    */
+   public function get_keys_by_user($user_id) {
+       global $DB;
 
-        $keys = $DB->get_records(self::DB_TABLE, ['owner_id' => $user_id]);
-        return $keys;
-    }
+       $keys = $DB->get_records(self::DB_TABLE, ['owner_id' => $user_id]);
+       return $keys;
+   }
+
+   /**
+   * Get all keys from a specific subscription
+   *
+   * @param int $subscription_id the id of the subscription
+   * @return array An array of keys indexed by first column.
+   */
+  public function get_keys_by_subscription($subscription_id) {
+      global $DB;
+
+      $keys = $DB->get_records(self::DB_TABLE, ['subscription_id' => $subscription_id]);
+      return $keys;
+  }
 
     /**
     * Get the key that belongs to a specific user from a specific region

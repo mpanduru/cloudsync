@@ -141,7 +141,7 @@ class vmcreate extends moodleform{
     // Function that gets the all subscriptions from the database
     function init_subscription_options($cloudproviderid) {
         $subscriptionmanager = new subscriptionmanager();
-        $subscriptions = $subscriptionmanager->get_subscriptions_by_provider_id($cloudproviderid);
+        $subscriptions = $subscriptionmanager->get_active_subscriptions_by_provider_id($cloudproviderid);
 
         return $subscriptions;
     }

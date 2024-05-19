@@ -394,7 +394,7 @@ class aws_helper {
      * @param string $group_id the security group id
      * @return bool whether or not the security group delete action started
      */
-    public function delete_security_group(Aws\Ec2\Ec2Client $ec2Client, $group_id) {
+    public function delete_security_group_by_id(Aws\Ec2\Ec2Client $ec2Client, $group_id) {
         $result = $ec2Client->deleteSecurityGroup([
             'GroupId' => $group_id,
         ]);
@@ -535,24 +535,54 @@ class aws_helper {
     return true;
     }
 
-    /**
-    * 
-    * Test an AWS account to make sure a subscription is valid
-    *
-    * @param object $secrets the secrets that are going to be tested
-    * @return bool whether or not the subscription is valid
-    */
-    public function delete_initial_resources($secrets) {
+    public function delete_security_group($client, $name) {
+        $result = $client->deleteSecurityGroup([
+            'GroupName' => $name,
+        ]);
+
+        if($result)
+            return true;
+        return false;
+    }
+
+    public function wait_instance_terminated(Aws\Ec2\Ec2Client $ec2Client, $instance_id) {
+        $waiterName = 'InstanceTerminated';
+        $waiterOptions = [
+            'InstanceIds' => [$instance_id,]
+        ];
+
+        try {
+            $ec2Client->waitUntil($waiterName, $waiterOptions);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function destroy_resources($secrets, $active_vms, $keys, $subscription) {
+        foreach ($active_vms as $vm) {
+            $client = $this->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+            $this->delete_instance($client, $vm->instance_id);
+            $vm->status = 'Deleted';
+        }
+
+        foreach($active_vms as $vm) {
+            $client = $this->create_connection($vm->region, $secrets->access_key_id, $secrets->access_key_secret);
+
+            $this->wait_instance_terminated($client, $vm->instance_id);
+        }
         foreach (SUPPORTED_AWS_REGIONS as $region) {
             $client = $this->create_connection($region, $secrets->access_key_id, $secrets->access_key_secret);
-            $sg_ssh = $this->create_security_group_with_rule($client, SSH_DESCRIPTION, CLOUDSYNC_RESOURCE . SSH_SECURITY_GROUP . $region . '_' . SITE_TAG, 
-                                                             CLOUDSYNC_RESOURCE . SSH_TAG,  SSH_PORT, 'tcp', '0.0.0.0/0', SSH_RULE);
-                                                        
-            if(!$sg_ssh) {
+
+            if (!$this->delete_security_group($client, CLOUDSYNC_RESOURCE . SSH_SECURITY_GROUP . $region . '_' . SITE_TAG))
                 return false;
-            }
         }
-        
+        foreach ($keys as $key) {
+            $client = $this->create_connection($key->region, $secrets->access_key_id, $secrets->access_key_secret);
+
+            $this->delete_key($client, $key->keypair_id);
+        }
+
         return true;
-        }
+    }
 }

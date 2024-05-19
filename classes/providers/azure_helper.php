@@ -119,7 +119,7 @@ class azure_helper {
         try {
             $response = $request->send();
             if ($response->getStatus() == 200 || $response->getStatus() == 201) {
-                if($jsondecode) {
+                if(!empty($response->getBody()) && $jsondecode) {
                     $result = json_decode($response->getBody());
                     if (json_last_error() === JSON_ERROR_NONE) {
                         return $result;
@@ -127,10 +127,10 @@ class azure_helper {
                         throw new Exception('Error decoding JSON');
                     }
                 }
-                return $response->getBody();
+                return $response;
             }
             else {
-                return $response->getBody();
+                return $wrong_status;
             }
           }
           catch(HTTP_Request2_Exception $e) {
@@ -698,5 +698,84 @@ class azure_helper {
         $response = $this->send_request($request, false, false, true);
 
         return $response;
+    }
+
+    public function cloudsync_delete_securitygroup($subscription_id, $name, $secrets) {
+        $token = $this->create_connection(new subscriptionmanager(), $subscription_id);
+
+        $url = 'https://management.azure.com/subscriptions/'.$secrets->azure_subscription_id.'/resourceGroups/'.$secrets->resource_group.
+                '/providers/Microsoft.Network/networkSecurityGroups/'.$name.'?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_DELETE, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        return $response;
+    }
+
+    public function cloudsync_delete_keypair($subscription_id, $name, $secrets) {
+        $token = $this->create_connection(new subscriptionmanager(), $subscription_id);
+
+        $url = 'https://management.azure.com/subscriptions/'.$secrets->azure_subscription_id.'/resourceGroups/'.$secrets->resource_group.
+                '/providers/Microsoft.Compute/sshPublicKeys/'.$name.'?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_DELETE, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        return $response;
+    }
+
+    public function cloudsync_delete_vnet($subscription_id, $name, $secrets) {
+        $token = $this->create_connection(new subscriptionmanager(), $subscription_id);
+
+        $url = 'https://management.azure.com/subscriptions/'.$secrets->azure_subscription_id.'/resourceGroups/'.$secrets->resource_group.
+                '/providers/Microsoft.Network/virtualNetworks/'.$name.'?api-version=2023-09-01';
+
+        $header = array(
+        'Authorization' => 'Bearer ' . $token->access_token,
+        'Content-Type' => 'application/json'
+        );
+
+        $request = $this->build_request($url, HTTP_Request2::METHOD_DELETE, $header, null, null);
+
+        $response = $this->send_request($request, false, false, true);
+
+        return $response;
+    }
+
+    public function wait_instance_deleted($vm, $secrets) {
+        $token = $this->create_connection(new subscriptionmanager(), $vm->subscription_id);
+
+        while($this->get_instance($token, $secrets->azure_subscription_id, $secrets->resource_group, $vm->instance_id));
+    }
+
+    public function destroy_resources($secrets, $active_vms, $keys, $subscription) {
+        foreach ($active_vms as $vm) {
+            $this->cloudsync_delete_instance($vm, $secrets);
+            $vm->status = 'Deleted';
+        }
+        foreach ($keys as $key) {
+            $this->cloudsync_delete_keypair($subscription->id, $key->keypair_id, $secrets);
+        }
+        foreach ($active_vms as $vm) {
+            $this->wait_instance_deleted($vm, $secrets);
+        }
+        foreach (SUPPORTED_AZURE_REGIONS as $region) {
+            $this->cloudsync_delete_securitygroup($subscription->id, CLOUDSYNC_RESOURCE . SSH_SECURITY_GROUP . $region . '_' . SITE_TAG, $secrets);
+            $this->cloudsync_delete_vnet($subscription->id, CLOUDSYNC_RESOURCE . VNET_RESOURCE . $region . '_' . SITE_TAG, $secrets);
+        }
+
+        return true;
     }
 }

@@ -22,7 +22,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define('SITE_TAG', 'CV');
+define('SITE_TAG', get_config('local_cloudsync', 'websitetag'));
 
 define('CLOUDSYNC_RESOURCE', 'cloudsync_');
 define('SSH_SECURITY_GROUP', 'ssh_');

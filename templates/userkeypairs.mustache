@@ -29,14 +29,16 @@
 <div>
     <div class="justify-content-center mt-5">
     {{#keypairs}}
-        <li class="list-group-item d-flex justify-content-between align-items-center border-primary text-center">
-            <span><b>{{#str}} usersshkeysname, local_cloudsync {{/str}}</b><br>{{name}}</span>
-            <span><b>{{#str}} usersshkeysvms, local_cloudsync {{/str}}</b><br><br>
-            {{#vms}}
-                <a href="{{vm_url}}?id={{vm_id}}">{{vm_name}}</a><br>
-            {{/vms}}
-            </span>
-        </li>
+        {{#vms}}
+            <li class="list-group-item d-flex justify-content-between align-items-center border-primary text-center">
+                <span><b>{{#str}} usersshkeysname, local_cloudsync {{/str}}</b><br>{{name}}</span>
+                <span><b>{{#str}} usersshkeysvms, local_cloudsync {{/str}}</b><br><br>
+                {{#vms}}
+                    <a href="{{vm_url}}?id={{vm_id}}">{{vm_name}}</a><br>
+                {{/vms}}
+                </span>
+            </li>
+        {{/vms}}
     {{/keypairs}}
     </div>
 </div>

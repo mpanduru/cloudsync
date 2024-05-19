@@ -27,6 +27,7 @@ require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
 global $USER;
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();

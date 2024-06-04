@@ -68,6 +68,7 @@ foreach ($vms as $vm) {
             'vm_id' => $vm->id,
             'vm_name' => $vm->name
         ];
+        $keypairs[$vm->vm_key_id]->activevms = true;
     }
 }
 

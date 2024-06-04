@@ -28,6 +28,7 @@ global $CFG;
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
+$context = context_system::instance();
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -43,6 +44,7 @@ if (!empty($CFG->forceloginforprofiles)) {
 } else if (!empty($CFG->forcelogin)) {
     require_login();
 }
+require_capability('local/cloudsync:managecloud', $context);
 
 // Set up the page
 $PAGE->set_url(new moodle_url('/local/cloudsync/subscriptionvms.php'));

@@ -30,11 +30,11 @@ $string['manage'] = 'CloudSync';
 $string['websitetag'] = 'Website tag';
 $string['websitetag_desc'] = 'This tag will be used when creating resources in cloud. This name should only contain letters and / or numbers and not special characters.
 A cloud resource created by the plugin will be named like this: cloudsync_ResourceType_WebsiteTag';
+$string['cloudsync:managecloud'] = 'Create virtual machines in the cloud';
 $string['dropdown_button'] = 'Cloud';
 $string['guestcannotaccessresource'] = 'Guests cannot access cloud resources. Please log in with a full user account to continue.';
 $string['virtualmachinestitle'] = 'Virtual Machines';
 $string['cloudadministrationtitle'] = 'Cloud Administration';
-$string['cloudoverviewtitle'] = 'Overview';
 $string['mycloudheading'] = 'My virtual machines';
 $string['cloudadminrequestsheading'] = 'Active requests';
 $string['cloudadminactivesubscriptions'] = 'Active subscriptions';

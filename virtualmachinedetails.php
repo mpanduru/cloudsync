@@ -32,22 +32,23 @@ require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager
 require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
 require_once($CFG->dirroot . '/local/cloudsync/constants.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
+$context = context_system::instance();
 
-// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
         echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
-                            get_login_url(),
-                            $CFG->wwwroot);
+                              get_login_url(),
+                              $CFG->wwwroot);
         echo $OUTPUT->footer();
         die;
     }
 } else if (!empty($CFG->forcelogin)) {
     require_login();
 }
+require_capability('local/cloudsync:managecloud', $context);
 
 $vmId = required_param('id', PARAM_INT);
 

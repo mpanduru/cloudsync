@@ -29,8 +29,8 @@ require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager
 require_once($CFG->dirroot . '/local/cloudsync/classes/models/vmrequest.php');
 require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 global $USER;
+$context = context_system::instance();
 
-// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
@@ -45,6 +45,7 @@ if (!empty($CFG->forceloginforprofiles)) {
 } else if (!empty($CFG->forcelogin)) {
     require_login();
 }
+require_capability('local/cloudsync:managecloud', $context);
 
 $id = required_param('request', PARAM_INT);
 

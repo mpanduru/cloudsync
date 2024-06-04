@@ -26,22 +26,23 @@ require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+$context = context_system::instance();
 
-// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
         echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
-                            get_login_url(),
-                            $CFG->wwwroot);
+                              get_login_url(),
+                              $CFG->wwwroot);
         echo $OUTPUT->footer();
         die;
     }
 } else if (!empty($CFG->forcelogin)) {
     require_login();
 }
+require_capability('local/cloudsync:managecloud', $context);
 
 $active = optional_param('active', 1, PARAM_BOOL);
 

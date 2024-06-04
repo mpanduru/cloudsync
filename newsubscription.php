@@ -26,6 +26,7 @@ require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
 require_once($CFG->dirroot.'/local/cloudsync/classes/form/subscriptionform.php');
 require_once($CFG->dirroot.'/local/cloudsync/classes/resourcecontroller.php');
+$context = context_system::instance();
 
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
@@ -33,14 +34,15 @@ if (!empty($CFG->forceloginforprofiles)) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
         echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
-                            get_login_url(),
-                            $CFG->wwwroot);
+                              get_login_url(),
+                              $CFG->wwwroot);
         echo $OUTPUT->footer();
         die;
     }
 } else if (!empty($CFG->forcelogin)) {
     require_login();
 }
+require_capability('local/cloudsync:managecloud', $context);
 
 // // Set the user id variable
 global $DB;

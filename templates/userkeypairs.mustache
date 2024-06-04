@@ -29,7 +29,7 @@
 <div>
     <div class="justify-content-center mt-5">
     {{#keypairs}}
-        {{#vms}}
+        {{#activevms}}
             <li class="list-group-item d-flex justify-content-between align-items-center border-primary text-center">
                 <span><b>{{#str}} usersshkeysname, local_cloudsync {{/str}}</b><br>{{name}}</span>
                 <span><b>{{#str}} usersshkeysvms, local_cloudsync {{/str}}</b><br><br>
@@ -38,7 +38,7 @@
                 {{/vms}}
                 </span>
             </li>
-        {{/vms}}
+        {{/activevms}}
     {{/keypairs}}
     </div>
 </div>

@@ -26,6 +26,7 @@ require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
 
 // Make sure the user is logged in
@@ -56,14 +57,22 @@ $PAGE->requires->css('/local/cloudsync/styles.css');
 
 $vmmanager = new virtualmachinemanager();
 $subscriptionmanager = new subscriptionmanager();
+$requestmanager = new vmrequestmanager();
 
-$vm = $vmmanager->get_vm_by_requestId($requestId);
-$subscription = $subscriptionmanager->get_subscription_by_id($vm->subscription_id);
+$request = $requestmanager->get_request_by_id($requestId);
+$request->approved = $request->status == REQUEST_APPROVED;
 
-$resourcecontroller = new resourcecontroller($subscription->cloud_provider_id);
-$request = $resourcecontroller->getRequestDetails($requestId);
 if ($request->approved) {
+    $vm = $vmmanager->get_vm_by_requestId($requestId);
+    $subscription = $subscriptionmanager->get_subscription_by_id($vm->subscription_id);
+
+    $resourcecontroller = new resourcecontroller($subscription->cloud_provider_id);
+    $request = $resourcecontroller->getRequestDetails($requestId);
     $vm = $resourcecontroller->getVmDetails($vm->id);
+} else {
+    $request->owner_name = get_user_name($request->owner_id);
+    $request->teacher_name = get_user_name($request->teacher_id);
+    $request->closed_by_user = get_user_name($request->closed_by);
 }
 
 // Output starts here

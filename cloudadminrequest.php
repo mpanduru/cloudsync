@@ -29,22 +29,23 @@ require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/form/vmcreate.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/vmrequestmanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
+$context = context_system::instance();
 
-// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
         $PAGE->set_context(context_system::instance());
         echo $OUTPUT->header();
         echo $OUTPUT->confirm(get_string('guestcannotaccessresource', 'local_cloudsync'),
-                            get_login_url(),
-                            $CFG->wwwroot);
+                              get_login_url(),
+                              $CFG->wwwroot);
         echo $OUTPUT->footer();
         die;
     }
 } else if (!empty($CFG->forcelogin)) {
     require_login();
 }
+require_capability('local/cloudsync:managecloud', $context);
 
 // Set up the page
 $PAGE->set_url(new moodle_url('/local/cloudsync/cloudadminrequest.php'));

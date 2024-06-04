@@ -45,6 +45,11 @@ class resourcecontroller {
     private $secrets_class;
     private $fields;
 
+     /**
+     * Constructor.
+     *
+     * @param int $cloud_provider_id the id of the cloud provider the resourcecontroller will use to create resources
+     */
     public function __construct($cloud_provider_id) {
         $cloudprovidermanager = new cloudprovidermanager();
         $cloudprovider = $cloudprovidermanager->get_provider_by_id($cloud_provider_id);

@@ -28,6 +28,13 @@
 
 {{^vm.deleted}}
 <div class="row">
+{{/vm.deleted}}
+{{#vm.awaits_delete}}
+    <div class="col">
+        <h3 style="color: red;">{{#str}} vmawaitsdelete, local_cloudsync {{/str}}</h3>
+    </div>
+{{/vm.awaits_delete}}
+{{^vm.deleted}}
     <div class="col">
         <input type="button" class="btn btn-danger float-right" onclick="location.href='{{delete_url}}?vm={{vm.id}}'" value="{{#str}} deletevmtitle, local_cloudsync {{/str}}">
     </div>

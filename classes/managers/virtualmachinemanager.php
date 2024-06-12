@@ -127,8 +127,8 @@ class virtualmachinemanager {
      */
     public function get_active_vms_by_user($user_id) {
         global $DB;
-        $where = "owner_id = :owner_id AND status != :status";
-        $params = ['owner_id' => $user_id, 'status' => 'Deleted'];
+        $where = "owner_id = :owner_id AND status != :status1 AND status != :status2";
+        $params = ['owner_id' => $user_id, 'status1' => 'Deleted', 'status2' => 'To-Be-Deleted'];
 
         $vms = $DB->get_records_select(self::DB_TABLE, $where, $params);
         return $vms;

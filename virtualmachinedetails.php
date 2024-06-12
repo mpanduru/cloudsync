@@ -81,7 +81,7 @@ $request->teacher_name = get_user_name($request->teacher_id);
 $resourcecontroller = new resourcecontroller($subscription->cloud_provider_id);
 
 $new_status = $resourcecontroller->get_vm_status($vm, $secrets);
-if($vm->status != $new_status) {
+if($vm->status != 'To-Be-Deleted' && $vm->status != $new_status) {
     $vm->status = $new_status;
     $vmmanager->update_vm($vm);
 }
@@ -89,7 +89,8 @@ if($vm->status != $new_status) {
 $vm->deleted = $vm->status == 'Deleted';
 if($vm->deleted) {
     $vm->deletedby_name = get_user_name($vm->deleted_by);
-} 
+}
+$vm->awaits_delete = $vm->status == 'To-Be-Deleted';
 
 $netinfo = $resourcecontroller->get_netinfo($vm, $secrets);
 

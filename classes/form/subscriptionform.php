@@ -90,7 +90,7 @@ class subscriptionform extends moodleform {
         $form->addElement('text', 'aws_access_key_id', 'AWS Access Key ID');
         $form->disabledIf('aws_access_key_id', $dependenton, 'ne', $id);
         $form->hideIf('aws_access_key_id', $dependenton, 'ne', $id);
-        $form->addElement('text', 'aws_secret_access_key', 'AWS Secret Access Key');
+        $form->addElement('password', 'aws_secret_access_key', 'AWS Secret Access Key');
         $form->disabledIf('aws_secret_access_key', $dependenton, 'ne', $id);
         $form->hideIf('aws_secret_access_key', $dependenton, 'ne', $id);
     }

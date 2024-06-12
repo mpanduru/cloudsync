@@ -41,7 +41,7 @@ class azure_helper {
 
         // Create the ssh key
         if($keypair){
-            if(!$this->key_exists($token, $secrets->azure_subscription_id, $secrets->resource_group, $keypair_id)) {
+            if(!$this->key_exists($token, $secrets->azure_subscription_id, $secrets->resource_group, $keypair->keypair_id)) {
                 throw new Exception("Key exists in db but not in cloud");
             }
         } else {

@@ -355,13 +355,16 @@ class aws_helper {
      * @return bool whether or not the instance delete action started
      */
     public function delete_instance(Aws\Ec2\Ec2Client $ec2Client, $instance_id) {
-        $result = $ec2Client->terminateInstances([
-            'InstanceIds' => [
-                $instance_id,
-            ],
-        ]);
-
-        return true;
+        try {
+            $result = $ec2Client->terminateInstances([
+                'InstanceIds' => [
+                    $instance_id,
+                ],
+            ]);
+            return true;
+        } catch(Exception $e){
+            return false;
+        }
     }
 
     public function cloudsync_delete_instance($vm, $secrets) {

@@ -22,12 +22,16 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php'); // Include Moodle configuration
 global $CFG;
+require('../../config.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/virtualmachinemanager.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/managers/subscriptionmanager.php');
-$context = context_system::instance();
+require_once($CFG->dirroot . '/local/cloudsync/classes/resourcecontroller.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/models/vm.php');
+require_once($CFG->dirroot . '/local/cloudsync/helpers.php');
+global $USER;
 
+// Make sure the user is logged in
 if (!empty($CFG->forceloginforprofiles)) {
     require_login();
     if (isguestuser()) {
@@ -42,45 +46,39 @@ if (!empty($CFG->forceloginforprofiles)) {
 } else if (!empty($CFG->forcelogin)) {
     require_login();
 }
-require_capability('local/cloudsync:managecloud', $context);
 
-$active = optional_param('active', 1, PARAM_BOOL);
+// Set the user id variable
+$userid = $userid ? $userid : $USER->id;
+
+$confirm = optional_param('confirm', 0, PARAM_BOOL);
+$id = required_param('vm', PARAM_INT);
 
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'));
+$PAGE->set_url(new moodle_url('/local/cloudsync/terminate_vm.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_pagelayout('standard');
-if($active){
-    $PAGE->set_title(get_string('virtualmachinestitle', 'local_cloudsync') . get_string('adminvmrequestsactivetitle', 'local_cloudsync'));
-    $PAGE->set_heading(get_string('virtualmachinestitle', 'local_cloudsync') . get_string('adminvmrequestsactivetitle', 'local_cloudsync'));
-} else {
-    $PAGE->set_title(get_string('virtualmachinestitle', 'local_cloudsync') . get_string('adminvmlistdeleted', 'local_cloudsync'));
-    $PAGE->set_heading(get_string('virtualmachinestitle', 'local_cloudsync') . get_string('adminvmlistdeleted', 'local_cloudsync'));
-}
+$PAGE->set_title(get_string('terminatevmtitle', 'local_cloudsync'));
+$PAGE->set_heading(get_string('terminatevmtitle', 'local_cloudsync'));
 $PAGE->requires->css('/local/cloudsync/styles.css');
 
 $vmmanager = new virtualmachinemanager();
-$subscriptionmanager = new subscriptionmanager();
+$vm = $vmmanager->get_vm_by_id($id);
 
-if($active) {
-    $vms = $vmmanager->get_active_vms();
-} else {
-    $vms = $vmmanager->get_deleted_vms();
+if ($confirm) {
+    $vm->status = 'To-Be-Deleted';
+    $vmmanager->update_vm($vm);
+    redirect(new moodle_url('/local/cloudsync/mycloud.php'),  'Virtual Machine terminated succesfully', null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
-foreach ($vms as $vm) {
-    $vm->subscription_name = $subscriptionmanager->get_subscription_by_id($vm->subscription_id)->name;
-    $vm->awaits_delete = $vm->status == 'To-Be-Deleted';
-}
+$yesurl = new moodle_url($PAGE->url, array('confirm'=>1, 'vm'=>$id));
+$nourl = new moodle_url('/local/cloudsync/mycloud.php');
+$message = get_string('terminatevmquestion', 'local_cloudsync') . $vm->name . '? ' . get_string('terminatevmwarning', 'local_cloudsync');
 
 // Output starts here
-echo $OUTPUT->header(); // Display the header
+echo $OUTPUT->header();
 
-$templatecontext = (object)[
-    'vms' => array_values($vms),
-    'active' => $active,
-    'vm_list_url' => new moodle_url('/local/cloudsync/adminvirtualmachinelist.php'),
-    'vm_url' => new moodle_url('/local/cloudsync/virtualmachinedetails.php'),
-];
-echo $OUTPUT->render_from_template('local_cloudsync/adminvmlist', $templatecontext);
+// A confirm message will be displayed, if the user accepts it 
+// he will be redirected to $yesurl otherwise he will be 
+// redirected to $nourl
+echo $OUTPUT->confirm($message, $yesurl, $nourl);
 echo $OUTPUT->footer();

@@ -70,7 +70,7 @@ $key = $keymanager->get_key_by_id($vm->vm_key_id);
 if($vm->owner_id != $userid){
    throw new Exception('You are not allowed to access this resource!');
 }
-if($vm->status == 'Deleted'){
+if($vm->status == 'Deleted' || $vm->status == 'To-Be-Deleted'){
     throw new Exception('You do not have access to this virtual machine since it has been deleted.');
 }
 

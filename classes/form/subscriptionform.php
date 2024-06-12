@@ -39,7 +39,7 @@ class subscriptionform extends moodleform {
         $mform->addRule('subscriptionname', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
     
         $cloudproviders = $this->init_cloud_provider_options();
-        $mform->addElement('select', 'cloudprovider', 'Select cloud provider', $this->providers_to_string($cloudproviders));
+        $mform->addElement('select', 'cloudprovider', get_string('selectcloudprovider', 'local_cloudsync'), $this->providers_to_string($cloudproviders));
         $mform->addRule('cloudprovider', get_string('vmrequest_missing_value', 'local_cloudsync'), 'required', null, 'client');
 
         foreach ($cloudproviders as $cloudprovider){

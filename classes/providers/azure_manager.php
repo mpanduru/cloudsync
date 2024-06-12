@@ -27,7 +27,7 @@ require($CFG->dirroot . '/local/cloudsync/vendor/autoload.php');
 
 // Class that will be used to administrate the resources that live
 // on AZURE subscriptions
-class azure_helper {
+class azure_manager {
 
      /**
      * Create a virtual machine for a moodle user via an existing virtual machine from db

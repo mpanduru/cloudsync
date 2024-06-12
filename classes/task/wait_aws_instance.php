@@ -25,13 +25,13 @@
 namespace local_cloudsync\task;
 
 global $CFG;
-require_once($CFG->dirroot.'/local/cloudsync/classes/providers/aws_helper.php');
+require_once($CFG->dirroot.'/local/cloudsync/classes/providers/aws_manager.php');
 
 class wait_aws_instance extends \core\task\adhoc_task {
     public function execute() {
         echo "<script>console.log('MERGE')</script>";
         $data = $this->get_custom_data();
-        $helper = new \aws_helper();
+        $helper = new \aws_manager();
         $client = $helper->create_connection($data->region, $data->access_key, $data->access_key_secret);
         $result = $helper->wait_instance($client, $data->instance_id);
         mtrace($result);

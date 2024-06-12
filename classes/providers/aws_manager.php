@@ -27,7 +27,7 @@ require($CFG->dirroot . '/local/cloudsync/vendor/autoload.php');
 
 // Class that will be used to administrate the resources that live
 // on AWS subscriptions
-class aws_helper {
+class aws_manager {
 
      /**
      * Create a connection to the AWS cloud

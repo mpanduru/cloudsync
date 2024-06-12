@@ -35,8 +35,8 @@ require_once($CFG->dirroot . '/local/cloudsync/classes/models/vmrequest.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/models/subscription.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/models/aws_secrets.php');
 require_once($CFG->dirroot . '/local/cloudsync/classes/models/azure_secrets.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_helper.php');
-require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_helper.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/providers/aws_manager.php');
+require_once($CFG->dirroot . '/local/cloudsync/classes/providers/azure_manager.php');
 
 // This class is used to connect the moodle frontend with the cloud provider managers
 class resourcecontroller {
@@ -57,13 +57,13 @@ class resourcecontroller {
         switch ($cloudprovider->name) {
             case AWS_PROVIDER:
                 $this->cloudprovider = AWS_PROVIDER;
-                $this->resource_manager = new aws_helper();
+                $this->resource_manager = new aws_manager();
                 $this->secrets_class = 'aws_secrets';
                 $this->fields = AWS_FIELDS;
                 break;
             case AZURE_PROVIDER:
                 $this->cloudprovider = AZURE_PROVIDER;
-                $this->resource_manager = new azure_helper();
+                $this->resource_manager = new azure_manager();
                 $this->secrets_class = 'azure_secrets';
                 $this->fields = AZURE_FIELDS;
                 break;

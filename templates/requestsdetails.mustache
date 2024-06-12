@@ -89,11 +89,11 @@
                             </div>
                             <div class="card-body">
                                 <ul class="list-group">
-                                    <li class="list-group-item"><strong>Cloud Provider: </strong>{{vm.provider}}</li>
-                                    <li class="list-group-item"><strong>Subscription: </strong>{{vm.subscription}}</li>
-                                    <li class="list-group-item"><strong>Region: </strong>{{vm.region}}</li>
-                                    <li class="list-group-item"><strong>ID (Cloud): </strong>{{vm.instance_id}}</li>
-                                    <li class="list-group-item"><strong>Type: </strong>{{vm.type}}</li>
+                                    <li class="list-group-item"><strong>{{#str}} vmreqcloudprovider, local_cloudsync {{/str}}</strong>{{vm.provider}}</li>
+                                    <li class="list-group-item"><strong>{{#str}} vmreqsubscription, local_cloudsync {{/str}}</strong>{{vm.subscription}}</li>
+                                    <li class="list-group-item"><strong>{{#str}} vmreqregion, local_cloudsync {{/str}}</strong>{{vm.region}}</li>
+                                    <li class="list-group-item"><strong>{{#str}} vmreqidcloud, local_cloudsync {{/str}}</strong>{{vm.instance_id}}</li>
+                                    <li class="list-group-item"><strong>{{#str}} vmreqtype, local_cloudsync {{/str}}</strong>{{vm.type}}</li>
                                     
                                 </ul>
                             </div>

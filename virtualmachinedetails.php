@@ -89,10 +89,10 @@ if($vm->status != 'To-Be-Deleted' && $vm->status != $new_status) {
 $vm->deleted = $vm->status == 'Deleted';
 if($vm->deleted) {
     $vm->deletedby_name = get_user_name($vm->deleted_by);
+} else {
+    $netinfo = $resourcecontroller->get_netinfo($vm, $secrets);
 }
 $vm->awaits_delete = $vm->status == 'To-Be-Deleted';
-
-$netinfo = $resourcecontroller->get_netinfo($vm, $secrets);
 
 // Output starts here
 echo $OUTPUT->header(); // Display the header

@@ -79,16 +79,16 @@ define('AZURE_TO_DB_STATES', array(
 
 // These will be displayed as choices for students when requesting virtual machines
 define('SUPPORTED_OS_VALUES', ['ubuntu 22.04']);
-define('SUPPORTED_MEMORY_VALUES', [1024, 2048, 4096, 8192]);
-define('SUPPORTED_VCPUS_VALUES', [1, 2, 4, 6, 8]);
+define('SUPPORTED_MEMORY_VALUES', [1024, 2048, 4096, 8192, 16384]);
+define('SUPPORTED_VCPUS_VALUES', [1, 2, 4, 6, 8, 16]);
 define('SUPPORTED_SECONDDISK_VALUES', ['None', 8, 16, 32, 64, 128, 256, 512]);
 
 define('SUPPORTED_AWS_ROOTDISK_VALUES', [8, 16, 32, 64, 128, 256, 512]);
 define('SUPPORTED_AZURE_ROOTDISK_VALUES', [30, 64, 128, 256, 512]);
 
 // These will be the regions that can be used to create virtual machines on
-define('SUPPORTED_AWS_REGIONS', ['us-east-1', 'eu-central-1', 'eu-west-1']);
-define('SUPPORTED_AZURE_REGIONS', ['eastus', 'westus']);
+define('SUPPORTED_AWS_REGIONS', ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 'eu-central-1', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'eu-north-1']);
+define('SUPPORTED_AZURE_REGIONS', ['eastus', 'eastus2', 'westus', 'westus2', 'westeurope', 'francecentral', 'germanywestcentral', 'southcentralus']);
 
 // These will be the OS that can be used for the virtual machines
 define('SUPPORTED_AWS_OS', ['ubuntu 22.04']);
@@ -101,18 +101,42 @@ define('SUPPORTED_AZURE_TYPES', ['Standard_B1s', 'Standard_B1ms', 'Standard_B2s'
 
 
 define('SUPPORTED_AWS_OS_IMAGES_USEAST1', array(
-    'ubuntu 22.04' => 'ami-04b70fa74e45c3917',
+    'ubuntu 22.04' => 'ami-0e001c9271cf7f3b9',
+));
+define('SUPPORTED_AWS_OS_IMAGES_USEAST2', array(
+    'ubuntu 22.04' => 'ami-0f30a9c3a48f3fa79',
+));
+define('SUPPORTED_AWS_OS_IMAGES_USWEST1', array(
+    'ubuntu 22.04' => 'ami-036cafe742923b3d9',
+));
+define('SUPPORTED_AWS_OS_IMAGES_USWEST2', array(
+    'ubuntu 22.04' => 'ami-03c983f9003cb9cd1',
 ));
 define('SUPPORTED_AWS_OS_IMAGES_EUCENTRAL1', array(
-    'ubuntu 22.04' => 'ami-01e444924a2233b07',
+    'ubuntu 22.04' => 'ami-026c3177c9bd54288',
 ));
 define('SUPPORTED_AWS_OS_IMAGES_EUWEST1', array(
-    'ubuntu 22.04' => 'ami-0776c814353b4814d',
+    'ubuntu 22.04' => 'ami-0607a9783dd204cae',
+));
+define('SUPPORTED_AWS_OS_IMAGES_EUWEST2', array(
+    'ubuntu 22.04' => 'ami-09627c82937ccdd6d',
+));
+define('SUPPORTED_AWS_OS_IMAGES_EUWEST3', array(
+    'ubuntu 22.04' => 'ami-0326f9264af7e51e2',
+));
+define('SUPPORTED_AWS_OS_IMAGES_EUNORTH1', array(
+    'ubuntu 22.04' => 'ami-011e54f70c1c91e17',
 ));
 define('SUPPORTED_AWS_OS_IMAGES', array(
     'us-east-1' => SUPPORTED_AWS_OS_IMAGES_USEAST1,
+    'us-east-2' => SUPPORTED_AWS_OS_IMAGES_USEAST2,
+    'us-west-1' => SUPPORTED_AWS_OS_IMAGES_USWEST1,
+    'us-west-2' => SUPPORTED_AWS_OS_IMAGES_USWEST2,
     'eu-central-1' => SUPPORTED_AWS_OS_IMAGES_EUCENTRAL1,
     'eu-west-1' => SUPPORTED_AWS_OS_IMAGES_EUWEST1,
+    'eu-west-2' => SUPPORTED_AWS_OS_IMAGES_EUWEST2,
+    'eu-west-3' => SUPPORTED_AWS_OS_IMAGES_EUWEST3,
+    'eu-north-1' => SUPPORTED_AWS_OS_IMAGES_EUNORTH1
 ));
 
 define('SUPPORTED_AWS_TYPES_SPEC_DESCRIPTION', array(
